@@ -11,6 +11,7 @@
 #include "cper-parse.h"
 #include "cper-utils.h"
 #include "sections/cper-section-generic.h"
+#include "sections/cper-section-ia32x64.h"
 
 //Private pre-definitions.
 json_object* cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER* header);
@@ -158,27 +159,27 @@ json_object* cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER* header)
     char* notification_type_readable = "Unknown";
     if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeCmcGuid))
         notification_type_readable = "CMC";
-    if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeCpeGuid))
+    else if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeCpeGuid))
         notification_type_readable = "CPE";
-    if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeMceGuid))
+    else if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeMceGuid))
         notification_type_readable = "MCE";
-    if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypePcieGuid))
+    else if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypePcieGuid))
         notification_type_readable = "PCIe";
-    if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeInitGuid))
+    else if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeInitGuid))
         notification_type_readable = "INIT";
-    if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeNmiGuid))
+    else if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeNmiGuid))
         notification_type_readable = "NMI";
-    if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeBootGuid))
+    else if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeBootGuid))
         notification_type_readable = "Boot";
-    if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeDmarGuid))
+    else if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeDmarGuid))
         notification_type_readable = "DMAr";
-    if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeSeaGuid))
+    else if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeSeaGuid))
         notification_type_readable = "SEA";
-    if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeSeiGuid))
+    else if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeSeiGuid))
         notification_type_readable = "SEI";
-    if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypePeiGuid))
+    else if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypePeiGuid))
         notification_type_readable = "PEI";
-    if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeCxlGuid))
+    else if (guid_equal(&header->NotificationType, &gEfiEventNotificationTypeCxlGuid))
         notification_type_readable = "CXL Component";
     json_object_object_add(notification_type, "type", json_object_new_string(notification_type_readable));
     json_object_object_add(header_ir, "notificationType", notification_type);
@@ -308,8 +309,8 @@ json_object* cper_section_to_ir(FILE* handle, EFI_ERROR_SECTION_DESCRIPTOR* desc
     json_object* result = NULL;
     if (guid_equal(&descriptor->SectionType, &gEfiProcessorGenericErrorSectionGuid))
         result = cper_section_generic_to_ir(handle, descriptor);
-    // if (guid_equal(&descriptor->SectionType, &gEfiIa32X64ProcessorErrorSectionGuid))
-    //     result = cper_section_ia32x64_to_ir(handle);
+    if (guid_equal(&descriptor->SectionType, &gEfiIa32X64ProcessorErrorSectionGuid))
+        result = cper_section_ia32x64_to_ir(handle, descriptor);
     // //todo: Why does IPF have an overly long GUID?
     // // if (guid_equal(&descriptor->SectionType, &gEfiIpfProcessorErrorSectionGuid))
     // if (guid_equal(&descriptor->SectionType, &gEfiArmProcessorErrorSectionGuid))

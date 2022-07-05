@@ -328,7 +328,6 @@ typedef struct {
   UINT64    InstructionIP;
 } EFI_PROCESSOR_GENERIC_ERROR_DATA;
 
-#if defined (MDE_CPU_IA32) || defined (MDE_CPU_X64)
 ///
 /// IA32 and x64 Specific definitions.
 ///
@@ -353,6 +352,11 @@ typedef struct {
   { \
     0x48AB7F57, 0xDC34, 0x4f6c, {0xA7, 0xD3, 0xB0, 0xB5, 0xB0, 0xA7, 0x43, 0x14 } \
   }
+extern EFI_GUID   gEfiIa32x64ErrorTypeCacheCheckGuid;
+extern EFI_GUID   gEfiIa32x64ErrorTypeTlbCheckGuid;
+extern EFI_GUID   gEfiIa32x64ErrorTypeBusCheckGuid;
+extern EFI_GUID   gEfiIa32x64ErrorTypeMsCheckGuid;
+
 ///@}
 
 ///
@@ -734,8 +738,6 @@ typedef struct {
   UINT64    ContextNum      : 6;
   UINT64    Resv1           : 50;
 } EFI_IA32_X64_VALID_BITS;
-
-#endif
 
 ///
 /// Error Status Fields

@@ -18,20 +18,7 @@ json_object* cper_section_generic_to_ir(void* section, EFI_ERROR_SECTION_DESCRIP
     json_object* section_ir = json_object_new_object();
 
     //Validation bits.
-    json_object* validation = json_object_new_object();
-    json_object_object_add(validation, "processorTypeValid", json_object_new_boolean(section_generic->ValidFields >> 63));
-    json_object_object_add(validation, "processorISAValid", json_object_new_boolean((section_generic->ValidFields >> 62) & 0x1));
-    json_object_object_add(validation, "processorErrorTypeValid", json_object_new_boolean((section_generic->ValidFields >> 61) & 0x1));
-    json_object_object_add(validation, "operationValid", json_object_new_boolean((section_generic->ValidFields >> 60) & 0x1));
-    json_object_object_add(validation, "flagsValid", json_object_new_boolean((section_generic->ValidFields >> 59) & 0x1));
-    json_object_object_add(validation, "levelValid", json_object_new_boolean((section_generic->ValidFields >> 58) & 0x1));
-    json_object_object_add(validation, "cpuVersionValid", json_object_new_boolean((section_generic->ValidFields >> 57) & 0x1));
-    json_object_object_add(validation, "cpuBrandInfoValid", json_object_new_boolean((section_generic->ValidFields >> 56) & 0x1));
-    json_object_object_add(validation, "cpuIDValid", json_object_new_boolean((section_generic->ValidFields >> 55) & 0x1));
-    json_object_object_add(validation, "targetAddressValid", json_object_new_boolean((section_generic->ValidFields >> 54) & 0x1));
-    json_object_object_add(validation, "requesterIDValid", json_object_new_boolean((section_generic->ValidFields >> 53) & 0x1));
-    json_object_object_add(validation, "responderIDValid", json_object_new_boolean((section_generic->ValidFields >> 52) & 0x1));
-    json_object_object_add(validation, "instructionIPValid", json_object_new_boolean((section_generic->ValidFields >> 51) & 0x1));
+    json_object* validation = bitfield64_to_ir(section_generic->ValidFields, 13, GENERIC_VALIDATION_BITFIELD_NAMES);
     json_object_object_add(section_ir, "validationBits", validation);
 
     //Processor type, with human readable name if possible.
@@ -67,11 +54,7 @@ json_object* cper_section_generic_to_ir(void* section, EFI_ERROR_SECTION_DESCRIP
     json_object_object_add(section_ir, "operation", operation);
 
     //Flags, additional information about the error.
-    json_object* flags = json_object_new_object();
-    json_object_object_add(flags, "restartable", json_object_new_boolean(section_generic->Flags >> 7));
-    json_object_object_add(flags, "preciseIP", json_object_new_boolean((section_generic->Flags >> 6) & 0b1));
-    json_object_object_add(flags, "overflow", json_object_new_boolean((section_generic->Flags >> 5) & 0b1));
-    json_object_object_add(flags, "corrected", json_object_new_boolean((section_generic->Flags >> 4) & 0b1));
+    json_object* flags = bitfield8_to_ir(section_generic->Flags, 4, GENERIC_FLAGS_BITFIELD_NAMES);
     json_object_object_add(section_ir, "flags", flags);
 
     //The level of the error.
