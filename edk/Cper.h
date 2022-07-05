@@ -759,24 +759,6 @@ typedef struct {
 /// ARM Processor Error Information Structure
 ///
 typedef struct {
-  UINT8 Version;
-  UINT8 Length;
-  UINT16 ValidationBits;
-  UINT8 Type;
-  UINT16 MultipleError;
-  UINT8 Flags;
-  EFI_ARM_PROCESSOR_ERROR_INFORMATION_STRUCTURE ErrorInformation;
-  UINT64 VirtualFaultAddress;
-  UINT64 PhysicalFaultAddress;
-} EFI_ARM_PROCESSOR_ERROR_INFORMATION_ENTRY;
-
-typedef union {
-  EFI_ARM_PROCESSOR_CACHE_ERROR_STRUCTURE CacheError;
-  EFI_ARM_PROCESSOR_TLB_ERROR_STRUCTURE TlbError;
-  EFI_ARM_PROCESSOR_BUS_ERROR_STRUCTURE BusError;
-} EFI_ARM_PROCESSOR_ERROR_INFORMATION_STRUCTURE;
-
-typedef struct {
   UINT64 ValidationBits : 16;
   UINT64 TransactionType : 2;
   UINT64 Operation : 4;
@@ -816,6 +798,24 @@ typedef struct {
   UINT64 AccessMode : 1;
   UINT64 Reserved : 19;
 } EFI_ARM_PROCESSOR_BUS_ERROR_STRUCTURE;
+
+typedef union {
+  EFI_ARM_PROCESSOR_CACHE_ERROR_STRUCTURE CacheError;
+  EFI_ARM_PROCESSOR_TLB_ERROR_STRUCTURE TlbError;
+  EFI_ARM_PROCESSOR_BUS_ERROR_STRUCTURE BusError;
+} EFI_ARM_PROCESSOR_ERROR_INFORMATION_STRUCTURE;
+
+typedef struct {
+  UINT8 Version;
+  UINT8 Length;
+  UINT16 ValidationBits;
+  UINT8 Type;
+  UINT16 MultipleError;
+  UINT8 Flags;
+  EFI_ARM_PROCESSOR_ERROR_INFORMATION_STRUCTURE ErrorInformation;
+  UINT64 VirtualFaultAddress;
+  UINT64 PhysicalFaultAddress;
+} EFI_ARM_PROCESSOR_ERROR_INFORMATION_ENTRY;
 
 ///
 /// Error Status Fields

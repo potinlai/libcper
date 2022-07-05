@@ -76,7 +76,7 @@ json_object* cper_ia32x64_processor_error_info_to_ir(EFI_IA32_X64_PROCESS_ERROR_
     json_object_object_add(error_info_ir, "type", json_object_new_string(error_type));
 
     //Validation bits.
-    json_object* validation = bitfield64_to_ir(error_info->ValidFields, 5, IA32X64_PROCESSOR_ERROR_VALID_BITFIELD_NAMES);
+    json_object* validation = bitfield_to_ir(error_info->ValidFields, 5, IA32X64_PROCESSOR_ERROR_VALID_BITFIELD_NAMES);
     json_object_object_add(error_info_ir, "validationBits", validation);
 
     //Add the check information on a per-structure basis.

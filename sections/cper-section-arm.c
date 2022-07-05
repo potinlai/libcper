@@ -85,7 +85,7 @@ json_object* cper_arm_error_info_to_ir(EFI_ARM_PROCESSOR_ERROR_INFORMATION_ENTRY
     json_object_object_add(error_info_ir, "errorType", error_type);
 
     //Multiple error count.
-    json_object* multiple_error = json_object_object_create();
+    json_object* multiple_error = json_object_new_object();
     json_object_object_add(multiple_error, "value", json_object_new_int(error_info->MultipleError));
     json_object_object_add(multiple_error, "type", 
         json_object_new_string(error_info->MultipleError < 1 ? "Single Error" : "Multiple Errors"));
@@ -100,13 +100,13 @@ json_object* cper_arm_error_info_to_ir(EFI_ARM_PROCESSOR_ERROR_INFORMATION_ENTRY
     switch (error_info->Type)
     {
         case 0: //Cache
-            error_subinfo = cper_arm_cache_error_to_ir((EFI_ARM_PROCESSOR_CACHE_ERROR_STRUCTURE*)error_info->ErrorInformation);
+            error_subinfo = cper_arm_cache_error_to_ir((EFI_ARM_PROCESSOR_CACHE_ERROR_STRUCTURE*)&error_info->ErrorInformation);
             break;
         case 1: //TLB
-            error_subinfo = cper_arm_tlb_error_to_ir((EFI_ARM_PROCESSOR_TLB_ERROR_STRUCTURE*)error_info->ErrorInformation);
+            error_subinfo = cper_arm_tlb_error_to_ir((EFI_ARM_PROCESSOR_TLB_ERROR_STRUCTURE*)&error_info->ErrorInformation);
             break;
         case 2: //Bus
-            error_subinfo = cper_arm_bus_error_to_ir((EFI_ARM_PROCESSOR_BUS_ERROR_STRUCTURE*)error_info->ErrorInformation);
+            error_subinfo = cper_arm_bus_error_to_ir((EFI_ARM_PROCESSOR_BUS_ERROR_STRUCTURE*)&error_info->ErrorInformation);
             break;
     }
     json_object_object_add(error_info_ir, "errorInformation", error_subinfo);

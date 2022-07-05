@@ -18,7 +18,7 @@ json_object* cper_section_generic_to_ir(void* section, EFI_ERROR_SECTION_DESCRIP
     json_object* section_ir = json_object_new_object();
 
     //Validation bits.
-    json_object* validation = bitfield64_to_ir(section_generic->ValidFields, 13, GENERIC_VALIDATION_BITFIELD_NAMES);
+    json_object* validation = bitfield_to_ir(section_generic->ValidFields, 13, GENERIC_VALIDATION_BITFIELD_NAMES);
     json_object_object_add(section_ir, "validationBits", validation);
 
     //Processor type, with human readable name if possible.
@@ -54,7 +54,7 @@ json_object* cper_section_generic_to_ir(void* section, EFI_ERROR_SECTION_DESCRIP
     json_object_object_add(section_ir, "operation", operation);
 
     //Flags, additional information about the error.
-    json_object* flags = bitfield8_to_ir(section_generic->Flags, 4, GENERIC_FLAGS_BITFIELD_NAMES);
+    json_object* flags = bitfield_to_ir(section_generic->Flags, 4, GENERIC_FLAGS_BITFIELD_NAMES);
     json_object_object_add(section_ir, "flags", flags);
 
     //The level of the error.
