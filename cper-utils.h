@@ -1,0 +1,15 @@
+#ifndef CPER_UTILS_H
+#define CPER_UTILS_H
+
+#define GUID_STRING_LENGTH 30
+#define TIMESTAMP_LENGTH 24
+
+json_object* revision_to_ir(UINT16 revision);
+const char* severity_to_string(UINT8 severity);
+void guid_to_string(char* out, EFI_GUID* guid);
+int guid_equal(EFI_GUID* a, EFI_GUID* b);
+
+//The available severity types for CPER.
+extern const char* CPER_SEVERITY_TYPES[4];
+
+#endif

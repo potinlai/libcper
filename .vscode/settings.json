@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "cper-section-generic.h": "c",
+        "cper-parse.h": "c",
+        "cper-utils.h": "c"
+    }
+}
