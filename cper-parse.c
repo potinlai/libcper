@@ -57,7 +57,6 @@ json_object* cper_to_ir(const char* filename)
 
     //Create the header JSON object from the read bytes.
     json_object* header_ir = cper_header_to_ir(&header);
-    printf("Finished header.\n");
 
     //Read the appropriate number of section descriptors & sections, and convert them into IR format.
     json_object* section_descriptors_ir = json_object_new_array();
@@ -72,11 +71,9 @@ json_object* cper_to_ir(const char* filename)
             return NULL;
         }
         json_object_array_add(section_descriptors_ir, cper_section_descriptor_to_ir(&section_descriptor));
-        printf("Finished descriptor %d.\n", i+1);
 
         //Read the section itself.
         json_object_array_add(sections_ir, cper_section_to_ir(cper_file, &section_descriptor));
-        printf("Finished section %d.\n", i+1);
     }
 
     //Add the header, section descriptors, and sections to a parent object.
