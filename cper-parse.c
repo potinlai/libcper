@@ -1,6 +1,6 @@
 /**
- * Describes functions for parsing CPER headers and section descriptions 
- * into an intermediate JSON format.
+ * Describes high level functions for converting an entire CPER log, and functions for parsing 
+ * CPER headers and section descriptions into an intermediate JSON format.
  * 
  * Author: Lawrence.Tang@arm.com
  **/
@@ -12,6 +12,7 @@
 #include "cper-utils.h"
 #include "sections/cper-section-generic.h"
 #include "sections/cper-section-ia32x64.h"
+#include "sections/cper-section-arm.h"
 
 //Private pre-definitions.
 json_object* cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER* header);
@@ -56,6 +57,7 @@ json_object* cper_to_ir(const char* filename)
 
     //Create the header JSON object from the read bytes.
     json_object* header_ir = cper_header_to_ir(&header);
+    printf("Finished header.\n");
 
     //Read the appropriate number of section descriptors & sections, and convert them into IR format.
     json_object* section_descriptors_ir = json_object_new_array();
@@ -70,15 +72,18 @@ json_object* cper_to_ir(const char* filename)
             return NULL;
         }
         json_object_array_add(section_descriptors_ir, cper_section_descriptor_to_ir(&section_descriptor));
+        printf("Finished descriptor %d.\n", i+1);
 
         //Read the section itself.
         json_object_array_add(sections_ir, cper_section_to_ir(cper_file, &section_descriptor));
+        printf("Finished section %d.\n", i+1);
     }
 
     //Add the header, section descriptors, and sections to a parent object.
     json_object* parent = json_object_new_object();
     json_object_object_add(parent, "header", header_ir);
     json_object_object_add(parent, "sectionDescriptors", section_descriptors_ir);
+    json_object_object_add(parent, "sections", sections_ir);
 
     //...
     return parent;
@@ -102,10 +107,7 @@ json_object* cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER* header)
     json_object_object_add(header_ir, "severity", error_severity);
 
     //The validation bits for each section.
-    json_object* validation_bits = json_object_new_object();
-    json_object_object_add(validation_bits, "platformID", json_object_new_boolean(header->ValidationBits & 0b1));
-    json_object_object_add(validation_bits, "timestamp", json_object_new_boolean(header->ValidationBits & 0b10 >> 1));
-    json_object_object_add(validation_bits, "partitionID", json_object_new_boolean(header->ValidationBits & 0b100 >> 2));
+    json_object* validation_bits = bitfield_to_ir(header->ValidationBits, 3, CPER_HEADER_VALID_BITFIELD_NAMES);
     json_object_object_add(header_ir, "validationBits", validation_bits);
 
     //Total length of the record (including headers) in bytes.
@@ -219,15 +221,7 @@ json_object* cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR* section
     json_object_object_add(section_descriptor_ir, "validationBits", validation_bits);
 
     //Flag bits.
-    json_object* flags = json_object_new_object();
-    json_object_object_add(flags, "primary", json_object_new_boolean(section_descriptor->SectionFlags >> 31));
-    json_object_object_add(flags, "containmentWarning", json_object_new_boolean((section_descriptor->SectionFlags >> 30) & 0b1));
-    json_object_object_add(flags, "reset", json_object_new_boolean((section_descriptor->SectionFlags >> 29) & 0b1));
-    json_object_object_add(flags, "errorThresholdExceeded", json_object_new_boolean((section_descriptor->SectionFlags >> 28) & 0b1));
-    json_object_object_add(flags, "resourceNotAccessible", json_object_new_boolean((section_descriptor->SectionFlags >> 27) & 0b1));
-    json_object_object_add(flags, "latentError", json_object_new_boolean((section_descriptor->SectionFlags >> 26) & 0b1));
-    json_object_object_add(flags, "propagated", json_object_new_boolean((section_descriptor->SectionFlags >> 25) & 0b1));
-    json_object_object_add(flags, "overflow", json_object_new_boolean((section_descriptor->SectionFlags >> 24) & 0b1));
+    json_object* flags = bitfield_to_ir(section_descriptor->SectionFlags, 8, CPER_SECTION_DESCRIPTOR_FLAGS_BITFIELD_NAMES);
     json_object_object_add(section_descriptor_ir, "flags", flags);
 
     //Section type (GUID).
@@ -298,7 +292,7 @@ json_object* cper_section_to_ir(FILE* handle, EFI_ERROR_SECTION_DESCRIPTOR* desc
 {
     //Read section as described by the section descriptor.
     fseek(handle, descriptor->SectionOffset, SEEK_SET);
-    void* section = malloc(descriptor->SectionLength);
+    void* section = calloc(1, descriptor->SectionLength);
     if (fread(section, descriptor->SectionLength, 1, handle) != 1)
     {
         printf("Section read failed: Could not read %d bytes from global offset %d.", 
@@ -308,29 +302,29 @@ json_object* cper_section_to_ir(FILE* handle, EFI_ERROR_SECTION_DESCRIPTOR* desc
 
     json_object* result = NULL;
     if (guid_equal(&descriptor->SectionType, &gEfiProcessorGenericErrorSectionGuid))
-        result = cper_section_generic_to_ir(handle, descriptor);
-    if (guid_equal(&descriptor->SectionType, &gEfiIa32X64ProcessorErrorSectionGuid))
-        result = cper_section_ia32x64_to_ir(handle, descriptor);
+        result = cper_section_generic_to_ir(section, descriptor);
+    else if (guid_equal(&descriptor->SectionType, &gEfiIa32X64ProcessorErrorSectionGuid))
+        result = cper_section_ia32x64_to_ir(section, descriptor);
     // //todo: Why does IPF have an overly long GUID?
     // // if (guid_equal(&descriptor->SectionType, &gEfiIpfProcessorErrorSectionGuid))
-    // if (guid_equal(&descriptor->SectionType, &gEfiArmProcessorErrorSectionGuid))
-    //     result = cper_section_arm_to_ir(handle);
+    else if (guid_equal(&descriptor->SectionType, &gEfiArmProcessorErrorSectionGuid))
+        result = cper_section_arm_to_ir(section, descriptor);
     // if (guid_equal(&descriptor->SectionType, &gEfiPlatformMemoryErrorSectionGuid))
-    //     result = cper_section_platform_memory_to_ir(handle);
+    //     result = cper_section_platform_memory_to_ir(section);
     // if (guid_equal(&descriptor->SectionType, &gEfiPcieErrorSectionGuid))
-    //     result = cper_section_pcie_to_ir(handle);
+    //     result = cper_section_pcie_to_ir(section);
     // if (guid_equal(&descriptor->SectionType, &gEfiFirmwareErrorSectionGuid))
-    //     result = cper_section_firmware_error_to_ir(handle);
+    //     result = cper_section_firmware_error_to_ir(section);
     // if (guid_equal(&descriptor->SectionType, &gEfiPciBusErrorSectionGuid))
-    //     result = cper_section_pci_bus_to_ir(handle);
+    //     result = cper_section_pci_bus_to_ir(section);
     // if (guid_equal(&descriptor->SectionType, &gEfiPciDevErrorSectionGuid))
-    //     result = cper_section_pci_dev_to_ir(handle);
+    //     result = cper_section_pci_dev_to_ir(section);
     // if (guid_equal(&descriptor->SectionType, &gEfiDMArGenericErrorSectionGuid))
-    //     result = cper_section_dmar_generic_to_ir(handle);
+    //     result = cper_section_dmar_generic_to_ir(section);
     // if (guid_equal(&descriptor->SectionType, &gEfiDirectedIoDMArErrorSectionGuid))
-    //     result = cper_section_intel_io_dma_to_ir(handle);
+    //     result = cper_section_intel_io_dma_to_ir(section);
     // if (guid_equal(&descriptor->SectionType, &gEfiIommuDMArErrorSectionGuid))
-    //     result = cper_section_iommu_dma_to_ir(handle);
+    //     result = cper_section_iommu_dma_to_ir(section);
 
     //Free section memory, return result.
     free(section);

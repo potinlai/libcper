@@ -28,11 +28,11 @@ json_object* cper_section_ia32x64_to_ir(void* section, EFI_ERROR_SECTION_DESCRIP
 
     //Flags.
     json_object* flags = json_object_new_object();
-    json_object_object_add(flags, "localAPICIDValid", json_object_new_boolean(record->ValidFields >> 31));
-    json_object_object_add(flags, "cpuIDInfoValid", json_object_new_boolean((record->ValidFields >> 30) & 0b1));
-    int processor_error_info_num = (record->ValidFields >> 29) & 0b111111;
+    json_object_object_add(flags, "localAPICIDValid", json_object_new_boolean(record->ValidFields & 0b1));
+    json_object_object_add(flags, "cpuIDInfoValid", json_object_new_boolean((record->ValidFields >> 1) & 0b1));
+    int processor_error_info_num = (record->ValidFields >> 2) & 0b111111;
     json_object_object_add(flags, "processorErrorInfoNum", json_object_new_int(processor_error_info_num));
-    int processor_context_info_num = (record->ValidFields >> 23) & 0b111111;
+    int processor_context_info_num = (record->ValidFields >> 8) & 0b111111;
     json_object_object_add(flags, "processorContextInfoNum", json_object_new_int(processor_context_info_num));
     json_object_object_add(record_ir, "flags", flags);
 

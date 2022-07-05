@@ -36,7 +36,7 @@ json_object* bitfield8_to_ir(UINT8 bitfield, int num_fields, const char* names[]
     json_object* result = json_object_new_object();
     for (int i=0; i<num_fields; i++)
     {
-        json_object_object_add(result, names[i], json_object_new_boolean((bitfield >> (7 - i)) & 0b1));
+        json_object_object_add(result, names[i], json_object_new_boolean((bitfield >> i) & 0b1));
     }
 
     return result;
@@ -48,7 +48,7 @@ json_object* bitfield_to_ir(UINT32 bitfield, int num_fields, const char* names[]
     json_object* result = json_object_new_object();
     for (int i=0; i<num_fields; i++)
     {
-        json_object_object_add(result, names[i], json_object_new_boolean((bitfield >> (31 - i)) & 0b1));
+        json_object_object_add(result, names[i], json_object_new_boolean((bitfield >> i) & 0b1));
     }
 
     return result;
@@ -60,7 +60,7 @@ json_object* bitfield64_to_ir(UINT64 bitfield, int num_fields, const char* names
     json_object* result = json_object_new_object();
     for (int i=0; i<num_fields; i++)
     {
-        json_object_object_add(result, names[i], json_object_new_boolean((bitfield >> (63 - i)) & 0b1));
+        json_object_object_add(result, names[i], json_object_new_boolean((bitfield >> i) & 0b1));
     }
 
     return result;

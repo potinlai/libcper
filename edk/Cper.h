@@ -739,6 +739,22 @@ typedef struct {
   UINT64    Resv1           : 50;
 } EFI_IA32_X64_VALID_BITS;
 
+
+///
+/// ARM Processor Error Structure
+///
+typedef struct {
+  UINT32    ValidFields;
+  UINT16    ErrInfoNum;
+  UINT16    ContextInfoNum;
+  UINT32    SectionLength;
+  UINT32  ErrorAffinityLevel;
+  UINT64  MPIDR_EL1;
+  UINT64  MIDR_EL1;
+  UINT32 RunningState;
+  UINT32 PsciState;
+} EFI_ARM_PROCESSOR_ERROR_RECORD;
+
 ///
 /// Error Status Fields
 ///
