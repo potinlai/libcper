@@ -30,32 +30,8 @@ json_object* integer_to_readable_pair(int value, int len, int keys[], const char
     return result;
 }
 
-//Converts the given uint8 bitfield to IR, assuming bit 0 starts on the left.
-json_object* bitfield8_to_ir(UINT8 bitfield, int num_fields, const char* names[])
-{
-    json_object* result = json_object_new_object();
-    for (int i=0; i<num_fields; i++)
-    {
-        json_object_object_add(result, names[i], json_object_new_boolean((bitfield >> i) & 0b1));
-    }
-
-    return result;
-}
-
-//Converts the given bitfield to IR, assuming bit 0 starts on the left.
-json_object* bitfield_to_ir(UINT32 bitfield, int num_fields, const char* names[])
-{
-    json_object* result = json_object_new_object();
-    for (int i=0; i<num_fields; i++)
-    {
-        json_object_object_add(result, names[i], json_object_new_boolean((bitfield >> i) & 0b1));
-    }
-
-    return result;
-}
-
 //Converts the given 64 bit bitfield to IR, assuming bit 0 starts on the left.
-json_object* bitfield64_to_ir(UINT64 bitfield, int num_fields, const char* names[])
+json_object* bitfield_to_ir(UINT64 bitfield, int num_fields, const char* names[])
 {
     json_object* result = json_object_new_object();
     for (int i=0; i<num_fields; i++)

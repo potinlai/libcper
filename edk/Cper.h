@@ -741,7 +741,7 @@ typedef struct {
 
 
 ///
-/// ARM Processor Error Structure
+/// ARM Processor Error Record
 ///
 typedef struct {
   UINT32    ValidFields;
@@ -754,6 +754,68 @@ typedef struct {
   UINT32 RunningState;
   UINT32 PsciState;
 } EFI_ARM_PROCESSOR_ERROR_RECORD;
+
+///
+/// ARM Processor Error Information Structure
+///
+typedef struct {
+  UINT8 Version;
+  UINT8 Length;
+  UINT16 ValidationBits;
+  UINT8 Type;
+  UINT16 MultipleError;
+  UINT8 Flags;
+  EFI_ARM_PROCESSOR_ERROR_INFORMATION_STRUCTURE ErrorInformation;
+  UINT64 VirtualFaultAddress;
+  UINT64 PhysicalFaultAddress;
+} EFI_ARM_PROCESSOR_ERROR_INFORMATION_ENTRY;
+
+typedef union {
+  EFI_ARM_PROCESSOR_CACHE_ERROR_STRUCTURE CacheError;
+  EFI_ARM_PROCESSOR_TLB_ERROR_STRUCTURE TlbError;
+  EFI_ARM_PROCESSOR_BUS_ERROR_STRUCTURE BusError;
+} EFI_ARM_PROCESSOR_ERROR_INFORMATION_STRUCTURE;
+
+typedef struct {
+  UINT64 ValidationBits : 16;
+  UINT64 TransactionType : 2;
+  UINT64 Operation : 4;
+  UINT64 Level : 3;
+  UINT64 ProcessorContextInterrupt : 1;
+  UINT64 Corrected : 1;
+  UINT64 PrecisePC : 1;
+  UINT64 RestartablePC : 1;
+  UINT64 Reserved : 34;
+} EFI_ARM_PROCESSOR_CACHE_ERROR_STRUCTURE;
+
+typedef struct {
+  UINT64 ValidationBits : 16;
+  UINT64 TransactionType : 2;
+  UINT64 Operation : 4;
+  UINT64 Level : 3;
+  UINT64 ProcessorContextInterrupt : 1;
+  UINT64 Corrected : 1;
+  UINT64 PrecisePC : 1;
+  UINT64 RestartablePC : 1;
+  UINT64 Reserved : 34;
+} EFI_ARM_PROCESSOR_TLB_ERROR_STRUCTURE;
+
+typedef struct {
+  UINT64 ValidationBits : 16;
+  UINT64 TransactionType : 2;
+  UINT64 Operation : 4;
+  UINT64 Level : 3;
+  UINT64 ProcessorContextInterrupt : 1;
+  UINT64 Corrected : 1;
+  UINT64 PrecisePC : 1;
+  UINT64 RestartablePC : 1;
+  UINT64 ParticipationType : 2;
+  UINT64 TimeOut : 1;
+  UINT64 AddressSpace : 2;
+  UINT64 MemoryAddressAttributes : 8;
+  UINT64 AccessMode : 1;
+  UINT64 Reserved : 19;
+} EFI_ARM_PROCESSOR_BUS_ERROR_STRUCTURE;
 
 ///
 /// Error Status Fields
