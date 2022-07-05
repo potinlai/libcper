@@ -187,23 +187,11 @@ json_object* cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER* header)
     json_object_object_add(header_ir, "recordID", json_object_new_uint64(header->RecordID));
 
     //Flag for the record, and a human readable form.
-    json_object* flags = json_object_new_object();
-    json_object_object_add(flags, "value", json_object_new_int(header->Flags));
-    char* flags_readable = "Unknown";
-    switch (header->Flags) 
-    {
-        case 1:
-            flags_readable = "HW_ERROR_FLAGS_RECOVERED";
-            break;
-        case 2:
-            flags_readable = "HW_ERROR_FLAGS_PREVERR";
-            break;
-        case 3:
-            flags_readable = "HW_ERROR_FLAGS_SIMULATED";
-            break;
-
-    }
-    json_object_object_add(flags, "type", json_object_new_string(flags_readable));
+    json_object* flags = integer_to_readable_pair(header->Flags,
+        sizeof(CPER_HEADER_FLAG_TYPES_KEYS) / sizeof(int),
+        CPER_HEADER_FLAG_TYPES_KEYS,
+        CPER_HEADER_FLAG_TYPES_VALUES,
+        "Unknown");
     json_object_object_add(header_ir, "flags", flags);
 
     //Persistence information. Outside the scope of specification, so just a uint32 here.

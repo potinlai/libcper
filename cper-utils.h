@@ -4,6 +4,7 @@
 #define GUID_STRING_LENGTH 30
 #define TIMESTAMP_LENGTH 24
 
+json_object* integer_to_readable_pair(int value, int len, int keys[], const char* values[], const char* default_value);
 json_object* revision_to_ir(UINT16 revision);
 const char* severity_to_string(UINT8 severity);
 void guid_to_string(char* out, EFI_GUID* guid);

@@ -12,6 +12,24 @@
 //The available severity types for CPER.
 const char* CPER_SEVERITY_TYPES[4] = {"Recoverable", "Fatal", "Corrected", "Informational"};
 
+//Converts a single integer value to an object containing a value, and a readable name if possible.
+json_object* integer_to_readable_pair(int value, int len, int keys[], const char* values[], const char* default_value)
+{
+    json_object* result = json_object_new_object();
+    json_object_object_add(result, "value", json_object_new_int(value));
+
+    //Search for human readable name, add.
+    char* name = default_value;
+    for (int i=0; i<len; i++)
+    {
+        if (keys[i] == value)
+            name = values[i];
+    }
+
+    json_object_object_add(result, "name", json_object_new_string(name));
+    return result;
+}
+
 //Converts a single UINT16 revision number into JSON IR representation.
 json_object* revision_to_ir(UINT16 revision)
 {
