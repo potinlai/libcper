@@ -12,6 +12,30 @@
 //The available severity types for CPER.
 const char* CPER_SEVERITY_TYPES[4] = {"Recoverable", "Fatal", "Corrected", "Informational"};
 
+//Converts the given generic CPER error status to JSON IR.
+json_object* cper_generic_error_status_to_ir(EFI_GENERIC_ERROR_STATUS* error_status)
+{
+    json_object* error_status_ir = json_object_new_object();
+
+    //Error type.
+    json_object_object_add(error_status_ir, "errorType", integer_to_readable_pair_with_desc(error_status->Type, 18,
+        CPER_GENERIC_ERROR_TYPES_KEYS,
+        CPER_GENERIC_ERROR_TYPES_VALUES,
+        CPER_GENERIC_ERROR_TYPES_DESCRIPTIONS,
+        "Unknown (Reserved)"));
+
+    //Boolean bit fields.
+    json_object_object_add(error_status_ir, "addressSignal", json_object_new_boolean(error_status->AddressSignal));
+    json_object_object_add(error_status_ir, "controlSignal", json_object_new_boolean(error_status->ControlSignal));
+    json_object_object_add(error_status_ir, "dataSignal", json_object_new_boolean(error_status->DataSignal));
+    json_object_object_add(error_status_ir, "detectedByResponder", json_object_new_boolean(error_status->DetectedByResponder));
+    json_object_object_add(error_status_ir, "detectedByRequester", json_object_new_boolean(error_status->DetectedByRequester));
+    json_object_object_add(error_status_ir, "firstError", json_object_new_boolean(error_status->FirstError));
+    json_object_object_add(error_status_ir, "overflowNotLogged", json_object_new_boolean(error_status->OverflowNotLogged));
+    
+    return error_status_ir;
+}
+
 //Converts a single uniform struct of UINT64s into intermediate JSON IR format, given names for each field in byte order.
 json_object* uniform_struct64_to_ir(UINT64* start, int len, const char* names[])
 {

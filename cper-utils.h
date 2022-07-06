@@ -4,6 +4,7 @@
 #define GUID_STRING_LENGTH 30
 #define TIMESTAMP_LENGTH 24
 
+json_object* cper_generic_error_status_to_ir(EFI_GENERIC_ERROR_STATUS* error_status);
 json_object* uniform_struct_to_ir(UINT32* start, int len, const char* names[]);
 json_object* uniform_struct64_to_ir(UINT64* start, int len, const char* names[]);
 json_object* integer_to_readable_pair(int value, int len, int keys[], const char* values[], const char* default_value);
