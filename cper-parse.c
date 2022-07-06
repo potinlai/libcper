@@ -18,6 +18,7 @@
 #include "sections/cper-section-pci-bus.h"
 #include "sections/cper-section-pci-dev.h"
 #include "sections/cper-section-firmware.h"
+#include "sections/cper-section-dmar-generic.h"
 
 //Private pre-definitions.
 json_object* cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER* header);
@@ -323,8 +324,8 @@ json_object* cper_section_to_ir(FILE* handle, EFI_ERROR_SECTION_DESCRIPTOR* desc
         result = cper_section_pci_bus_to_ir(section, descriptor);
     else if (guid_equal(&descriptor->SectionType, &gEfiPciDevErrorSectionGuid))
         result = cper_section_pci_dev_to_ir(section, descriptor);
-    // if (guid_equal(&descriptor->SectionType, &gEfiDMArGenericErrorSectionGuid))
-    //     result = cper_section_dmar_generic_to_ir(section);
+    else if (guid_equal(&descriptor->SectionType, &gEfiDMArGenericErrorSectionGuid))
+        result = cper_section_dmar_generic_to_ir(section, descriptor);
     // if (guid_equal(&descriptor->SectionType, &gEfiDirectedIoDMArErrorSectionGuid))
     //     result = cper_section_intel_io_dma_to_ir(section);
     // if (guid_equal(&descriptor->SectionType, &gEfiIommuDMArErrorSectionGuid))
