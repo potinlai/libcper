@@ -21,6 +21,7 @@
 #include "sections/cper-section-dmar-generic.h"
 #include "sections/cper-section-dmar-vtd.h"
 #include "sections/cper-section-dmar-iommu.h"
+#include "sections/cper-section-ccix-per.h"
 
 //Private pre-definitions.
 json_object* cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER* header);
@@ -239,29 +240,31 @@ json_object* cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR* section
     char* section_type_readable = "Unknown";
     if (guid_equal(&section_descriptor->SectionType, &gEfiProcessorGenericErrorSectionGuid))
         section_type_readable = "Processor Generic";
-    if (guid_equal(&section_descriptor->SectionType, &gEfiIa32X64ProcessorErrorSectionGuid))
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiIa32X64ProcessorErrorSectionGuid))
         section_type_readable = "IA32/X64";
     //todo: Why does IPF have an overly long GUID?
     // if (guid_equal(&section_descriptor->SectionType, &gEfiIpfProcessorErrorSectionGuid))
     //     section_type_readable = "IPF";
-    if (guid_equal(&section_descriptor->SectionType, &gEfiArmProcessorErrorSectionGuid))
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiArmProcessorErrorSectionGuid))
         section_type_readable = "ARM";
-    if (guid_equal(&section_descriptor->SectionType, &gEfiPlatformMemoryErrorSectionGuid))
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiPlatformMemoryErrorSectionGuid))
         section_type_readable = "Platform Memory";
-    if (guid_equal(&section_descriptor->SectionType, &gEfiPcieErrorSectionGuid))
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiPcieErrorSectionGuid))
         section_type_readable = "PCIe";
-    if (guid_equal(&section_descriptor->SectionType, &gEfiFirmwareErrorSectionGuid))
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiFirmwareErrorSectionGuid))
         section_type_readable = "Firmware Error Record Reference";
-    if (guid_equal(&section_descriptor->SectionType, &gEfiPciBusErrorSectionGuid))
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiPciBusErrorSectionGuid))
         section_type_readable = "PCI/PCI-X Bus";
-    if (guid_equal(&section_descriptor->SectionType, &gEfiPciDevErrorSectionGuid))
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiPciDevErrorSectionGuid))
         section_type_readable = "PCI Component/Device";
-    if (guid_equal(&section_descriptor->SectionType, &gEfiDMArGenericErrorSectionGuid))
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiDMArGenericErrorSectionGuid))
         section_type_readable = "DMAr Generic";
-    if (guid_equal(&section_descriptor->SectionType, &gEfiDirectedIoDMArErrorSectionGuid))
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiDirectedIoDMArErrorSectionGuid))
         section_type_readable = "Intel VT for Directed I/O specific DMAr section";
-    if (guid_equal(&section_descriptor->SectionType, &gEfiIommuDMArErrorSectionGuid))
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiIommuDMArErrorSectionGuid))
         section_type_readable = "IOMMU specific DMAr section";
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiCcixPerLogErrorSectionGuid))
+        section_type_readable = "CCIX PER Log Error";
 
     //todo: How do you determine if this is a CXL component event?
     // if (guid_equal(&section_descriptor->SectionType, &gEfiProcessorGenericErrorSectionGuid))
@@ -333,6 +336,8 @@ json_object* cper_section_to_ir(FILE* handle, EFI_ERROR_SECTION_DESCRIPTOR* desc
         result = cper_section_dmar_vtd_to_ir(section, descriptor);
     else if (guid_equal(&descriptor->SectionType, &gEfiIommuDMArErrorSectionGuid))
         result = cper_section_dmar_iommu_to_ir(section, descriptor);
+    else if (guid_equal(&descriptor->SectionType, &gEfiCcixPerLogErrorSectionGuid))
+        result = cper_section_ccix_per_to_ir(section, descriptor);
     else
     {
         //Failed read, unknown GUID.
