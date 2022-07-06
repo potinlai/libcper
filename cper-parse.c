@@ -14,6 +14,7 @@
 #include "sections/cper-section-ia32x64.h"
 #include "sections/cper-section-arm.h"
 #include "sections/cper-section-memory.h"
+#include "sections/cper-section-pcie.h"
 
 //Private pre-definitions.
 json_object* cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER* header);
@@ -311,8 +312,8 @@ json_object* cper_section_to_ir(FILE* handle, EFI_ERROR_SECTION_DESCRIPTOR* desc
         result = cper_section_platform_memory_to_ir(section, descriptor);
     else if (guid_equal(&descriptor->SectionType, &gEfiPlatformMemoryError2SectionGuid))
         result = cper_section_platform_memory2_to_ir(section, descriptor);
-    // if (guid_equal(&descriptor->SectionType, &gEfiPcieErrorSectionGuid))
-    //     result = cper_section_pcie_to_ir(section);
+    else if (guid_equal(&descriptor->SectionType, &gEfiPcieErrorSectionGuid))
+        result = cper_section_pcie_to_ir(section, descriptor);
     // if (guid_equal(&descriptor->SectionType, &gEfiFirmwareErrorSectionGuid))
     //     result = cper_section_firmware_error_to_ir(section);
     // if (guid_equal(&descriptor->SectionType, &gEfiPciBusErrorSectionGuid))

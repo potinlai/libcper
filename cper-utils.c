@@ -171,3 +171,9 @@ int guid_equal(EFI_GUID* a, EFI_GUID* b)
 
     return 1;
 }
+
+//Converts the given BCD byte to a standard integer.
+int bcd_to_int(UINT8 bcd)
+{
+    return ((bcd & 0xF0) >> 4) * 10 + (bcd & 0x0F);
+}
