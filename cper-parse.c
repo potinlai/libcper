@@ -19,6 +19,8 @@
 #include "sections/cper-section-pci-dev.h"
 #include "sections/cper-section-firmware.h"
 #include "sections/cper-section-dmar-generic.h"
+#include "sections/cper-section-dmar-vtd.h"
+#include "sections/cper-section-dmar-iommu.h"
 
 //Private pre-definitions.
 json_object* cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER* header);
@@ -303,6 +305,7 @@ json_object* cper_section_to_ir(FILE* handle, EFI_ERROR_SECTION_DESCRIPTOR* desc
             descriptor->SectionOffset);
     }
 
+    //Parse section to IR based on GUID.
     json_object* result = NULL;
     if (guid_equal(&descriptor->SectionType, &gEfiProcessorGenericErrorSectionGuid))
         result = cper_section_generic_to_ir(section, descriptor);
@@ -326,10 +329,15 @@ json_object* cper_section_to_ir(FILE* handle, EFI_ERROR_SECTION_DESCRIPTOR* desc
         result = cper_section_pci_dev_to_ir(section, descriptor);
     else if (guid_equal(&descriptor->SectionType, &gEfiDMArGenericErrorSectionGuid))
         result = cper_section_dmar_generic_to_ir(section, descriptor);
-    // if (guid_equal(&descriptor->SectionType, &gEfiDirectedIoDMArErrorSectionGuid))
-    //     result = cper_section_intel_io_dma_to_ir(section);
-    // if (guid_equal(&descriptor->SectionType, &gEfiIommuDMArErrorSectionGuid))
-    //     result = cper_section_iommu_dma_to_ir(section);
+    else if (guid_equal(&descriptor->SectionType, &gEfiDirectedIoDMArErrorSectionGuid))
+        result = cper_section_dmar_vtd_to_ir(section, descriptor);
+    else if (guid_equal(&descriptor->SectionType, &gEfiIommuDMArErrorSectionGuid))
+        result = cper_section_dmar_iommu_to_ir(section, descriptor);
+    else
+    {
+        //Failed read, unknown GUID.
+        //todo: dump the binary data out to b64.
+    }
 
     //Free section memory, return result.
     free(section);

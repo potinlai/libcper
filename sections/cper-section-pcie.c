@@ -41,9 +41,9 @@ json_object* cper_section_pcie_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR
 
     //PCIe Device ID.
     json_object* device_id = json_object_new_object();
-    UINT64 class_id =  pcie_error->DevBridge.ClassCode[0] + 
+    UINT64 class_id = (pcie_error->DevBridge.ClassCode[0] << 16) + 
                       (pcie_error->DevBridge.ClassCode[1] << 8) +
-                      (pcie_error->DevBridge.ClassCode[2] << 16);
+                      pcie_error->DevBridge.ClassCode[2];
     json_object_object_add(device_id, "vendorID", json_object_new_uint64(pcie_error->DevBridge.VendorId));
     json_object_object_add(device_id, "deviceID", json_object_new_uint64(pcie_error->DevBridge.DeviceId));
     json_object_object_add(device_id, "classCode", json_object_new_uint64(class_id));
