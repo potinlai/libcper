@@ -309,6 +309,8 @@ json_object* cper_section_to_ir(FILE* handle, EFI_ERROR_SECTION_DESCRIPTOR* desc
         result = cper_section_arm_to_ir(section, descriptor);
     else if (guid_equal(&descriptor->SectionType, &gEfiPlatformMemoryErrorSectionGuid))
         result = cper_section_platform_memory_to_ir(section, descriptor);
+    else if (guid_equal(&descriptor->SectionType, &gEfiPlatformMemoryError2SectionGuid))
+        result = cper_section_platform_memory2_to_ir(section, descriptor);
     // if (guid_equal(&descriptor->SectionType, &gEfiPcieErrorSectionGuid))
     //     result = cper_section_pcie_to_ir(section);
     // if (guid_equal(&descriptor->SectionType, &gEfiFirmwareErrorSectionGuid))

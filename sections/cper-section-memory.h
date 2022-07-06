@@ -1,5 +1,5 @@
-#ifndef CPER_SECTION_ARM_H
-#define CPER_SECTION_ARM_H
+#ifndef CPER_SECTION_MEMORY_H
+#define CPER_SECTION_MEMORY_H
 
 #include "json.h"
 #include "../edk/Cper.h"
@@ -15,6 +15,11 @@
     "Multi-bit ECC", "Single-symbol ChipKill ECC", "Multi-symbol ChipKill ECC", "Master Abort", \
     "Target Abort", "Parity Error", "Watchdog Timeout", "Invalid Address", "Mirror Broken", \
     "Memory Sparing", "Scrub Corrected Error", "Scrub Uncorrected Error", "Physical Memory Map-out Event"}
+#define MEMORY_ERROR_2_VALID_BITFIELD_NAMES (const char*[]) \
+    {"errorStatusValid", "physicalAddressValid", "physicalAddressMaskValid", "nodeValid", "cardValid", "moduleValid", \
+    "bankValid", "deviceValid", "rowValid", "columnValid", "rankValid", "bitPositionValid", "chipIDValid", \
+    "memoryErrorTypeValid", "statusValid", "requestorIDValid", "responderIDValid", "targetIDValid", "cardHandleValid", \
+    "moduleHandleValid", "bankGroupValid", "bankAddressValid"}
 
 json_object* cper_section_platform_memory_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor);
 json_object* cper_section_platform_memory2_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor);
