@@ -1253,8 +1253,7 @@ extern EFI_GUID   gEfiEventNotificationTypeCxlGuid;
 extern EFI_GUID   gEfiProcessorGenericErrorSectionGuid;
 extern EFI_GUID   gEfiProcessorSpecificErrorSectionGuid;
 extern EFI_GUID   gEfiIa32X64ProcessorErrorSectionGuid;
-//todo: Why does the IPF GUID have an excess of elements?
-//extern EFI_GUID   gEfiIpfProcessorErrorSectionGuid;
+extern EFI_GUID   gEfiIpfProcessorErrorSectionGuid;
 extern EFI_GUID   gEfiArmProcessorErrorSectionGuid;
 extern EFI_GUID   gEfiPlatformMemoryErrorSectionGuid;
 extern EFI_GUID   gEfiPlatformMemoryError2SectionGuid;

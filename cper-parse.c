@@ -23,6 +23,7 @@
 #include "sections/cper-section-dmar-iommu.h"
 #include "sections/cper-section-ccix-per.h"
 #include "sections/cper-section-cxl-protocol.h"
+#include "sections/cper-section-ipf.h"
 
 //Private pre-definitions.
 json_object* cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER* header);
@@ -243,9 +244,8 @@ json_object* cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR* section
         section_type_readable = "Processor Generic";
     else if (guid_equal(&section_descriptor->SectionType, &gEfiIa32X64ProcessorErrorSectionGuid))
         section_type_readable = "IA32/X64";
-    //todo: Why does IPF have an overly long GUID?
-    // if (guid_equal(&section_descriptor->SectionType, &gEfiIpfProcessorErrorSectionGuid))
-    //     section_type_readable = "IPF";
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiIpfProcessorErrorSectionGuid))
+         section_type_readable = "IPF";
     else if (guid_equal(&section_descriptor->SectionType, &gEfiArmProcessorErrorSectionGuid))
         section_type_readable = "ARM";
     else if (guid_equal(&section_descriptor->SectionType, &gEfiPlatformMemoryErrorSectionGuid))
@@ -318,8 +318,8 @@ json_object* cper_section_to_ir(FILE* handle, EFI_ERROR_SECTION_DESCRIPTOR* desc
         result = cper_section_generic_to_ir(section, descriptor);
     else if (guid_equal(&descriptor->SectionType, &gEfiIa32X64ProcessorErrorSectionGuid))
         result = cper_section_ia32x64_to_ir(section, descriptor);
-    // //todo: Why does IPF have an overly long GUID?
-    // // if (guid_equal(&descriptor->SectionType, &gEfiIpfProcessorErrorSectionGuid))
+    else if (guid_equal(&descriptor->SectionType, &gEfiIpfProcessorErrorSectionGuid))
+        result = cper_section_ipf_to_ir(section, descriptor);
     else if (guid_equal(&descriptor->SectionType, &gEfiArmProcessorErrorSectionGuid))
         result = cper_section_arm_to_ir(section, descriptor);
     else if (guid_equal(&descriptor->SectionType, &gEfiPlatformMemoryErrorSectionGuid))
