@@ -12,6 +12,36 @@
 //The available severity types for CPER.
 const char* CPER_SEVERITY_TYPES[4] = {"Recoverable", "Fatal", "Corrected", "Informational"};
 
+//Converts a single uniform struct of UINT64s into intermediate JSON IR format, given names for each field in byte order.
+json_object* uniform_struct64_to_ir(UINT64* start, int len, const char* names[])
+{
+    json_object* result = json_object_new_object();
+
+    UINT64* cur = start;
+    for (int i=0; i<len; i++)
+    {
+        json_object_object_add(result, names[i], json_object_new_uint64(*cur));
+        cur++;
+    }
+
+    return result;
+}
+
+//Converts a single uniform struct of UINT32s into intermediate JSON IR format, given names for each field in byte order.
+json_object* uniform_struct_to_ir(UINT32* start, int len, const char* names[])
+{
+    json_object* result = json_object_new_object();
+
+    UINT32* cur = start;
+    for (int i=0; i<len; i++)
+    {
+        json_object_object_add(result, names[i], json_object_new_uint64(*cur));
+        cur++;
+    }
+
+    return result;
+}
+
 //Converts a single integer value to an object containing a value, and a readable name if possible.
 json_object* integer_to_readable_pair(int value, int len, int keys[], const char* values[], const char* default_value)
 {
@@ -24,6 +54,28 @@ json_object* integer_to_readable_pair(int value, int len, int keys[], const char
     {
         if (keys[i] == value)
             name = values[i];
+    }
+
+    json_object_object_add(result, "name", json_object_new_string(name));
+    return result;
+}
+
+//Converts a single integer value to an object containing a value, readable name and description if possible.
+json_object* integer_to_readable_pair_with_desc(int value, int len, int keys[], const char* values[], 
+    const char* descriptions[], const char* default_value) 
+{
+    json_object* result = json_object_new_object();
+    json_object_object_add(result, "value", json_object_new_int(value));
+
+    //Search for human readable name, add.
+    const char* name = default_value;
+    for (int i=0; i<len; i++)
+    {
+        if (keys[i] == value) 
+        {
+            name = values[i];
+            json_object_object_add(result, "description", json_object_new_string(descriptions[i]));
+        }
     }
 
     json_object_object_add(result, "name", json_object_new_string(name));

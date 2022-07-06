@@ -251,7 +251,7 @@ json_object* cper_ia32x64_processor_context_info_to_ir(EFI_IA32_X64_PROCESSOR_CO
         //No parseable data, just shift the head to the next item.
         //todo: Dump the unparseable data into JSON IR anyway
         *cur_pos = (void*)(context_info + 1);
-        *cur_pos = (void*)(((char*)cur_pos) + context_info->ArraySize);
+        *cur_pos = (void*)(((char*)*cur_pos) + context_info->ArraySize);
     }
     json_object_object_add(context_info_ir, "registerArray", register_array);
 
