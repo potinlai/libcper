@@ -22,6 +22,7 @@
 #include "sections/cper-section-dmar-vtd.h"
 #include "sections/cper-section-dmar-iommu.h"
 #include "sections/cper-section-ccix-per.h"
+#include "sections/cper-section-cxl-protocol.h"
 
 //Private pre-definitions.
 json_object* cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER* header);
@@ -265,8 +266,11 @@ json_object* cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR* section
         section_type_readable = "IOMMU specific DMAr section";
     else if (guid_equal(&section_descriptor->SectionType, &gEfiCcixPerLogErrorSectionGuid))
         section_type_readable = "CCIX PER Log Error";
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiCxlProtocolErrorSectionGuid))
+        section_type_readable = "CXL Protocol Error";
 
     //todo: How do you determine if this is a CXL component event?
+    //perhaps refer to CXL Specification, Rev 2.0
     // if (guid_equal(&section_descriptor->SectionType, &gEfiProcessorGenericErrorSectionGuid))
     //     section_type_readable = "CXL Component Event";
 
@@ -338,6 +342,8 @@ json_object* cper_section_to_ir(FILE* handle, EFI_ERROR_SECTION_DESCRIPTOR* desc
         result = cper_section_dmar_iommu_to_ir(section, descriptor);
     else if (guid_equal(&descriptor->SectionType, &gEfiCcixPerLogErrorSectionGuid))
         result = cper_section_ccix_per_to_ir(section, descriptor);
+    else if (guid_equal(&descriptor->SectionType, &gEfiCxlProtocolErrorSectionGuid))
+        result = cper_section_cxl_protocol_to_ir(section, descriptor);
     else
     {
         //Failed read, unknown GUID.

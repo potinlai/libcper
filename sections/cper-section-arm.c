@@ -124,6 +124,10 @@ json_object* cper_arm_error_info_to_ir(EFI_ARM_ERROR_INFORMATION_ENTRY* error_in
     }
     json_object_object_add(error_info_ir, "errorInformation", error_subinfo);
 
+    //Virtual fault address, physical fault address.
+    json_object_object_add(error_info_ir, "virtualFaultAddress", json_object_new_uint64(error_info->VirtualFaultAddress));
+    json_object_object_add(error_info_ir, "physicalFaultAddress", json_object_new_uint64(error_info->PhysicalFaultAddress));
+    
     return error_info_ir;
 }
 

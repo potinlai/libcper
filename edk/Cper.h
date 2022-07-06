@@ -1266,6 +1266,7 @@ extern EFI_GUID   gEfiDMArGenericErrorSectionGuid;
 extern EFI_GUID   gEfiDirectedIoDMArErrorSectionGuid;
 extern EFI_GUID   gEfiIommuDMArErrorSectionGuid;
 extern EFI_GUID   gEfiCcixPerLogErrorSectionGuid;
+extern EFI_GUID   gEfiCxlProtocolErrorSectionGuid;
 #pragma pack()
 
 #if defined (MDE_CPU_IA32) || defined (MDE_CPU_X64)
