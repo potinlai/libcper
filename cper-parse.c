@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include "json.h"
+#include "b64.h"
 #include "edk/Cper.h"
 #include "cper-parse.h"
 #include "cper-utils.h"
@@ -24,6 +25,7 @@
 #include "sections/cper-section-ccix-per.h"
 #include "sections/cper-section-cxl-protocol.h"
 #include "sections/cper-section-ipf.h"
+#include "sections/cper-section-cxl-component.h"
 
 //Private pre-definitions.
 json_object* cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER* header);
@@ -268,6 +270,16 @@ json_object* cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR* section
         section_type_readable = "CCIX PER Log Error";
     else if (guid_equal(&section_descriptor->SectionType, &gEfiCxlProtocolErrorSectionGuid))
         section_type_readable = "CXL Protocol Error";
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiCxlGeneralMediaErrorSectionGuid))
+        section_type_readable = "CXL General Media Component Error";
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiCxlDramEventErrorSectionGuid))
+        section_type_readable = "CXL DRAM Component Error";
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiCxlPhysicalSwitchErrorSectionGuid))
+        section_type_readable = "CXL Physical Switch Component Error";
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiCxlVirtualSwitchErrorSectionGuid))
+        section_type_readable = "CXL Virtual Switch Component Error";
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiCxlMldPortErrorSectionGuid))
+        section_type_readable = "CXL MLD Port Component Error";
 
     //todo: How do you determine if this is a CXL component event?
     //perhaps refer to CXL Specification, Rev 2.0
@@ -346,10 +358,22 @@ json_object* cper_section_to_ir(FILE* handle, EFI_ERROR_SECTION_DESCRIPTOR* desc
         result = cper_section_ccix_per_to_ir(section, descriptor);
     else if (guid_equal(&descriptor->SectionType, &gEfiCxlProtocolErrorSectionGuid))
         result = cper_section_cxl_protocol_to_ir(section, descriptor);
+    else if (guid_equal(&descriptor->SectionType, &gEfiCxlGeneralMediaErrorSectionGuid)
+          || guid_equal(&descriptor->SectionType, &gEfiCxlDramEventErrorSectionGuid)
+          || guid_equal(&descriptor->SectionType, &gEfiCxlPhysicalSwitchErrorSectionGuid)
+          || guid_equal(&descriptor->SectionType, &gEfiCxlVirtualSwitchErrorSectionGuid)
+          || guid_equal(&descriptor->SectionType, &gEfiCxlMldPortErrorSectionGuid))
+    {
+        result = cper_section_cxl_component_to_ir(section, descriptor);
+    }
     else
     {
         //Failed read, unknown GUID.
-        //todo: dump the binary data out to b64.
+        //Output the data as formatted base64.
+        result = json_object_new_object();
+        char* encoded = b64_encode((unsigned char*)section, descriptor->SectionLength);
+        json_object_object_add(result, "data", json_object_new_string(encoded));
+        free(encoded);
     }
 
     //Free section memory, return result.

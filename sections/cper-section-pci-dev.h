@@ -11,14 +11,14 @@
 /// PCI/PCI-X Device Error Section
 ///
 typedef struct {
-  UINT64 VendorId : 2;
-  UINT64 DeviceId : 2;
-  UINT64 ClassCode : 3;
-  UINT64 FunctionNumber : 1;
-  UINT64 DeviceNumber : 1;
-  UINT64 BusNumber : 1;
-  UINT64 SegmentNumber : 1;
-  UINT64 Reserved : 5;
+  UINT64 VendorId : 16;
+  UINT64 DeviceId : 16;
+  UINT64 ClassCode : 24;
+  UINT64 FunctionNumber : 8;
+  UINT64 DeviceNumber : 8;
+  UINT64 BusNumber : 8;
+  UINT64 SegmentNumber : 8;
+  UINT64 Reserved : 40;
 } EFI_PCI_PCIX_DEVICE_ID_INFO;
 
 typedef struct {

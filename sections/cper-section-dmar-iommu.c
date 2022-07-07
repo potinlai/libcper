@@ -6,6 +6,7 @@
  **/
 #include <stdio.h>
 #include "json.h"
+#include "b64.h"
 #include "../edk/Cper.h"
 #include "../cper-utils.h"
 #include "cper-section-dmar-iommu.h"
@@ -26,8 +27,10 @@ json_object* cper_section_dmar_iommu_to_ir(void* section, EFI_ERROR_SECTION_DESC
     //IOMMU event log entry.
     //todo: implement as specified in the IOMMU specification
 
-    //Device table entry.
-    //todo: dump as b64
+    //Device table entry (as base64).
+    char* encoded = b64_encode((unsigned char*)iommu_error->DeviceTableEntry, 32);
+    json_object_object_add(section_ir, "deviceTableEntry", json_object_new_string(encoded));
+    free(encoded);
 
     //Page table entries.
     json_object_object_add(section_ir, "pageTableEntry_Level6", json_object_new_uint64(iommu_error->PteL6));

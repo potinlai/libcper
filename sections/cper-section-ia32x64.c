@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include "json.h"
+#include "b64.h"
 #include "../edk/Cper.h"
 #include "../cper-utils.h"
 #include "cper-section-ia32x64.h"
@@ -248,9 +249,14 @@ json_object* cper_ia32x64_processor_context_info_to_ir(EFI_IA32_X64_PROCESSOR_CO
     }
     else 
     {
-        //No parseable data, just shift the head to the next item.
-        //todo: Dump the unparseable data into JSON IR anyway
+        //No parseable data, just dump as base64 and shift the head to the next item.
         *cur_pos = (void*)(context_info + 1);
+
+        char* encoded = b64_encode((unsigned char*)cur_pos, context_info->ArraySize);
+        register_array = json_object_new_object();
+        json_object_object_add(register_array, "data", json_object_new_string(encoded));
+        free(encoded);
+
         *cur_pos = (void*)(((char*)*cur_pos) + context_info->ArraySize);
     }
     json_object_object_add(context_info_ir, "registerArray", register_array);

@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include "json.h"
+#include "b64.h"
 #include "../edk/Cper.h"
 #include "../cper-utils.h"
 #include "cper-section-arm.h"
@@ -72,7 +73,12 @@ json_object* cper_section_arm_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR*
     //Is there any vendor-specific information following?
     if (cur_pos < section + record->SectionLength)
     {
-        //todo: b64 and tag on vendor-specific binary info.
+        json_object* vendor_specific = json_object_new_object();
+        char* encoded = b64_encode((unsigned char*)cur_pos, section + record->SectionLength - cur_pos);
+        json_object_object_add(vendor_specific, "data", json_object_new_string(encoded));
+        free(encoded);
+
+        json_object_object_add(section_ir, "vendorSpecificInfo", vendor_specific);
     }
 
     return section_ir;
@@ -291,9 +297,11 @@ json_object* cper_arm_processor_context_to_ir(EFI_ARM_CONTEXT_INFORMATION_HEADER
             register_array = cper_arm_misc_register_array_to_ir((EFI_ARM_MISC_CONTEXT_REGISTER*)cur_pos);
             break;
         default:
-            //Unknown register array type.
-            //todo: Format raw binary data and add instead of blank.
+            //Unknown register array type, add as base64 data instead.
             register_array = json_object_new_object();
+            char* encoded = b64_encode((unsigned char*)cur_pos, header->RegisterArraySize);
+            json_object_object_add(register_array, "data", json_object_new_string(encoded));
+            free(encoded);
             break;
     }
 
