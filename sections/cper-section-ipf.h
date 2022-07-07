@@ -4,6 +4,11 @@
 #include "json.h"
 #include "../edk/Cper.h"
 
+#define IPF_MOD_ERROR_VALID_BITFIELD_NAMES (const char*[]) {"checkInfoValid", "requestorIdentifierValid", \
+    "responderIdentifierValid", "targetIdentifierValid", "preciseIPValid"}
+#define IPF_PSI_STATIC_INFO_VALID_BITFIELD_NAMES (const char*[]) {"minstateValid", "brValid", "crValid", \
+    "arValid", "rrValid", "frValid"}
+
 ///
 /// IPF Error Record Section
 /// Defined as according to B.2.3 of the ItaniumTM Processor Family System Abstraction Layer (SAL) Specification.
@@ -33,7 +38,7 @@ typedef struct {
     UINT64 ValidBits;
     UINT64 ModCheckInfo;
     UINT64 ModTargetId;
-    UINT64 ModRequestorId;
+    UINT64 ModRequestorId; //todo: Which way around are these? Spec has a typo
     UINT64 ModResponderId;
     UINT64 ModPreciseIp;
 } EFI_IPF_MOD_ERROR_INFO;
@@ -41,13 +46,17 @@ typedef struct {
 typedef struct {
     UINT8 CpuIdInfo[40];
     UINT8 Reserved1[8];
+} EFI_IPF_CPU_INFO;
+
+typedef struct {
     UINT64 ValidBits;
     UINT8 MinimalSaveStateInfo[1024];
-    UINT8 Brs[64];
-    UINT8 Crs[1024];
-    UINT8 Rrs[64];
-    UINT8 Frs[2048];
-} EFI_IPF_ERROR_INFO_FOOTER;
+    UINT64 Brs[8];
+    UINT64 Crs[128];
+    UINT64 Ars[128];
+    UINT64 Rrs[8];
+    UINT64 Frs[256];
+} EFI_IPF_PSI_STATIC;
 
 json_object* cper_section_ipf_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor);
 

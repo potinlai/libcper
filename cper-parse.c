@@ -304,12 +304,14 @@ json_object* cper_section_to_ir(FILE* handle, EFI_ERROR_SECTION_DESCRIPTOR* desc
 {
     //Read section as described by the section descriptor.
     fseek(handle, descriptor->SectionOffset, SEEK_SET);
-    void* section = calloc(1, descriptor->SectionLength);
+    void* section = malloc(descriptor->SectionLength);
     if (fread(section, descriptor->SectionLength, 1, handle) != 1)
     {
         printf("Section read failed: Could not read %d bytes from global offset %d.", 
             descriptor->SectionLength,
             descriptor->SectionOffset);
+        free(section);
+        return NULL;
     }
 
     //Parse section to IR based on GUID.

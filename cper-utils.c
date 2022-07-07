@@ -118,6 +118,14 @@ json_object* bitfield_to_ir(UINT64 bitfield, int num_fields, const char* names[]
     return result;
 }
 
+//Converts the given UINT64 array into a JSON IR array, given the length.
+json_object* uint64_array_to_ir_array(UINT64* array, int len)
+{
+    json_object* array_ir = json_object_new_array();
+    for (int i=0; i<len; i++)
+        json_object_array_add(array_ir, json_object_new_uint64(array[i]));
+    return array_ir;
+}
 
 //Converts a single UINT16 revision number into JSON IR representation.
 json_object* revision_to_ir(UINT16 revision)
