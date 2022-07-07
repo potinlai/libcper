@@ -721,6 +721,7 @@ typedef struct {
   UINT64    Cr2;
   UINT64    Cr3;
   UINT64    Cr4;
+  UINT64    Cr8;
   UINT64    Gdtr[2];
   UINT64    Idtr[2];
   UINT16    Ldtr;

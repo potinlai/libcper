@@ -336,8 +336,7 @@ json_object* cper_ia32x64_register_64bit_to_ir(EFI_CONTEXT_X64_REGISTER_STATE* r
     json_object_object_add(x64_registers, "cr2", json_object_new_uint64(registers->Cr2));
     json_object_object_add(x64_registers, "cr3", json_object_new_uint64(registers->Cr3));
     json_object_object_add(x64_registers, "cr4", json_object_new_uint64(registers->Cr4));
-    //todo: Where is CR8? On the specification, not in the headers.
-    //json_object_object_add(x64_registers, "cr8", json_object_new_uint64(registers->));
+    json_object_object_add(x64_registers, "cr8", json_object_new_uint64(registers->Cr8));
     json_object_object_add(x64_registers, "gdtr_0", json_object_new_uint64(registers->Gdtr[0]));
     json_object_object_add(x64_registers, "gdtr_1", json_object_new_uint64(registers->Gdtr[1]));
     json_object_object_add(x64_registers, "idtr_0", json_object_new_uint64(registers->Idtr[0]));

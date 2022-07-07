@@ -50,7 +50,7 @@ json_object* cper_section_ipf_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR*
     
     //CPU ID information.
     EFI_IPF_CPU_INFO* cpu_info = (EFI_IPF_CPU_INFO*)cur_error;
-    //todo: find out how this is represented
+    //stretch: find out how this is represented
 
     //Processor static information.
     EFI_IPF_PSI_STATIC* psi_static = (EFI_IPF_PSI_STATIC*)(cpu_info + 1);
@@ -61,7 +61,7 @@ json_object* cper_section_ipf_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR*
     json_object_object_add(psi_static_ir, "validationBits", psi_validation);
 
     //PSI minimal state save info.
-    //todo: structure min save state area as in Intel Itanium Architecture Software Developer's Manual.
+    //stretch: structure min save state area as in Intel Itanium Architecture Software Developer's Manual.
 
     //BRs, CRs, ARs, RRs, FRs.
     json_object_object_add(psi_static_ir, "brs", uint64_array_to_ir_array(psi_static->Brs, 8));
