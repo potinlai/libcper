@@ -38,8 +38,8 @@ typedef struct {
     UINT64 ValidBits;
     UINT64 ModCheckInfo;
     UINT64 ModTargetId;
-    UINT64 ModRequestorId; //todo: Which way around are these? Spec has a typo
-    UINT64 ModResponderId;
+    UINT64 ModRequestorId; //NOTE: The Intel Itanium specification contains a typo which makes the order
+    UINT64 ModResponderId; // of these two fields undefined. This is a best guess and could be wrong.
     UINT64 ModPreciseIp;
 } EFI_IPF_MOD_ERROR_INFO;
 

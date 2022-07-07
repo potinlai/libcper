@@ -6,6 +6,7 @@
  **/
 #include <stdio.h>
 #include "json.h"
+#include "b64.h"
 #include "../edk/Cper.h"
 #include "../cper-utils.h"
 #include "cper-section-pcie.h"
@@ -67,10 +68,49 @@ json_object* cper_section_pcie_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR
     json_object_object_add(section_ir, "bridgeControlStatus", bridge_control_status);
 
     //Capability structure.
-    //todo: See Figure 6-9 of the PCIe 2.0 Base Specification to implement this
+    //The PCIe capability structure provided here could either be PCIe 1.1 Capability Structure 
+    //(36-byte, padded to 60 bytes) or PCIe 2.0 Capability Structure (60-byte). There does not seem
+    //to be a way to differentiate these, so this is left as a b64 dump.
+    char* encoded = b64_encode((unsigned char*)pcie_error->Capability.PcieCap, 60);
+    json_object* capability = json_object_new_object();
+    json_object_object_add(capability, "data", json_object_new_string(encoded));
+    free(encoded);
+    json_object_object_add(section_ir, "capabilityStructure", capability);
 
     //AER information.
-    //todo: See the PCIe 2.0 Base Specification to implement this.
+    json_object* aer_capability_ir = json_object_new_object();
+    EFI_PCIE_ADV_ERROR_EXT_CAPABILITY* aer_capability = (EFI_PCIE_ADV_ERROR_EXT_CAPABILITY*)pcie_error->AerInfo.PcieAer;
+    json_object_object_add(aer_capability_ir, "capabilityID", 
+        json_object_new_uint64(aer_capability->Header.PcieExtendedCapabilityId));
+    json_object_object_add(aer_capability_ir, "capabilityVersion", 
+        json_object_new_uint64(aer_capability->Header.CapabilityVersion));
+    json_object_object_add(aer_capability_ir, "uncorrectableErrorStatusRegister", 
+        json_object_new_uint64(aer_capability->UncorrectableErrorStatusReg));
+    json_object_object_add(aer_capability_ir, "uncorrectableErrorMaskRegister", 
+        json_object_new_uint64(aer_capability->UncorrectableErrorMaskReg));
+    json_object_object_add(aer_capability_ir, "uncorrectableErrorSeverityRegister", 
+        json_object_new_uint64(aer_capability->UncorrectableErrorSeverityReg));
+    json_object_object_add(aer_capability_ir, "correctableErrorStatusRegister", 
+        json_object_new_uint64(aer_capability->CorrectableErrorStatusReg));
+    json_object_object_add(aer_capability_ir, "correctableErrorMaskRegister", 
+        json_object_new_uint64(aer_capability->CorrectableErrorMaskReg));
+    json_object_object_add(aer_capability_ir, "aeccReg", json_object_new_uint64(aer_capability->AeccReg));
 
+    //Header log register (b64).
+    encoded = b64_encode((unsigned char*)aer_capability->HeaderLogReg, 16);
+    json_object_object_add(aer_capability_ir, "headerLogRegister", json_object_new_string(encoded));
+    free(encoded);
+
+    //Remaining AER fields.
+    json_object_object_add(aer_capability_ir, "rootErrorCommand", 
+        json_object_new_uint64(aer_capability->RootErrorCommand));
+    json_object_object_add(aer_capability_ir, "rootErrorStatus", 
+        json_object_new_uint64(aer_capability->RootErrorStatus));
+    json_object_object_add(aer_capability_ir, "errorSourceIDRegister", 
+        json_object_new_uint64(aer_capability->ErrorSourceIdReg));
+    json_object_object_add(aer_capability_ir, "correctableErrorSourceIDRegister", 
+        json_object_new_uint64(aer_capability->CorrectableSourceIdReg));
+
+    json_object_object_add(section_ir, "aerInfo", aer_capability_ir);
     return section_ir;
 }
