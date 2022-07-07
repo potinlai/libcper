@@ -50,7 +50,8 @@ json_object* cper_section_arm_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR*
     if (record->RunningState >> 31)
     {
         //Bit 32 of running state is on, so PSCI state information is included.
-        //todo: Look at how to make this human readable from the ARM PSCI document.
+        //This can't be made human readable, as it is unknown whether this will be the pre-PSCI 1.0 format
+        //or the newer Extended StateID format.
         json_object_object_add(section_ir, "psciState", json_object_new_int(record->PsciState));
     }
 

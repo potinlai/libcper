@@ -6,6 +6,7 @@
  **/
 #include <stdio.h>
 #include "json.h"
+#include "b64.h"
 #include "../edk/Cper.h"
 #include "../cper-utils.h"
 #include "cper-section-ccix-per.h"
@@ -28,8 +29,15 @@ json_object* cper_section_ccix_per_to_ir(void* section, EFI_ERROR_SECTION_DESCRI
     json_object_object_add(section_ir, "ccixPortID", json_object_new_int(ccix_error->CcixPortId));
     
     //CCIX PER Log.
-    //todo: implement as described in Section 7.3.2 of CCIX Base Specification (Rev 1.0)
-    //the PER Log structure notes the number of DWORDs in the record.
+    //This is formatted as described in Section 7.3.2 of CCIX Base Specification (Rev 1.0).
+    unsigned char* cur_pos = (unsigned char*)(ccix_error + 1);
+    int remaining_length = section - (void*)cur_pos + ccix_error->Length;
+    if (remaining_length > 0)
+    {
+        char* encoded = b64_encode(cur_pos, remaining_length);
+        json_object_object_add(section_ir, "ccixPERLog", json_object_new_string(encoded));
+        free(encoded);
+    }
 
     return section_ir;
 }

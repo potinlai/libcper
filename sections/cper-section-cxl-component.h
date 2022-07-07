@@ -4,6 +4,9 @@
 #include "json.h"
 #include "../edk/Cper.h"
 
+#define CXL_COMPONENT_ERROR_VALID_BITFIELD_NAMES (const char*[]) {"deviceIDValid", "deviceSerialValid", \
+    "cxlComponentEventLogValid"}
+
 ///
 /// CXL Generic Component Error Section
 ///
@@ -25,10 +28,6 @@ typedef struct {
     EFI_CXL_DEVICE_ID_INFO DeviceId;
     UINT64 DeviceSerial;
 } EFI_CXL_COMPONENT_EVENT_HEADER;
-
-typedef struct {
-    //todo: What is the structure for this? The UEFI spec is a bit vague.
-} EFI_CXL_COMPONENT_COMMON_RECORD_HEAD;
 
 json_object* cper_section_cxl_component_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor);
 

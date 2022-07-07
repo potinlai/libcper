@@ -281,11 +281,6 @@ json_object* cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR* section
     else if (guid_equal(&section_descriptor->SectionType, &gEfiCxlMldPortErrorSectionGuid))
         section_type_readable = "CXL MLD Port Component Error";
 
-    //todo: How do you determine if this is a CXL component event?
-    //perhaps refer to CXL Specification, Rev 2.0
-    // if (guid_equal(&section_descriptor->SectionType, &gEfiProcessorGenericErrorSectionGuid))
-    //     section_type_readable = "CXL Component Event";
-
     json_object_object_add(section_type, "type", json_object_new_string(section_type_readable));
     json_object_object_add(section_descriptor_ir, "sectionType", section_type);
 
