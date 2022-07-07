@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "cper-parse.h"
+#include "../cper-parse.h"
 #include "json.h"
 
 int main(int argc, char* argv[]) {
