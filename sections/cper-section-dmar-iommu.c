@@ -25,10 +25,13 @@ json_object* cper_section_dmar_iommu_to_ir(void* section, EFI_ERROR_SECTION_DESC
     json_object_object_add(section_ir, "statusRegister", json_object_new_uint64(iommu_error->Status));
 
     //IOMMU event log entry.
-    //todo: implement as specified in the IOMMU specification
+    //The format of these entries differ widely by the type of error.
+    char* encoded = b64_encode((unsigned char*)iommu_error->EventLogEntry, 16);
+    json_object_object_add(section_ir, "eventLogEntry", json_object_new_string(encoded));
+    free(encoded);
 
     //Device table entry (as base64).
-    char* encoded = b64_encode((unsigned char*)iommu_error->DeviceTableEntry, 32);
+    encoded = b64_encode((unsigned char*)iommu_error->DeviceTableEntry, 32);
     json_object_object_add(section_ir, "deviceTableEntry", json_object_new_string(encoded));
     free(encoded);
 
