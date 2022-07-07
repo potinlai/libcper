@@ -99,7 +99,6 @@ json_object* cper_arm_error_info_to_ir(EFI_ARM_ERROR_INFORMATION_ENTRY* error_in
     json_object_object_add(error_info_ir, "validationBits", validation);
 
     //The type of error information in this log.
-    //todo: The UEFI spec is ambiguous, what are the values for these??
     json_object* error_type = integer_to_readable_pair(error_info->Type, 4,
         ARM_ERROR_INFO_ENTRY_INFO_TYPES_KEYS,
         ARM_ERROR_INFO_ENTRY_INFO_TYPES_VALUES,
@@ -155,7 +154,6 @@ json_object* cper_arm_cache_tlb_error_to_ir(EFI_ARM_CACHE_ERROR_STRUCTURE* cache
     json_object_object_add(cache_tlb_error_ir, "transactionType", transaction_type);
 
     //Operation.
-    //todo: What are the types' numeric values? UEFI spec is ambiguous
     json_object* operation;
     if (error_info->Type == 0)
     {

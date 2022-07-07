@@ -60,8 +60,8 @@ json_object* cper_section_generic_to_ir(void* section, EFI_ERROR_SECTION_DESCRIP
     //The level of the error.
     json_object_object_add(section_ir, "level", json_object_new_int(section_generic->Level));
 
-    //CPU version information (todo)
-    //...
+    //CPU version information.
+    json_object_object_add(section_ir, "cpuVersionInfo", json_object_new_uint64(section_generic->VersionInfo));
 
     //CPU brand string. May not exist if on ARM.
     json_object_object_add(section_ir, "cpuBrandString", json_object_new_string(section_generic->BrandString));

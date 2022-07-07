@@ -40,8 +40,14 @@ json_object* cper_section_ia32x64_to_ir(void* section, EFI_ERROR_SECTION_DESCRIP
     //APIC ID.
     json_object_object_add(record_ir, "localAPICID", json_object_new_uint64(record->ApicId));
 
-    //CPU ID information (todo, see generic).
-    //...
+    //CPUID information.
+    json_object* cpuid_info_ir = json_object_new_object();
+    EFI_IA32_X64_CPU_ID* cpuid_info = (EFI_IA32_X64_CPU_ID*)record->CpuIdInfo;
+    json_object_object_add(cpuid_info_ir, "eax", json_object_new_uint64(cpuid_info->Eax));
+    json_object_object_add(cpuid_info_ir, "ebx", json_object_new_uint64(cpuid_info->Ebx));
+    json_object_object_add(cpuid_info_ir, "ecx", json_object_new_uint64(cpuid_info->Ecx));
+    json_object_object_add(cpuid_info_ir, "edx", json_object_new_uint64(cpuid_info->Edx));
+    json_object_object_add(record_ir, "cpuidInfo", cpuid_info_ir);
 
     //Processor error information, of the amount described above.
     EFI_IA32_X64_PROCESS_ERROR_INFO* current_error_info = (EFI_IA32_X64_PROCESS_ERROR_INFO*)(record + 1);

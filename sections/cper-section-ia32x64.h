@@ -30,6 +30,14 @@
     "32-bit Mode Execution Context", "64-bit Mode Execution Context", "FXSave Context", \
     "32-bit Mode Debug Registers", "64-bit Mode Debug Registers", "Memory Mapper Registers"}
 
+typedef struct {
+    UINT64 Eax;
+    UINT64 Ebx;
+    UINT64 Ecx;
+    UINT64 Edx;
+    UINT64 Reserved[2];
+} EFI_IA32_X64_CPU_ID;
+
 json_object* cper_section_ia32x64_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor);
 
 #endif
