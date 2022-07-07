@@ -295,8 +295,8 @@ json_object* cper_ia32x64_register_32bit_to_ir(EFI_CONTEXT_IA32_REGISTER_STATE* 
     json_object_object_add(ia32_registers, "cr2", json_object_new_int(registers->Cr2));
     json_object_object_add(ia32_registers, "cr3", json_object_new_int(registers->Cr3));
     json_object_object_add(ia32_registers, "cr4", json_object_new_int(registers->Cr4));
-    json_object_object_add(ia32_registers, "gdtr", json_object_new_uint64((registers->Gdtr[0] << 16) + registers->Gdtr[1]));
-    json_object_object_add(ia32_registers, "idtr", json_object_new_uint64((registers->Idtr[0] << 16) + registers->Idtr[1]));
+    json_object_object_add(ia32_registers, "gdtr", json_object_new_uint64(registers->Gdtr[0] + ((UINT64)registers->Gdtr[1] << 32)));
+    json_object_object_add(ia32_registers, "idtr", json_object_new_uint64(registers->Idtr[0] + ((UINT64)registers->Idtr[1] << 32)));
     json_object_object_add(ia32_registers, "ldtr", json_object_new_int(registers->Ldtr));
     json_object_object_add(ia32_registers, "tr", json_object_new_int(registers->Tr));
 

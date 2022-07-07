@@ -9,6 +9,7 @@
 #define CPER_HEADER_FLAG_TYPES_KEYS (int []){1, 2, 3}
 #define CPER_HEADER_FLAG_TYPES_VALUES (const char*[]){"HW_ERROR_FLAGS_RECOVERED", "HW_ERROR_FLAGS_PREVERR", "HW_ERROR_FLAGS_SIMULATED"}
 
-json_object* cper_to_ir(const char* filename);
+json_object* cper_to_ir(FILE* cper_file);
+void ir_to_cper(json_object* ir, FILE* out);
 
 #endif

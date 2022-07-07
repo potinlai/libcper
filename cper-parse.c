@@ -34,15 +34,8 @@ json_object* cper_section_to_ir(FILE* handle, EFI_ERROR_SECTION_DESCRIPTOR* desc
 
 //Reads a CPER log file at the given file location, and returns an intermediate
 //JSON representation of this CPER record.
-json_object* cper_to_ir(const char* filename) 
+json_object* cper_to_ir(FILE* cper_file) 
 {
-    //Get a handle for the log file.
-    FILE* cper_file = fopen(filename, "r");
-    if (cper_file == NULL) {
-        printf("Could not open CPER record, file handle returned null.");
-        return NULL;
-    }
-
     //Ensure this is really a CPER log.
     EFI_COMMON_ERROR_RECORD_HEADER header;
     fseek(cper_file, 0, SEEK_SET);
@@ -57,16 +50,6 @@ json_object* cper_to_ir(const char* filename)
         printf("Invalid CPER file: Invalid header (incorrect signature).");
         return NULL;
     }
-
-    // //Print struct contents (debug).
-    // fpos_t file_pos;
-    // fgetpos(cper_file, &file_pos);
-    // printf("Stream is at position %d.\n", file_pos);
-    // printf("SignatureStart: %s\n", (char*)&header.SignatureStart);
-    // printf("Revision: %u\n", header.Revision);
-    // printf("SectionCount: %u\n", header.SectionCount);
-    // printf("Severity: %d\n", header.ErrorSeverity);
-    // printf("RecordLength: %d\n", header.RecordLength);
 
     //Create the header JSON object from the read bytes.
     json_object* header_ir = cper_header_to_ir(&header);
@@ -95,7 +78,6 @@ json_object* cper_to_ir(const char* filename)
     json_object_object_add(parent, "sectionDescriptors", section_descriptors_ir);
     json_object_object_add(parent, "sections", sections_ir);
 
-    //...
     return parent;
 }
 

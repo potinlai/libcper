@@ -26,7 +26,7 @@ FetchContent_MakeAvailable(json-c b64-c)
 # Add library and test executable.
 file(GLOB SectionSources sections/*.c)
 file(GLOB EDKSources edk/*.c)
-add_library(CPERParseLibrary STATIC cper-parse.c cper-utils.c ${SectionSources} ${EDKSources})
+add_library(CPERParseLibrary STATIC cper-parse.c ir-parse.c cper-utils.c ${SectionSources} ${EDKSources})
 add_executable(CPERParseTest testing/cper-test.c)
 
 # Link library.
