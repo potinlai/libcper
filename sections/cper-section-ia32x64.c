@@ -27,15 +27,15 @@ json_object* cper_section_ia32x64_to_ir(void* section, EFI_ERROR_SECTION_DESCRIP
     EFI_IA32_X64_PROCESSOR_ERROR_RECORD* record = (EFI_IA32_X64_PROCESSOR_ERROR_RECORD*)section;
     json_object* record_ir = json_object_new_object();
 
-    //Flags.
-    json_object* flags = json_object_new_object();
-    json_object_object_add(flags, "localAPICIDValid", json_object_new_boolean(record->ValidFields & 0b1));
-    json_object_object_add(flags, "cpuIDInfoValid", json_object_new_boolean((record->ValidFields >> 1) & 0b1));
+    //Validation bits.
+    json_object* validationBits = json_object_new_object();
+    json_object_object_add(validationBits, "localAPICIDValid", json_object_new_boolean(record->ValidFields & 0b1));
+    json_object_object_add(validationBits, "cpuIDInfoValid", json_object_new_boolean((record->ValidFields >> 1) & 0b1));
     int processor_error_info_num = (record->ValidFields >> 2) & 0b111111;
-    json_object_object_add(flags, "processorErrorInfoNum", json_object_new_int(processor_error_info_num));
+    json_object_object_add(validationBits, "processorErrorInfoNum", json_object_new_int(processor_error_info_num));
     int processor_context_info_num = (record->ValidFields >> 8) & 0b111111;
-    json_object_object_add(flags, "processorContextInfoNum", json_object_new_int(processor_context_info_num));
-    json_object_object_add(record_ir, "flags", flags);
+    json_object_object_add(validationBits, "processorContextInfoNum", json_object_new_int(processor_context_info_num));
+    json_object_object_add(record_ir, "validationBits", validationBits);
 
     //APIC ID.
     json_object_object_add(record_ir, "localAPICID", json_object_new_uint64(record->ApicId));

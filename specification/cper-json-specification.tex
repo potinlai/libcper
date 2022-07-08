@@ -219,13 +219,43 @@ This chapter defines section body formats for all of the sections defined within
 \label{section:genericprocessorerrorsection}
 This section describes the JSON format for a single Generic Processor Error Section from a CPER record. The GUID used for Generic Processor Error Sections is \texttt{\{x9876CCAD, 0x47B4, 0x4bdb, \{0xB6, 0x5E, 0x16, 0xF1, 0x93, 0xC4, 0xF3, 0xDB\}\}}.
 \jsontable{table:genericprocessorerrorsection}
-validationBits & object & A Generic Processor Error Validation Structure, as described in \\
-\jsontableend{CPER revision structure field table.}
+validationBits & object & A Generic Processor Error Validation Structure, as described in Subsection \ref{subsection:genericprocessorvalidationstructure}.\\
+\hline
+processorType.name & string & If available, the human readable name of the processor type.\\
+processorType.value & uint64 & The integer value of the processor type.\\
+\hline
+processorISA.name & string & If available, the human readable name of the processor ISA.\\
+processorISA.value & uint64 & The integer value corresponding to the processor ISA.\\
+\hline
+errorType.name & string & If available, the human readable name of the type of processor error this section describes.\\
+errorType.value & uint64 & The integer value corresponding to the processor error type.\\
+\hline
+operation.name & string & If available, the human readable name of the operation.\\
+operation.value & uint64 & The integer value corresponding to the operation.\\
+\hline
+flags & object & Flag information for the Generic Processor Error as described in Subsection \ref{subsection:genericprocessorflagsstructure}.\\
+\hline
+level & int & The level of the structure at which the error occurred.\\
+\hline
+cpuVersionInfo & uint64 & The CPU version information as reported by CPUID with EAX=1. On ARM, this is MIDR\_EL1.\\
+\hline
+cpuBrandString & string & The ASCII brand string of the CPU. This field is optional on ARM.\\
+\hline
+processorID & uint64 & The unique identifier of the logical processor. On ARM, this is MPIDR\_EL1.\\
+\hline
+targetAddress & uint64 & The target address associated with the error.\\
+\hline
+requestorID & uint64 & ID of the requestor associated with the error.\\
+\hline
+responderID & uint64 & ID of the responder associated with the error.\\
+\hline
+instructionIP & uint64 & Identifies the instruction pointer at the point of error.\\
+\jsontableend{Generic Processor Error structure field table.}
 
 % Generic processor error validation structure.
 \subsection{Generic Processor Error Validation Structure}
 \label{subsection:genericprocessorvalidationstructure}
-This structure describes the revision of a single CPER record or sub-structure.
+This structure describes the valdation bits structure of a General Processor Error CPER section.
 \jsontable{table:genericprocessorvalidationstructure}
 processorTypeValid & boolean & Whether the "processorType" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
 \hline
@@ -252,6 +282,82 @@ requesterIDValid & boolean & Whether the "requesterID" field of the Generic Proc
 responderIDValid & boolean & Whether the "responderID" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
 \hline
 instructionIPValid & boolean & Whether the "instructionIP" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
-\jsontableend{CPER revision structure field table.}
+\jsontableend{Generic Processor Error validation structure field table.}
+
+% Generic processor error flags structure.
+\subsection{Generic Processor Error Flags Structure}
+\label{subsection:genericprocessorflagsstructure}
+This structure describes the flags structure of a General Processor Error CPER section.
+\jsontable{table:genericprocessorflagsstructure}
+restartable & boolean & Whether program execution can be restarted reliably after the error.\\
+\hline
+preciseIP & boolean & Whether the instruction IP captured is directly associated with the error.\\
+\hline
+overflow & boolean & Whether a machine check overflow occurred (multiple errors occurred at once).\\
+\hline
+corrected & boolean & Whether the error was corrected by hardware/firmware.\\
+\jsontableend{Generic Processor Error flags structure field table.}
+
+% IA32/x64 error section.
+\section{IA32/x64 Processor Error Section}
+\label{section:ia32x64errorsection}
+This section describes the JSON format for a single IA32/x64 Error Section from a CPER record. The GUID used for IA32/x64 Processor Error Sections is \texttt{\{0xDC3EA0B0, 0xA144, 0x4797, \{0xB9, 0x5B, 0x53, 0xFA, 0x24, 0x2B, 0x6E, 0x1D\}\}}.
+\jsontable{table:genericprocessorerrorsection}
+validationBits & object & IA32/x64 Processor Error Validation Structure as described in Subsection \ref{subsection:ia32x64processorflagsstructure}.\\
+\hline
+localAPICID & uint64 & The APIC ID of the processor.\\
+\hline
+cpuidInfo & object & IA32/x64 CPUINFO Structure as defined in Subsection \ref{subsection:ia32x64cpuinfostructure}.\\
+\hline
+processorErrorInfo & array & Array of IA32/x64 Processor Error Info Structures as described in Subsection \ref{subsection:ia32x64processorerrorinfostructure}.\\
+\hline
+processorContextInfo & array & Array of IA32/x64 Processor Context Info Structures as described in Subsection \ref{subsection:ia32x64processorcontextinfostructure}.\\
+\jsontableend{IA32/x64 Processor Error structure field table.}
+
+% IA32/x64 validation bitfield structure.
+\subsection{IA32/x64 Processor Error Validation Structure}
+\label{subsection:ia32x64processorflagsstructure}
+This structure describes the validation bitfield structure of an IA32/x64 Error CPER section.
+\jsontable{table:ia32x64processorflagsstructure}
+localAPICIDValid & boolean & Whether the "localAPICID" field of the IA32/x64 Error section (\ref{section:ia32x64errorsection}) is valid.\\
+\hline
+cpuIDInfoValid & boolean & Whether the "cpuIDInfo" field of the IA32/x64 Error section (\ref{section:ia32x64errorsection}) is valid.\\ 
+\hline
+processorErrorInfoNum & int & The number of IA32/x64 Processor Error Info Structures (\ref{subsection:ia32x64processorerrorinfostructure}) that are included with this error section.\\
+\hline
+processorContextInfoNum & int & The number of IA32/x64 Processor Context Info Structures (\ref{subsection:ia32x64processorcontextinfostructure}) that are included with this error section.\\
+\jsontableend{IA32/x64 Processor Error validation structure field table.}
+
+% IA32/x64 CPUINFO structure.
+\subsection{IA32/x64 CPUINFO Structure}
+\label{subsection:ia32x64cpuinfostructure}
+This structure describes the CPUINFO structure of an IA32/x64 Error CPER section.
+\jsontable{table:ia32x64cpuinfostructure}
+eax & uint64 & Value of the EAX register resulting from a call to CPUID with EAX=1.\\
+\hline
+ebx & uint64 & Value of the EBX register resulting from a call to CPUID with EAX=1.\\
+\hline
+ecx & uint64 & Value of the ECX register resulting from a call to CPUID with EAX=1.\\
+\hline
+edx & uint64 & Value of the EDX register resulting from a call to CPUID with EAX=1.\\
+\jsontableend{IA32/x64 CPUINFO structure field table.}
+
+% IA32/x64 Processor Error Info structure.
+\subsection{IA32/x64 Processor Error Info Structure}
+\label{subsection:ia32x64processorerrorinfostructure}
+This structure describes a single IA32/x64 Processor Error Info sub-section, which is part of the larger IA32/x64 record (\ref{section:ia32x64errorsection}).
+\jsontable{table:ia32x64processorerrorinfostructure}
+todo & todo & todo.\\
+\hline
+\jsontableend{IA32/x64 Processor Error Info structure field table.}
+
+% IA32/x64 Processor Context Info structure.
+\subsection{IA32/x64 Processor Context Info Structure}
+\label{subsection:ia32x64processorcontextinfostructure}
+This structure describes a single IA32/x64 Processor Context Info sub-section, which is part of the larger IA32/x64 record (\ref{section:ia32x64errorsection}).
+\jsontable{table:ia32x64processorcontextinfostructure}
+todo & todo & todo.\\
+\hline
+\jsontableend{IA32/x64 Processor Context Info structure field table.}
 
 \end{document}
