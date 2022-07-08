@@ -2,7 +2,7 @@
 #define CPER_PARSE_H
 #include "json.h"
 
-#define CPER_HEADER_VALID_BITFIELD_NAMES (const char*[]) {"platformID", "timestamp", "partitionID"}
+#define CPER_HEADER_VALID_BITFIELD_NAMES (const char*[]) {"platformIDValid", "timestampValid", "partitionIDValid"}
 #define CPER_SECTION_DESCRIPTOR_FLAGS_BITFIELD_NAMES (const char*[]) \
     {"primary", "containmentWarning", "reset", "errorThresholdExceeded", "resourceNotAccessible", "latentError", \
     "propagated", "overflow"}

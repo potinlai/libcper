@@ -1,0 +1,257 @@
+\documentclass{report}
+\usepackage{hyperref}
+\usepackage{adjustbox}
+\usepackage{placeins}
+
+% Metadata.
+\title{CPER-JSON Specification}
+\author{\parbox{\linewidth}{\centering%
+Lawrence Tang\endgraf
+Lawrence.Tang@arm.com\endgraf\medskip}}
+\date{\parbox{\linewidth}{\centering%
+Revision v0.0.1 (\today)\endgraf
+First revision released [DATE].}}
+
+% Commands.
+\newcommand*{\thead}[1]{\multicolumn{1}{|c|}{\bfseries #1}}
+\newcommand*{\jsontable}[1]{
+    \begin{table}[!ht]
+    \label{#1}
+    \centering
+    \begin{adjustbox}{center}
+    \begin{tabular}{|l|c|p{8cm}|}
+    \hline
+    \thead{Field Name} & \thead{Type} & \thead{Description} \\
+    \hline
+}
+\newcommand*{\jsontableend}[1]{
+    \hline
+    \end{tabular}
+    \end{adjustbox}
+    \caption{#1}
+    \label{table:headerrevstructure}
+    \end{table}
+    \FloatBarrier
+}
+    
+\begin{document}
+\maketitle
+\tableofcontents
+\listoftables
+
+% Introductory section.
+\chapter{Preface}
+\section{Introduction \& Summary}
+This document lays out a structure for representing UEFI CPER records, as described in UEFI Appendix N
+\footnote{Version referenced is \href{https://uefi.org/sites/default/files/resources/UEFI_Spec_2_9_2021_03_18.pdf}{UEFI Specification 2021/03/18}.},
+ in a human-readable JSON format, intended to be interoperable with standard CPER binary.
+\\\\
+The C library released with this specification allows for the conversion between UEFI CPER records, an intermediate format, and the JSON structures
+defined in this document.
+
+% Specification section.
+\chapter{Main Structure Specification}
+\section{Parent Structure}
+\label{section:parentstructure}
+This structure contains descriptions of the CPER log header, as well as the section descriptors and
+section structures themselves within arrays. This is the structure returned by \texttt{cper\_to\_ir(FILE* cper\_file)} as JSON IR.
+
+% Parent structure table.
+\jsontable{table:parentstructure}
+header & object & A CPER header structure as defined in Section \ref{section:headerstructure}. \\
+\hline
+sectionDescriptors & array & An array of section descriptor objects as defined in Section \ref{section:sectiondescriptorstructure}. \\
+\hline
+sections & array & An array of section objects as defined in Chapter \ref{chapter:sectionchapter}. These sections are at the same index as their corresponding section descriptor within the \texttt{sectionDescriptors} array.\\
+\jsontableend{Parent structure field table.}
+
+% Header structure.
+\section{Header Structure}
+\label{section:headerstructure}
+This structure describes the JSON format of the standard CPER header as defined in section N.2.1 of the
+UEFI specification.
+
+% Header structure table.
+\jsontable{table:headerstructure}
+revision & object & A CPER revision object structure as defined in Subsection \ref{subsection:revisionstructure}. \\
+\hline
+sectionCount & int & The number of sections that are described by the CPER record.\\
+\hline
+severity & object & An error severity structure as described in \ref{subsection:headererrorseveritystructure}.\\
+\hline
+validationBits & object & A CPER header validation bitfield as described in Subsection \ref{subsection:headervalidbitfieldstructure}.\\
+\hline
+recordLength & uint64 & The total length of the binary CPER record, including the header, in bytes.\\
+\hline
+timestamp & string (\textbf{optional}) & The attached record timestamp, if the validity field is set. Formatted identically to \texttt{Date.toJson()} (ISO 8601), minus the trailing timezone letter. Timezone is local to the machine creating the record.\\
+\hline
+timestampIsPrecise & boolean (\textbf{optional}) & If a timestamp is attached, indicates whether the provided timestamp is precise.\\
+\hline
+platformID & string (\textbf{optional}) & If validation bit is set, uniquely identifying GUID of the platform. Platform SMBIOS UUID should be used to populate this field.\\
+\hline
+partitionID & string (\textbf{optional}) & If validation bit is set, GUID identifying the partition on which the error occurred.\\
+\hline
+creatorID & string & A GUID identifying the creator of the error record. May be overwritten by subsequent owners of the record.\\
+\hline
+notificationType & object & A CPER notification type structure as described in Subsection \ref{subsection:notificationtypestructure}.\\
+\hline
+recordID & uint64 & A unique value which, when combined with the \texttt{creatorID} field, uniquely identifies this error record on a given system.\\
+\hline
+flags & object & A CPER header flags structure, as defined in Subsection \ref{subsection:headerflagsstructure}.\\
+\hline
+persistenceInfo & uint64 & Produced and consumed by the creator of the error record identified by \texttt{creatorID}. Format undefined.\\
+\jsontableend{Header structure field table.}
+
+% Header error severity.
+\subsection{Header Error Severity Structure}
+\label{subsection:headererrorseveritystructure}
+This structure describes the error severity of a single CPER record.
+\jsontable{table:headererrorseveritystructure}
+name & string & The human readable name of this error severity, if known. \\
+\hline
+code & uint64 & The integer value of this error severity. \\
+\jsontableend{Header error severity structure field table.}
+
+% Header validation bitfield.
+\subsection{Header Validation Bitfield Structure}
+\label{subsection:headervalidbitfieldstructure}
+This structure describes a bitfield for validating the fields of the header of a single CPER record.
+\jsontable{table:headervalidbitfieldstructure}
+platformIDValid & boolean & Whether the "platformID" field in the header structure (\ref{section:headerstructure}) is valid. \\
+\hline
+timestampValid & boolean & Whether the "timestamp" field in the header structure (\ref{section:headerstructure}) is valid. \\
+\hline
+partitionIDValid & boolean & Whether the "partitionID" field in the header structure (\ref{section:headerstructure}) is valid.\\
+\jsontableend{Header validation bitfield structure field table.}
+
+% Header notification type.
+\subsection{Notification Type Structure}
+\label{subsection:notificationtypestructure}
+This structure describes the notification type of a single CPER record.
+\jsontable{table:notificationtypestructure}
+guid & string & The GUID of this notification type. Assigned GUIDs for types of CPER records are defined in UEFI Specification section N.2.1.1.\\
+\hline
+type & string & A human readable name, if available, of the notification type for the given GUID.\\
+\jsontableend{Notification type structure field table.}
+
+% Header flags.
+\subsection{Header Flags Structure}
+\label{subsection:headerflagsstructure}
+This structure describes the enabled flag on a given CPER record header.
+\jsontable{table:headerflagsstructure}
+name & string & A human readable name, if available, of this flag.\\
+\hline
+value & uint64 & The integer value of this flag.\\
+\jsontableend{Header flags structure field table.}
+
+%Section descriptor structure.
+\section{Section Descriptor Structure}
+\label{section:sectiondescriptorstructure}
+This section describes the JSON format of a single CPER record section descriptor as defined by section N.2.2 of the UEFI specification. An array of these structures is contained within the parent structure as defined in Section \ref{section:parentstructure}.
+
+%Section descriptor structure table.
+\jsontable{table:sectiondescriptorstructure}
+sectionOffset & uint64 & The offset (in bytes) of the section body this section descriptor describes from the base of the record header.\\
+\hline
+sectionLength & uint64 & The length (in bytes) of the section body.\\
+\hline
+revision & object & A CPER revision structure as defined in Subsection \ref{subsection:revisionstructure}.\\
+\hline
+validationBits.fruIDValid & boolean & Whether the "fruID" field on this section descriptor contains valid data.\\
+validationBits.fruStringValid & boolean & Whether the "fruString" field on this section descriptor contains valid data.\\
+\hline
+flags & object & A CPER section descriptor flags structure as described in Subsection \ref{subsection:sectiondescriptorflagsstructure}.\\
+\hline
+sectionType.data & string & GUID data for the type of section body.\\
+sectionType.type & string & The human readable name, if possible, for the type of section body. GUIDs for types of sectoin body are defined in UEFI specification section N.2.2 Table N-5 and section N.2.4.\\
+\hline
+fruID & string (\textbf{optional}) & If validation field set, the FRU ID of the section reporting the error.\\
+\hline
+severity.code & uint64 & The integer value of the severity of the described section.\\
+severity.name & string & If available, the human readable name for the severity of the described section.\\
+\hline
+fruText & string (\textbf{optional}) & If validation field set, ASCII string identifying the FRU hardware.\\
+\jsontableend{Section descriptor structure field table.}
+
+% Section descriptor flags.
+\subsection{Section Descriptor Flags Structure}
+\label{subsection:sectiondescriptorflagsstructure}
+This structure describes the enabled flags on a given CPER section descriptor.
+\jsontable{table:sectiondescriptorflagsstructure}
+primary & boolean & If true, indicates the section body should be associated with the error condition.\\
+\hline
+containmentWarning & boolean & If true, the error was not contained within the processor or memory heirarchy, and may have propagated elsewhere.\\
+\hline
+reset & boolean & If true, indicates the component has been reset and must be re-initialised or re-enabled by the operating system.\\
+\hline
+errorThresholdExceeded & boolean & If true, indicates the operating system may choose to discontinue use of this resource.\\
+\hline
+resourceNotAccessible & boolean & If true, the resource could not be queried for error information due to conflicts with other system software or resources. Some fields of the section will be invalid.\\
+\hline
+latentError & boolean & If true, indicates that action has been taken to ensure error containment, but the error has not been fully corrected. System software may choose to take further action before the data is consumed.\\
+\hline
+propagated & boolean & If true, indicates that the error has been propagated due to hardware poisoning.\\
+\hline
+overflow & boolean & If true, overflow of data structures used to manage errors has been detected. Some error records may be lost.\\
+\jsontableend{Section descriptor flags structure field table.}
+
+% Generic CPER structures.
+\section{Generic CPER Structures}
+This section describes generic CPER structures that are re-used throughout the specification.
+
+% Revision.
+\subsection{Revision Structure}
+\label{subsection:revisionstructure}
+This structure describes the revision of a single CPER record or sub-structure.
+\jsontable{table:revisionstructure}
+major & int & The major version number. An increase in this revision indicates the changes are not backward compatible. \\
+\hline
+minor & int & The minor version number. Incremented on additions of new GUID types, errata fixes, or clarifications. Backwards compatible with the same major version number. \\
+\jsontableend{CPER revision structure field table.}
+
+%Sections.
+\chapter{Section Specification}
+\label{chapter:sectionchapter}
+This chapter defines section body formats for all of the sections defined within UEFI Specification section N.2.4.
+
+% Generic processor error section.
+\section{Generic Processor Error Section}
+\label{section:genericprocessorerrorsection}
+This section describes the JSON format for a single Generic Processor Error Section from a CPER record. The GUID used for Generic Processor Error Sections is \texttt{\{x9876CCAD, 0x47B4, 0x4bdb, \{0xB6, 0x5E, 0x16, 0xF1, 0x93, 0xC4, 0xF3, 0xDB\}\}}.
+\jsontable{table:genericprocessorerrorsection}
+validationBits & object & A Generic Processor Error Validation Structure, as described in \\
+\jsontableend{CPER revision structure field table.}
+
+% Generic processor error validation structure.
+\subsection{Generic Processor Error Validation Structure}
+\label{subsection:genericprocessorvalidationstructure}
+This structure describes the revision of a single CPER record or sub-structure.
+\jsontable{table:genericprocessorvalidationstructure}
+processorTypeValid & boolean & Whether the "processorType" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
+\hline
+processorISAValid & boolean & Whether the "processorISA" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
+\hline
+errorTypeValid & boolean & Whether the "errorType" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
+\hline
+operationValid & boolean & Whether the "operation" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
+\hline
+flagsValid & boolean & Whether the "flags" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
+\hline
+levelValid & boolean & Whether the "levelValid" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
+\hline
+cpuVersionValid & boolean & Whether the "cpuVersion" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
+\hline
+cpuBrandInfoValid & boolean & Whether the "cpuBrandInfo" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
+\hline
+cpuIDValid & boolean & Whether the "cpuID" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
+\hline
+targetAddressValid & boolean & Whether the "targetAddress" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
+\hline
+requesterIDValid & boolean & Whether the "requesterID" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
+\hline
+responderIDValid & boolean & Whether the "responderID" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
+\hline
+instructionIPValid & boolean & Whether the "instructionIP" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
+\jsontableend{CPER revision structure field table.}
+
+\end{document}

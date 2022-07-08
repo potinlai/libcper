@@ -9,3 +9,12 @@ CPackConfig.cmake
 CPackSourceConfig.cmake
 Makefile
 *.bin
+specification/*.out
+specification/*.pdf
+specification/*.toc
+specification/*.lot
+specification/*.log
+specification/*.fls
+specification/*.fdb_*
+specification/*.*gz
+specification/*aux

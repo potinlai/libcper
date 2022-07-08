@@ -67,10 +67,10 @@ json_object* uniform_struct_to_ir(UINT32* start, int len, const char* names[])
 }
 
 //Converts a single integer value to an object containing a value, and a readable name if possible.
-json_object* integer_to_readable_pair(int value, int len, int keys[], const char* values[], const char* default_value)
+json_object* integer_to_readable_pair(UINT64 value, int len, int keys[], const char* values[], const char* default_value)
 {
     json_object* result = json_object_new_object();
-    json_object_object_add(result, "value", json_object_new_int(value));
+    json_object_object_add(result, "value", json_object_new_uint64(value));
 
     //Search for human readable name, add.
     const char* name = default_value;

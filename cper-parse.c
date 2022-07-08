@@ -94,7 +94,7 @@ json_object* cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER* header)
 
     //Error severity (with interpreted string version).
     json_object* error_severity = json_object_new_object();
-    json_object_object_add(error_severity, "code", json_object_new_int(header->ErrorSeverity));
+    json_object_object_add(error_severity, "code", json_object_new_uint64(header->ErrorSeverity));
     json_object_object_add(error_severity, "name", json_object_new_string(severity_to_string(header->ErrorSeverity)));
     json_object_object_add(header_ir, "severity", error_severity);
 
@@ -103,7 +103,7 @@ json_object* cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER* header)
     json_object_object_add(header_ir, "validationBits", validation_bits);
 
     //Total length of the record (including headers) in bytes.
-    json_object_object_add(header_ir, "recordLength", json_object_new_int(header->RecordLength));
+    json_object_object_add(header_ir, "recordLength", json_object_new_uint64(header->RecordLength));
 
     //If a timestamp exists according to validation bits, then add it.
     if (header->ValidationBits & 0b10)
@@ -190,7 +190,7 @@ json_object* cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER* header)
     json_object_object_add(header_ir, "flags", flags);
 
     //Persistence information. Outside the scope of specification, so just a uint32 here.
-    json_object_object_add(header_ir, "persistenceInformation", json_object_new_uint64(header->PersistenceInfo));
+    json_object_object_add(header_ir, "persistenceInfo", json_object_new_uint64(header->PersistenceInfo));
     return header_ir;
 }
 
@@ -200,16 +200,16 @@ json_object* cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR* section
     json_object* section_descriptor_ir = json_object_new_object();
 
     //The offset of the section from the base of the record header, length.
-    json_object_object_add(section_descriptor_ir, "sectionOffset", json_object_new_int(section_descriptor->SectionOffset));
-    json_object_object_add(section_descriptor_ir, "sectionLength", json_object_new_int(section_descriptor->SectionLength));
+    json_object_object_add(section_descriptor_ir, "sectionOffset", json_object_new_uint64(section_descriptor->SectionOffset));
+    json_object_object_add(section_descriptor_ir, "sectionLength", json_object_new_uint64(section_descriptor->SectionLength));
 
     //Revision.
     json_object_object_add(section_descriptor_ir, "revision", revision_to_ir(section_descriptor->Revision));
 
     //Validation bits.
     json_object* validation_bits = json_object_new_object();
-    json_object_object_add(validation_bits, "fruID", json_object_new_boolean(section_descriptor->SecValidMask & 0b1));
-    json_object_object_add(validation_bits, "fruString", json_object_new_boolean((section_descriptor->SecValidMask & 0b10) >> 1));
+    json_object_object_add(validation_bits, "fruIDValid", json_object_new_boolean(section_descriptor->SecValidMask & 0b1));
+    json_object_object_add(validation_bits, "fruStringValid", json_object_new_boolean((section_descriptor->SecValidMask & 0b10) >> 1));
     json_object_object_add(section_descriptor_ir, "validationBits", validation_bits);
 
     //Flag bits.
@@ -280,7 +280,7 @@ json_object* cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR* section
 
     //Section severity.
     json_object* section_severity = json_object_new_object();
-    json_object_object_add(section_severity, "code", json_object_new_int(section_descriptor->Severity));
+    json_object_object_add(section_severity, "code", json_object_new_uint64(section_descriptor->Severity));
     json_object_object_add(section_severity, "name", json_object_new_string(severity_to_string(section_descriptor->Severity)));
     json_object_object_add(section_descriptor_ir, "severity", section_severity);
 
