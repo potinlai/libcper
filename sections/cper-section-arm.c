@@ -322,11 +322,11 @@ json_object* cper_arm_misc_register_array_to_ir(EFI_ARM_MISC_CONTEXT_REGISTER* m
 {
     json_object* register_array = json_object_new_object();
     json_object* mrs_encoding = json_object_new_object();
-    json_object_object_add(mrs_encoding, "op2", json_object_new_int(misc_register->MrsOp2));
-    json_object_object_add(mrs_encoding, "crm", json_object_new_int(misc_register->MrsOp2));
-    json_object_object_add(mrs_encoding, "crn", json_object_new_int(misc_register->MrsOp2));
-    json_object_object_add(mrs_encoding, "op1", json_object_new_int(misc_register->MrsOp2));
-    json_object_object_add(mrs_encoding, "o0", json_object_new_int(misc_register->MrsOp2));
+    json_object_object_add(mrs_encoding, "op2", json_object_new_uint64(misc_register->MrsOp2));
+    json_object_object_add(mrs_encoding, "crm", json_object_new_uint64(misc_register->MrsOp2));
+    json_object_object_add(mrs_encoding, "crn", json_object_new_uint64(misc_register->MrsOp2));
+    json_object_object_add(mrs_encoding, "op1", json_object_new_uint64(misc_register->MrsOp2));
+    json_object_object_add(mrs_encoding, "o0", json_object_new_uint64(misc_register->MrsOp2));
     json_object_object_add(register_array, "mrsEncoding", mrs_encoding);
     json_object_object_add(register_array, "value", json_object_new_uint64(misc_register->Value));
 

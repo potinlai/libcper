@@ -26,8 +26,17 @@ json_object* cper_section_platform_memory_to_ir(void* section, EFI_ERROR_SECTION
 
     //Bank.
     json_object* bank = json_object_new_object();
-    json_object_object_add(bank, "address", json_object_new_uint64(memory_error->Bank & 0xFF));
-    json_object_object_add(bank, "group", json_object_new_uint64(memory_error->Bank >> 8));
+    if ((memory_error->ValidFields >> 5) & 0x1)
+    {
+        //Entire bank address mode.
+        json_object_object_add(bank, "value", json_object_new_uint64(memory_error->Bank));
+    }
+    else 
+    {
+        //Address/group address mode.
+        json_object_object_add(bank, "address", json_object_new_uint64(memory_error->Bank & 0xFF));
+        json_object_object_add(bank, "group", json_object_new_uint64(memory_error->Bank >> 8));
+    }
     json_object_object_add(section_ir, "bank", bank);
 
     //Memory error type.
@@ -80,8 +89,17 @@ json_object* cper_section_platform_memory2_to_ir(void* section, EFI_ERROR_SECTIO
 
     //Bank.
     json_object* bank = json_object_new_object();
-    json_object_object_add(bank, "address", json_object_new_uint64(memory_error->Bank & 0xFF));
-    json_object_object_add(bank, "group", json_object_new_uint64(memory_error->Bank >> 8));
+    if ((memory_error->ValidFields >> 5) & 0x1)
+    {
+        //Entire bank address mode.
+        json_object_object_add(bank, "value", json_object_new_uint64(memory_error->Bank));
+    }
+    else 
+    {
+        //Address/group address mode.
+        json_object_object_add(bank, "address", json_object_new_uint64(memory_error->Bank & 0xFF));
+        json_object_object_add(bank, "group", json_object_new_uint64(memory_error->Bank >> 8));
+    }
     json_object_object_add(section_ir, "bank", bank);
 
     //Memory error type.

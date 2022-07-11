@@ -29,7 +29,7 @@ First revision released [DATE].}}
     \end{tabular}
     \end{adjustbox}
     \caption{#1}
-    \label{table:headerrevstructure}
+    \label{table:#1}
     \end{table}
     \FloatBarrier
 }
@@ -208,6 +208,30 @@ major & int & The major version number. An increase in this revision indicates t
 \hline
 minor & int & The minor version number. Incremented on additions of new GUID types, errata fixes, or clarifications. Backwards compatible with the same major version number. \\
 \jsontableend{CPER revision structure field table.}
+
+% Generic Error Status
+\subsection{Generic Error Status Structure}
+\label{subsection:genericerrorstatusstructure}
+This structure describes the a generic CPER error status, that can be used by any CPER section.
+\jsontable{table:genericerrorstatusstructure}
+errorType.value & uint64 & The raw value of the error type.\\
+errorType.name & string & The human readable name, if available, of the error type.\\
+errorType.description & string & A human readable description, if available, of the error type.\\
+\hline
+addressSignal & boolean & Whether the error was detected on the address signals/address portion of the transaction.\\
+\hline
+controlSignal & boolean & Whether the error was detected on the control signals/control portion of the transaction.\\
+\hline
+dataSignal & boolean & Whether the error was detected on the data signals/data portion of the transaction.\\
+\hline
+detectedByResponder & boolean & Whether the error was detected by the responder of the transaction.\\
+\hline
+detectedByRequester & boolean & Whether the error was detected by the requester of the transaction.\\
+\hline
+firstError & boolean & If multiple errors are logged for a single type of section, this indicates this is the first error in a chronological sequence. This field is optional to set.\\
+\hline
+overflowDroppedLogs & boolean & Additional errors occurred and were not logged due to lack of resources.\\
+\jsontableend{Generic Error Status structure field table.}
 
 %Sections.
 \chapter{Section Specification}
@@ -1230,5 +1254,231 @@ This structure describes the register array for unknown ARM registers as part of
 data & string & A base64 representation of the unknown binary register array data.\\
 \jsontableend{ARM AARCH64 Unknown Registers structure field table.}
 
+% Memory error section.
+\section{Memory Error Section}
+\label{section:memoryerrorsection}
+This section describes the JSON format for a single Memory Error Section from a CPER record. The GUID used for Memory Error Sections is \texttt{\{ 0xa5bc1114, 0x6f64, 0x4ede, \{ 0xb8, 0x63, 0x3e, 0x83, 0xed, 0x7c, 0x83, 0xb1 \}\}}.
+\jsontable{table:memoryerrorsection}
+validationBits & object & A Memory Error Validation structure, as described in Subsection \ref{subsection:memoryerrorvalidationstructure}.\\
+\hline
+errorStatus & object & A CPER Generic Error Status structure, as described in Subsection \ref{subsection:genericerrorstatusstructure}.\\
+\hline
+bank & object & Structure as described in one of Subsection \ref{subsection:memoryerrorstandardbankaddressstructure} or Subsection \ref{subsection:memoryerroraddressgroupbankaddressstructure}. Selected structure depends on the \texttt{validationBits.bankValid} field.\\
+\hline
+memoryErrorType.value & uint64 & The raw value of the memory error type.\\
+memoryErrorType.name & string & The human readable name, if available, of the memory error type.\\
+\hline
+extended.rowBit16 & boolean & Bit 16 of the row number of the memory error location.\\
+extended.rowBit17 & boolean & Bit 17 of the row number of the memory error location.\\
+extended.chipIdentification & int & The ID of the related chip.\\
+\hline
+physicalAddress & uint64 & The physical address at which the error occurred.\\
+\hline
+physicalAddressMask & uint64 & Defines the valid address bits in the \texttt{physicalAddress} field.\\
+\hline
+node & uint64 & Identifies the node containing the memory error, if in a multi-node system.\\
+\hline
+card & uint64 & The card number of the memory error location.\\
+\hline
+moduleRank & uint64 & The module or rank number of the offending memory error location.\\
+\hline
+device & uint64 & The device number of the memory associated with the error.\\
+\hline
+row & uint64 & The first 16 bits of the row number of the memory location.\\
+\hline
+column & uint64 & The column number of the memory error location.\\
+\hline
+bitPosition & uint64 & The bit position at which the error occurred.\\
+\hline
+requestorID & uint64 & Hardware address of the device that initiated the errored transaction.\\
+\hline
+responderID & uint64 & Hardware address of the device that responded to the transaction.\\
+\hline
+targetID & uint64 & Hardware address of the intended target of the transaction.\\
+\hline
+rankNumber & uint64 & The rank number of the memory error location.\\
+\hline
+cardSmbiosHandle & uint64 & The SMBIOS handle for the memory card's Type 16 Memory Array Structure.\\
+\hline
+moduleSmbiosHandle & uint64 & The SMBIOS handle for the memory module's Type 17 Memory Device Structure.\\
+\jsontableend{Memory Error structure field table.}
+
+% Memory error validation structure.
+\subsection{Memory Error Validation Structure}
+\label{subsection:memoryerrorvalidationstructure}
+This structure describes whether fields in a single Memory Error (\ref{section:memoryerrorsection}) are valid, using boolean fields.
+\jsontable{table:memoryerrorvalidationstructure}
+errorStatusValid & boolean & Whether the "errorStatus" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
+\hline
+physicalAddressValid & boolean & Whether the "physicalAddress" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
+\hline
+physicalAddressMaskValid & boolean & Whether the "physicalAddressMask" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
+\hline
+nodeValid & boolean & Whether the "node" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
+\hline
+cardValid & boolean & Whether the "card" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
+\hline
+moduleValid & boolean & Whether the "module" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
+\hline
+bankValid & boolean & Whether the "bank.value" field of a Memory Error (\ref{section:memoryerrorsection}) is valid. When the bank is addressed by group/address, refer to \texttt{bankGroupValid} and \texttt{bankAddressValid} instead.\\
+\hline
+deviceValid & boolean & Whether the "device" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
+\hline
+rowValid & boolean & Whether the "row" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
+\hline
+memoryPlatformTargetValid & boolean & Whether the memory platform target of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
+\hline
+memoryErrorTypeValid & boolean & Whether the "memoryErrorType" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
+\hline
+rankNumberValid & boolean & Whether the "rankNumber" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
+\hline
+cardHandleValid & boolean & Whether the "cardSmbiosHandle" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
+\hline
+moduleHandleValid & boolean & Whether the "moduleSmbiosHandle" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
+\hline
+extendedRowBitsValid & boolean & Whether the "extended.rowBit16" and "extended.rowBit17" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
+\hline
+bankGroupValid & boolean & Whether the "bank.group" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
+\hline
+bankAddressValid & boolean & Whether the "bank.address" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
+\hline
+chipIdentificationValid & boolean & Whether the "extended.chipIdentification" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
+\jsontableend{Memory Error Validation structure field table.}
+
+% Memory error normal bank addressing structure.
+\subsection{Memory Error Standard Bank Address Structure}
+\label{subsection:memoryerrorstandardbankaddressstructure}
+This structure describes a simple bank address for a Memory Error section (\ref{section:memoryerrorsection}). This structure is selected when the \texttt{bankValid} field in the corresponding Memory Error Validation Structure (\ref{subsection:memoryerrorvalidationstructure}) is set to "true".
+\jsontable{table:memoryerrorstandardbankaddressstructure}
+value & uint64 & The value of the bank address.\\
+\jsontableend{Memory Error Standard Bank Address structure field table.}
+
+% Memory error address/group bank addressing structure.
+\subsection{Memory Error Address/Group Bank Address Structure}
+\label{subsection:memoryerroraddressgroupbankaddressstructure}
+This structure describes an address/group bank address for a Memory Error section (\ref{section:memoryerrorsection}). This structure is selected when the \texttt{bankValid} field in the corresponding Memory Error Validation Structure (\ref{subsection:memoryerrorvalidationstructure}) is set to "false".
+\jsontable{table:memoryerroraddressgroupbankaddressstructure}
+address & uint64 & The address of the bank.\\
+\hline
+group & uint64 & The group of the bank.\\
+\jsontableend{Memory Error Address/Group Bank Address structure field table.}
+
+% Memory error 2 section.
+\section{Memory Error 2 Section}
+\label{section:memoryerror2section}
+This section describes the JSON format for a single Memory Error 2 Section from a CPER record. The GUID used for Memory Error 2 Sections is \texttt{\{ 0x61EC04FC, 0x48E6, 0xD813, \{ 0x25, 0xC9, 0x8D, 0xAA, 0x44, 0x75, 0x0B, 0x12 \}\}}.
+\jsontable{table:memoryerror2section}
+validationBits & object & A Memory Error 2 Validation structure, as described in Subsection \ref{subsection:memoryerror2validationstructure}.\\
+\hline
+errorStatus & object & A CPER Generic Error Status structure, as described in Subsection \ref{subsection:genericerrorstatusstructure}.\\
+\hline
+bank & object & Structure as described in one of Subsection \ref{subsection:memoryerror2standardbankaddressstructure} or Subsection \ref{subsection:memoryerror2addressgroupbankaddressstructure}. Selected structure depends on the \texttt{validationBits.bankValid} field.\\
+\hline
+memoryErrorType.value & uint64 & The raw value of the memory error type.\\
+memoryErrorType.name & string & The human readable name, if available, of the memory error type.\\
+\hline
+status.value & int & The raw value of the memory error status.\\
+status.state & string & The human readable value, if available, of the memory error status (corrected/uncorrected).\\
+\hline
+physicalAddress & uint64 & The physical address at which the error occurred.\\
+\hline
+physicalAddressMask & uint64 & Defines the valid address bits in the \texttt{physicalAddress} field.\\
+\hline
+node & uint64 & Identifies the node containing the memory error, if in a multi-node system.\\
+\hline
+card & uint64 & The card number of the memory error location.\\
+\hline
+module & uint64 & The module of the offending memory error location.\\
+\hline
+device & uint64 & The device number of the memory associated with the error.\\
+\hline
+row & uint64 & The first 16 bits of the row number of the memory location.\\
+\hline
+column & uint64 & The column number of the memory error location.\\
+\hline
+bitPosition & uint64 & The bit position at which the error occurred.\\
+\hline
+rank & uint64 & The rank number of the error location.\\
+\hline
+chipID & uint64 & Chip identifier. Encoded field used to address the die in 3DS packages.\\
+\hline
+requestorID & uint64 & Hardware address of the device that initiated the errored transaction.\\
+\hline
+responderID & uint64 & Hardware address of the device that responded to the transaction.\\
+\hline
+targetID & uint64 & Hardware address of the intended target of the transaction.\\
+\hline
+cardSmbiosHandle & uint64 & The SMBIOS handle for the memory card's Type 16 Memory Array Structure.\\
+\hline
+moduleSmbiosHandle & uint64 & The SMBIOS handle for the memory module's Type 17 Memory Device Structure.\\
+\jsontableend{Memory Error 2 structure field table.}
+
+% Memory error 2 validation structure.
+\subsection{Memory Error 2 Validation Structure}
+\label{subsection:memoryerror2validationstructure}
+This structure describes whether fields in a single Memory Error 2 (\ref{section:memoryerror2section}) are valid, using boolean fields.
+\jsontable{table:memoryerror2validationstructure}
+errorStatusValid & boolean & Whether the "errorStatus" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+physicalAddressValid & boolean & Whether the "physicalAddress" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+physicalAddressMaskValid & boolean & Whether the "physicalAddressMask" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+nodeValid & boolean & Whether the "node" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+cardValid & boolean & Whether the "card" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+moduleValid & boolean & Whether the "module" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+bankValid & boolean & Whether the "bank.value" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid. When the bank is addressed by group/address, refer to \texttt{bankGroupValid} and \texttt{bankAddressValid} instead.\\
+\hline
+deviceValid & boolean & Whether the "device" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+rowValid & boolean & Whether the "row" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+columnValid & boolean & Whether the "column" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+rankValid & boolean & Whether the "rank" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+bitPositionValid & boolean & Whether the "bitPosition" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+chipIDValid & boolean & Whether the "chipID" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+memoryErrorTypeValid & boolean & Whether the "memoryErrorType" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+statusValid & boolean & Whether the "status" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+requestorIDValid & boolean & Whether the "requestorID" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+responderIDValid & boolean & Whether the "responderID" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+targetIDValid & boolean & Whether the "targetID" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+cardHandleValid & boolean & Whether the "cardSmbiosHandle" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+moduleHandleValid & boolean & Whether the "moduleSmbiosHandle" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+bankGroupValid & boolean & Whether the "bankGroup" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\hline
+bankAddressValid & boolean & Whether the "bankAddress" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
+\jsontableend{Memory Error 2 Validation structure field table.}
+
+% Memory error 2 normal bank addressing structure.
+\subsection{Memory Error 2 Standard Bank Address Structure}
+\label{subsection:memoryerror2standardbankaddressstructure}
+This structure describes a simple bank address for a Memory Error 2 section (\ref{section:memoryerror2section}). This structure is selected when the \texttt{bankValid} field in the corresponding Memory Error 2 Validation Structure (\ref{subsection:memoryerror2validationstructure}) is set to "true".
+\jsontable{table:memoryerror2standardbankaddressstructure}
+value & uint64 & The value of the bank address.\\
+\jsontableend{Memory Error 2 Standard Bank Address structure field table.}
+
+% Memory error 2 address/group bank addressing structure.
+\subsection{Memory Error 2 Address/Group Bank Address Structure}
+\label{subsection:memoryerror2addressgroupbankaddressstructure}
+This structure describes an address/group bank address for a Memory Error 2 section (\ref{section:memoryerror2section}). This structure is selected when the \texttt{bankValid} field in the corresponding Memory Error 2 Validation Structure (\ref{subsection:memoryerror2validationstructure}) is set to "false".
+\jsontable{table:memoryerror2addressgroupbankaddressstructure}
+address & uint64 & The address of the bank.\\
+\hline
+group & uint64 & The group of the bank.\\
+\jsontableend{Memory Error 2 Address/Group Bank Address structure field table.}
 
 \end{document}

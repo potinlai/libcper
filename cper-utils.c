@@ -31,7 +31,7 @@ json_object* cper_generic_error_status_to_ir(EFI_GENERIC_ERROR_STATUS* error_sta
     json_object_object_add(error_status_ir, "detectedByResponder", json_object_new_boolean(error_status->DetectedByResponder));
     json_object_object_add(error_status_ir, "detectedByRequester", json_object_new_boolean(error_status->DetectedByRequester));
     json_object_object_add(error_status_ir, "firstError", json_object_new_boolean(error_status->FirstError));
-    json_object_object_add(error_status_ir, "overflowNotLogged", json_object_new_boolean(error_status->OverflowNotLogged));
+    json_object_object_add(error_status_ir, "overflowDroppedLogs", json_object_new_boolean(error_status->OverflowNotLogged));
     
     return error_status_ir;
 }
