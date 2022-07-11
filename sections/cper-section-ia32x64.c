@@ -101,9 +101,9 @@ json_object* cper_ia32x64_processor_error_info_to_ir(EFI_IA32_X64_PROCESS_ERROR_
     json_object_object_add(error_info_ir, "checkInfo", checkInformation);
 
     //Target, requestor, and responder identifiers.
-    json_object_object_add(error_info_ir, "targetIdentifier", json_object_new_uint64(error_info->TargetId));
-    json_object_object_add(error_info_ir, "requestorIdentifier", json_object_new_uint64(error_info->RequestorId));
-    json_object_object_add(error_info_ir, "responderIdentifier", json_object_new_uint64(error_info->ResponderId));
+    json_object_object_add(error_info_ir, "targetAddressID", json_object_new_uint64(error_info->TargetId));
+    json_object_object_add(error_info_ir, "requestorID", json_object_new_uint64(error_info->RequestorId));
+    json_object_object_add(error_info_ir, "responderID", json_object_new_uint64(error_info->ResponderId));
     json_object_object_add(error_info_ir, "instructionPointer", json_object_new_uint64(error_info->InstructionIP));
 
     return error_info_ir;
@@ -202,7 +202,7 @@ json_object* cper_ia32x64_ms_check_to_ir(EFI_IA32_X64_MS_CHECK_INFO* ms_check)
     json_object* ms_check_ir = json_object_new_object();
 
     //Validation bits.
-    json_object* validation = bitfield_to_ir(ms_check->ValidFields, 6, IA32X64_CHECK_INFO_VALID_BITFIELD_NAMES);
+    json_object* validation = bitfield_to_ir(ms_check->ValidFields, 6, IA32X64_CHECK_INFO_MS_CHECK_VALID_BITFIELD_NAMES);
     json_object_object_add(ms_check_ir, "validationBits", validation);
 
     //Error type (operation that caused the error).
@@ -274,31 +274,31 @@ json_object* cper_ia32x64_processor_context_info_to_ir(EFI_IA32_X64_PROCESSOR_CO
 json_object* cper_ia32x64_register_32bit_to_ir(EFI_CONTEXT_IA32_REGISTER_STATE* registers)
 {
     json_object* ia32_registers = json_object_new_object();
-    json_object_object_add(ia32_registers, "eax", json_object_new_int(registers->Eax));
-    json_object_object_add(ia32_registers, "ebx", json_object_new_int(registers->Ebx));
-    json_object_object_add(ia32_registers, "ecx", json_object_new_int(registers->Ecx));
-    json_object_object_add(ia32_registers, "edx", json_object_new_int(registers->Edx));
-    json_object_object_add(ia32_registers, "esi", json_object_new_int(registers->Esi));
-    json_object_object_add(ia32_registers, "edi", json_object_new_int(registers->Edi));
-    json_object_object_add(ia32_registers, "ebp", json_object_new_int(registers->Ebp));
-    json_object_object_add(ia32_registers, "esp", json_object_new_int(registers->Esp));
-    json_object_object_add(ia32_registers, "cs", json_object_new_int(registers->Cs));
-    json_object_object_add(ia32_registers, "ds", json_object_new_int(registers->Ds));
-    json_object_object_add(ia32_registers, "ss", json_object_new_int(registers->Ss));
-    json_object_object_add(ia32_registers, "es", json_object_new_int(registers->Es));
-    json_object_object_add(ia32_registers, "fs", json_object_new_int(registers->Fs));
-    json_object_object_add(ia32_registers, "gs", json_object_new_int(registers->Gs));
-    json_object_object_add(ia32_registers, "eflags", json_object_new_int(registers->Eflags));
-    json_object_object_add(ia32_registers, "eip", json_object_new_int(registers->Eip));
-    json_object_object_add(ia32_registers, "cr0", json_object_new_int(registers->Cr0));
-    json_object_object_add(ia32_registers, "cr1", json_object_new_int(registers->Cr1));
-    json_object_object_add(ia32_registers, "cr2", json_object_new_int(registers->Cr2));
-    json_object_object_add(ia32_registers, "cr3", json_object_new_int(registers->Cr3));
-    json_object_object_add(ia32_registers, "cr4", json_object_new_int(registers->Cr4));
+    json_object_object_add(ia32_registers, "eax", json_object_new_uint64(registers->Eax));
+    json_object_object_add(ia32_registers, "ebx", json_object_new_uint64(registers->Ebx));
+    json_object_object_add(ia32_registers, "ecx", json_object_new_uint64(registers->Ecx));
+    json_object_object_add(ia32_registers, "edx", json_object_new_uint64(registers->Edx));
+    json_object_object_add(ia32_registers, "esi", json_object_new_uint64(registers->Esi));
+    json_object_object_add(ia32_registers, "edi", json_object_new_uint64(registers->Edi));
+    json_object_object_add(ia32_registers, "ebp", json_object_new_uint64(registers->Ebp));
+    json_object_object_add(ia32_registers, "esp", json_object_new_uint64(registers->Esp));
+    json_object_object_add(ia32_registers, "cs", json_object_new_uint64(registers->Cs));
+    json_object_object_add(ia32_registers, "ds", json_object_new_uint64(registers->Ds));
+    json_object_object_add(ia32_registers, "ss", json_object_new_uint64(registers->Ss));
+    json_object_object_add(ia32_registers, "es", json_object_new_uint64(registers->Es));
+    json_object_object_add(ia32_registers, "fs", json_object_new_uint64(registers->Fs));
+    json_object_object_add(ia32_registers, "gs", json_object_new_uint64(registers->Gs));
+    json_object_object_add(ia32_registers, "eflags", json_object_new_uint64(registers->Eflags));
+    json_object_object_add(ia32_registers, "eip", json_object_new_uint64(registers->Eip));
+    json_object_object_add(ia32_registers, "cr0", json_object_new_uint64(registers->Cr0));
+    json_object_object_add(ia32_registers, "cr1", json_object_new_uint64(registers->Cr1));
+    json_object_object_add(ia32_registers, "cr2", json_object_new_uint64(registers->Cr2));
+    json_object_object_add(ia32_registers, "cr3", json_object_new_uint64(registers->Cr3));
+    json_object_object_add(ia32_registers, "cr4", json_object_new_uint64(registers->Cr4));
     json_object_object_add(ia32_registers, "gdtr", json_object_new_uint64(registers->Gdtr[0] + ((UINT64)registers->Gdtr[1] << 32)));
     json_object_object_add(ia32_registers, "idtr", json_object_new_uint64(registers->Idtr[0] + ((UINT64)registers->Idtr[1] << 32)));
-    json_object_object_add(ia32_registers, "ldtr", json_object_new_int(registers->Ldtr));
-    json_object_object_add(ia32_registers, "tr", json_object_new_int(registers->Tr));
+    json_object_object_add(ia32_registers, "ldtr", json_object_new_uint64(registers->Ldtr));
+    json_object_object_add(ia32_registers, "tr", json_object_new_uint64(registers->Tr));
 
     return ia32_registers;
 }

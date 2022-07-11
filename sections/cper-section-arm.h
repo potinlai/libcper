@@ -15,7 +15,7 @@
     "precisePCValid", "restartablePCValid"}
 #define ARM_BUS_ERROR_VALID_BITFIELD_NAMES (const char*[]) \
     {"transactionTypeValid", "operationValid", "levelValid", "processorContextCorruptValid", "correctedValid", \
-    "precisePCValid", "restartablePCValid", "participationTypeValid", "timeOutValid", "addressSpaceValid", \
+    "precisePCValid", "restartablePCValid", "participationTypeValid", "timedOutValid", "addressSpaceValid", \
     "memoryAttributesValid", "accessModeValid"}
 #define ARM_ERROR_TRANSACTION_TYPES_KEYS (int []){0, 1, 2}
 #define ARM_ERROR_TRANSACTION_TYPES_VALUES (const char*[]){"Instruction", "Data Access", "Generic"}

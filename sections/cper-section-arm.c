@@ -32,7 +32,7 @@ json_object* cper_section_arm_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR*
     //Number of error info and context info structures, and length.
     json_object_object_add(section_ir, "errorInfoNum", json_object_new_int(record->ErrInfoNum));
     json_object_object_add(section_ir, "contextInfoNum", json_object_new_int(record->ContextInfoNum));
-    json_object_object_add(section_ir, "sectionLength", json_object_new_int(record->SectionLength));
+    json_object_object_add(section_ir, "sectionLength", json_object_new_uint64(record->SectionLength));
 
     //Error affinity.
     json_object* error_affinity = json_object_new_object();
@@ -46,13 +46,13 @@ json_object* cper_section_arm_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR*
     json_object_object_add(section_ir, "midrEl1", json_object_new_uint64(record->MIDR_EL1));
 
     //Whether the processor is running, and the state of it if so.
-    json_object_object_add(section_ir, "running", json_object_new_boolean(record->RunningState));
+    json_object_object_add(section_ir, "running", json_object_new_boolean(record->RunningState & 0b1));
     if (record->RunningState >> 31)
     {
         //Bit 32 of running state is on, so PSCI state information is included.
         //This can't be made human readable, as it is unknown whether this will be the pre-PSCI 1.0 format
         //or the newer Extended StateID format.
-        json_object_object_add(section_ir, "psciState", json_object_new_int(record->PsciState));
+        json_object_object_add(section_ir, "psciState", json_object_new_uint64(record->PsciState));
     }
 
     //Processor error structures.
@@ -68,8 +68,14 @@ json_object* cper_section_arm_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR*
     //Processor context structures.
     //The current position is moved within the processing, as it is a dynamic size structure.
     void* cur_pos = (void*)cur_error;
-    EFI_ARM_CONTEXT_INFORMATION_HEADER* header = (EFI_ARM_CONTEXT_INFORMATION_HEADER*)cur_error;
-    json_object* processor_context = cper_arm_processor_context_to_ir(header, &cur_pos);
+    json_object* context_info_array = json_object_new_array();
+    for (int i=0; i<record->ContextInfoNum; i++)
+    {
+        EFI_ARM_CONTEXT_INFORMATION_HEADER* header = (EFI_ARM_CONTEXT_INFORMATION_HEADER*)cur_pos;
+        json_object* processor_context = cper_arm_processor_context_to_ir(header, &cur_pos);
+        json_object_array_add(context_info_array, processor_context);
+    }
+    json_object_object_add(section_ir, "contextInfo", context_info_array);
 
     //Is there any vendor-specific information following?
     if (cur_pos < section + record->SectionLength)
@@ -229,7 +235,7 @@ json_object* cper_arm_bus_error_to_ir(EFI_ARM_BUS_ERROR_STRUCTURE* bus_error)
 
     //Memory access attributes.
     //todo: find the specification of these in the ARM ARM
-    //...
+    json_object_object_add(bus_error_ir, "memoryAttributes", json_object_new_int(bus_error->MemoryAddressAttributes));
 
     //Access Mode
     json_object* access_mode = json_object_new_object();
@@ -303,6 +309,7 @@ json_object* cper_arm_processor_context_to_ir(EFI_ARM_CONTEXT_INFORMATION_HEADER
             free(encoded);
             break;
     }
+    json_object_object_add(context_ir, "registerArray", register_array);
 
     //Set the current position to after the processor context structure.
     *cur_pos = (UINT8*)(*cur_pos) + header->RegisterArraySize;

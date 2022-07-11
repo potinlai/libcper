@@ -347,17 +347,888 @@ edx & uint64 & Value of the EDX register resulting from a call to CPUID with EAX
 \label{subsection:ia32x64processorerrorinfostructure}
 This structure describes a single IA32/x64 Processor Error Info sub-section, which is part of the larger IA32/x64 record (\ref{section:ia32x64errorsection}).
 \jsontable{table:ia32x64processorerrorinfostructure}
-todo & todo & todo.\\
+type & string & A GUID indicating the type of processor error defined in this structure. See \texttt{edk/Cper.h} in the library repository for the defined GUID values.\\
 \hline
+validationBits & object & An IA32/x64 Processor Error Info Validation structure, as defined in Subsection \ref{subsection:ia32x64processorerrorinfovalidationstructure}.\\
+\hline
+checkInfo & object & Check information structure for this error. One of the structures defined in Subsections \ref{subsection:ia32x64processorerrorcheckinfocachetlbstructure}, \ref{subsection:ia32x64processorerrorcheckinfobusstructure}, or \ref{subsection:ia32x64processorerrorcheckinfomscheckstructure}. Which section is placed here is dependent on the \texttt{type} field.\\
+\hline
+targetAddressID & uint64 & Identifies the target address associated with the error.\\
+\hline
+requestorID & uint64 & Identifies the requestor associated with the error.\\
+\hline
+responderID & uint64 & Identifies the responder associated with the error.\\
+\hline
+instructionPointer & uint64 & Identifies the instruction executing when the error occurred.\\ 
 \jsontableend{IA32/x64 Processor Error Info structure field table.}
+
+% IA32/x64 Processor Error Info Validation structure.
+\subsection{IA32/x64 Processor Error Info Validation Structure}
+\label{subsection:ia32x64processorerrorinfovalidationstructure}
+This structure describes a single IA32/x64 Processor Error Info structure's valid fields, as a set of boolean values.
+\jsontable{table:ia32x64processorerrorinfovalidationstructure}
+checkInfoValid & boolean & Whether the "checkInfo" field in the Processor Error Info structure (\ref{subsection:ia32x64processorerrorinfostructure}) is valid.\\
+\hline
+targetAddressIDValid & boolean & Whether the "targetAddressID" field in the Processor Error Info structure (\ref{subsection:ia32x64processorerrorinfostructure}) is valid.\\
+\hline
+requestorIDValid & boolean & Whether the "requestorID" field in the Processor Error Info structure (\ref{subsection:ia32x64processorerrorinfostructure}) is valid.\\
+\hline
+responderIDValid & boolean & Whether the "responderID" field in the Processor Error Info structure (\ref{subsection:ia32x64processorerrorinfostructure}) is valid.\\
+\hline
+instructionPointerValid & boolean & Whether the "instructionPointer" field in the Processor Error Info structure (\ref{subsection:ia32x64processorerrorinfostructure}) is valid.\\
+\hline
+\jsontableend{IA32/x64 Processor Error Info Validation structure field table.}
+
+% IA32/x64 Processor Error Check Info (Cache/TLB Error)
+\subsection{IA32/x64 Processor Error Check Info (Cache/TLB Error) Structure}
+\label{subsection:ia32x64processorerrorcheckinfocachetlbstructure}
+This structure describes check info for an IA32/x64 Processor Error Info structure (\ref{subsection:ia32x64processorerrorinfostructure}) stemming from a cache or TLB error.
+The GUIDs for cache and TLB error check info structures can be found in the library repository's \texttt{edk/Cper.h}.
+\jsontable{table:ia32x64processorerrorcheckinfocachetlbstructure}
+validationBits & object & An IA32/x64 Processor Error Check Info (Cache/TLB/Bus) Validation structure, as defined in Subsection \ref{subsection:ia32x64processorerrorcheckinfovalidationstructure}.\\
+\hline
+transactionType.value & uint64 & The raw value of the type of cache/TLB error that occurred.\\
+transactionType.name & string & The human readable name, if available, of the type of cache/TLB error that occurred.\\
+\hline
+operation.value & uint64 & The raw value of the type of cache/TLB operation that caused the error.\\
+operation.name & string & The human readable name, if available, of the type of cache/TLB operation that caused the error.\\
+\hline
+level & uint64 & The cache/TLB level at which the error occurred.\\
+\hline
+processorContextCorrupt & boolean & Whether the processor context might have been corrupted.\\
+\hline
+uncorrected & boolean & Whether the error remained uncorrected.\\
+\hline
+preciseIP & boolean & Whether the instruction pointed pushed onto the stack is directly associated with the error.\\
+\hline
+restartableIP & boolean & Whether program execution can be restarted reliably at the instruction pointer pushed onto the stack.\\
+\hline
+overflow & boolean & Whether an error overflow occurred (multiple errors within a short timeframe may cause this, can indicate loss of data).\\
+\jsontableend{IA32/x64 Processor Error Check Info (Cache/TLB Error) structure field table.}
+
+% IA32/x64 Processor Error Check Info (Bus Error)
+\subsection{IA32/x64 Processor Error Check Info (Bus Error) Structure}
+\label{subsection:ia32x64processorerrorcheckinfobusstructure}
+This structure describes check info for an IA32/x64 Processor Error Info structure (\ref{subsection:ia32x64processorerrorinfostructure}) stemming from a bus error.
+The GUID for bus error check info structures can be found in the library repository's \texttt{edk/Cper.h}.
+\jsontable{table:ia32x64processorerrorcheckinfobusstructure}
+validationBits & object & An IA32/x64 Processor Error Check Info (Cache/TLB/Bus) Validation structure, as defined in Subsection \ref{subsection:ia32x64processorerrorcheckinfovalidationstructure}.\\
+\hline
+transactionType.value & uint64 & The raw value of the type of bus error that occurred.\\
+transactionType.name & string & The human readable name, if available, of the type of bus error that occurred.\\
+\hline
+operation.value & uint64 & The raw value of the type of bus operation that caused the error.\\
+operation.name & string & The human readable name, if available, of the type of bus operation that caused the error.\\
+\hline
+level & uint64 & The bus heirarchy level at which the error occurred.\\
+\hline
+processorContextCorrupt & boolean & Whether the processor context might have been corrupted.\\
+\hline
+uncorrected & boolean & Whether the error remained uncorrected.\\
+\hline
+preciseIP & boolean & Whether the instruction pointed pushed onto the stack is directly associated with the error.\\
+\hline
+restartableIP & boolean & Whether program execution can be restarted reliably at the instruction pointer pushed onto the stack.\\
+\hline
+overflow & boolean & Whether an error overflow occurred (multiple errors within a short timeframe may cause this, can indicate loss of data).\\
+\hline
+participationType.value & uint64 & The raw value of the type of participation.\\
+participationType.name & string & The human readable name, if available, of the type of participation.\\
+\hline
+timedOut & boolean & Whether the request timed out.\\
+\hline
+addressSpace.value & uint64 & The raw value of the address space the error was in.\\
+addressSpace.name  & string & The human readable name, if available, of the address space the error was in.\\
+\jsontableend{IA32/x64 Processor Error Check Info (Bus Error) structure field table.}
+
+% IA32/x64 Processor Error Check Info (MS Check Error)
+\subsection{IA32/x64 Processor Error Check Info (MS Check Error) Structure}
+\label{subsection:ia32x64processorerrorcheckinfomscheckstructure}
+This structure describes check info for an IA32/x64 Processor Error Info structure (\ref{subsection:ia32x64processorerrorinfostructure}) stemming from an MS check error.
+The GUID for MS check check info structures can be found in the library repository's \texttt{edk/Cper.h}.
+\jsontable{table:ia32x64processorerrorcheckinfomscheckstructure}
+validationBits & object & An IA32/x64 Processor Error Check Info (MS Check) Validation structure, as defined in Subsection \ref{subsection:ia32x64processorerrorcheckinfomscheckvalidationstructure}.\\
+\hline
+errorType.value & uint64 & The raw value of the type of operation that caused the error.\\
+errorType.name & string & The human readable name, if available, of the type of operation that caused the error.\\
+\hline
+processorContextCorrupt & boolean & Whether the processor context might have been corrupted.\\
+\hline
+uncorrected & boolean & Whether the error remained uncorrected.\\
+\hline
+preciseIP & boolean & Whether the instruction pointed pushed onto the stack is directly associated with the error.\\
+\hline
+restartableIP & boolean & Whether program execution can be restarted reliably at the instruction pointer pushed onto the stack.\\
+\hline
+overflow & boolean & Whether an error overflow occurred (multiple errors within a short timeframe may cause this, can indicate loss of data).\\
+\jsontableend{IA32/x64 Processor Error Check Info (MS Check Error) structure field table.}
+
+% IA32/x64 Processor Error Check Info Validation structure.
+\subsection{IA32/x64 Processor Error Check Info (Cache/TLB/Bus) Validation Structure}
+\label{subsection:ia32x64processorerrorcheckinfovalidationstructure}
+This structure describes a single IA32/x64 Processor Error Check Info structure's valid fields for cache, TLB and bus errors, as a set of boolean values.
+\jsontable{table:ia32x64processorerrorcheckinfovalidationstructure}
+transactionTypeValid & boolean & Whether the "transactionType" field in a Processor Error Check Info structure is valid.\\
+\hline
+operationValid & boolean & Whether the "operation" field in a Processor Error Check Info structure is valid.\\
+\hline
+levelValid & boolean & Whether the "level" field in a Processor Error Check Info structure is valid.\\
+\hline
+processorContextCorruptValid & boolean & Whether the "processorContextCorrupt" field in a Processor Error Check Info structure is valid.\\
+\hline
+uncorrectedValid & boolean & Whether the "uncorrected" field in a Processor Error Check Info structure is valid.\\
+\hline
+preciseIPValid & boolean & Whether the "preciseIP" field in a Processor Error Check Info structure is valid.\\
+\hline
+restartableIPValid & boolean & Whether the "restartableIP" field in a Processor Error Check Info structure is valid.\\
+\hline
+overflowValid & boolean & Whether the "overflow" field in a Processor Error Check Info structure is valid.\\
+\hline
+participationTypeValid & boolean (\textbf{optional}) & Whether the "participationType" field in the Processor Error Check Info (Bus Error) structure (\ref{subsection:ia32x64processorerrorcheckinfobusstructure}) is valid. \textbf{This field is only present on bus related check info structures.}\\
+\hline
+timedOutValid & boolean (\textbf{optional}) & Whether the "timeOut" field in the Processor Error Check Info (Bus Error) structure (\ref{subsection:ia32x64processorerrorcheckinfobusstructure}) is valid. \textbf{This field is only present on bus related check info structures.}\\
+\jsontableend{IA32/x64 Processor Error Check Info (Cache/TLB/Bus) Validation structure field table.}
+
+% IA32/x64 Processor Error Check Info (MS Check) Validation structure.
+\subsection{IA32/x64 Processor Error Check Info (MS Check) Validation Structure}
+\label{subsection:ia32x64processorerrorcheckinfomscheckvalidationstructure}
+This structure describes a single IA32/x64 Processor Error Check Info structure's valid fields for MS check errors, as a set of boolean values.
+\jsontable{table:ia32x64processorerrorcheckinfomscheckvalidationstructure}
+errorTypeValid & boolean & Whether the "transactionType" field in a Processor Error Check Info (MS Check) (\ref{subsection:ia32x64processorerrorcheckinfomscheckstructure}) structure is valid.\\
+\hline
+processorContextCorruptValid & boolean & Whether the "processorContextCorrupt" field in a Processor Error Check Info (MS Check) (\ref{subsection:ia32x64processorerrorcheckinfomscheckstructure}) structure is valid.\\
+\hline
+uncorrectedValid & boolean & Whether the "uncorrected" field in a Processor Error Check Info (MS Check) (\ref{subsection:ia32x64processorerrorcheckinfomscheckstructure}) structure is valid.\\
+\hline
+preciseIPValid & boolean & Whether the "preciseIP" field in a Processor Error Check Info (MS Check) (\ref{subsection:ia32x64processorerrorcheckinfomscheckstructure}) structure is valid.\\
+\hline
+restartableIPValid & boolean & Whether the "restartableIP" field in a Processor Error Check Info (MS Check) (\ref{subsection:ia32x64processorerrorcheckinfomscheckstructure}) structure is valid.\\
+\hline
+overflowValid & boolean & Whether the "overflow" field in a Processor Error Check Info (MS Check) (\ref{subsection:ia32x64processorerrorcheckinfomscheckstructure}) structure is valid.\\
+\jsontableend{IA32/x64 Processor Error Check Info (MS Check) Validation structure field table.}
 
 % IA32/x64 Processor Context Info structure.
 \subsection{IA32/x64 Processor Context Info Structure}
 \label{subsection:ia32x64processorcontextinfostructure}
 This structure describes a single IA32/x64 Processor Context Info sub-section, which is part of the larger IA32/x64 record (\ref{section:ia32x64errorsection}).
 \jsontable{table:ia32x64processorcontextinfostructure}
-todo & todo & todo.\\
+registerContextType.value & uint64 & The raw value of the type of processor context state being reported.\\
+registerContextType.name & string & The human readable name, if available, of the type of processor context state being reported.\\
 \hline
+registerArraySize & uint64 & The total size of the array for the data type being reported, in bytes.\\
+\hline
+msrAddress & uint64 & The starting MSR address. Valid when the \texttt{registerContextType.value} field is "1" (MSR Registers).\\
+\hline
+mmRegisterAddress & uint64 & The starting memory address for when the \texttt{registerContextType.value} field is "7" (Memory Mapped Registers).\\
+\hline
+registerArray & object & Register data, formatted as object fields. If the \texttt{registerContextType.value} field has the value "2" or "3", this takes the structure of Subsections \ref{subsection:ia32x64ia32registerstatestructure} and \ref{subsection:ia32x64x64registerstatestructure} respectively. If the value is any other, it takes the form of the structure defined in Subsection \ref{subsection:ia32x64unformattedregisterstatestructure}.\\
 \jsontableend{IA32/x64 Processor Context Info structure field table.}
+
+% IA32/x64 IA32 Register State structure
+\subsection{IA32/x64 IA32 Register State Structure}
+\label{subsection:ia32x64ia32registerstatestructure}
+This structure describes a single IA32/x64 IA32 register state, which is contained in IA32/x64 Processor Context Info structures (\ref{subsection:ia32x64processorcontextinfostructure}) when \texttt{registerContextType.value} has the value "2".
+\jsontable{table:ia32x64ia32registerstatestructure}
+eax & uint64 & The EAX register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+ebx & uint64 & The EBX register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+ecx & uint64 & The ECX register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+edx & uint64 & The EDX register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+esi & uint64 & The ESI register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+edi & uint64 & The EDI register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+ebp & uint64 & The EBP register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+esp & uint64 & The ESP register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+cs & uint64 & The CS register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+ds & uint64 & The DS register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+ss & uint64 & The SS register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+es & uint64 & The ES register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+fs & uint64 & The FS register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+gs & uint64 & The GS register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+eflags & uint64 & The EFLAGS register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+eip & uint64 & The EIP register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+cr0 & uint64 & The CR0 register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+cr1 & uint64 & The CR1 register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+cr2 & uint64 & The CR2 register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+cr3 & uint64 & The CR3 register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+cr4 & uint64 & The CR4 register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\hline
+gdtr & uint64 & The GDTR register.\\
+\hline
+idtr & uint64 & The IDTR register.\\
+\hline
+ldtr & uint64 & The LDTR register.\\
+\hline
+tr & uint64 & The TR register. Real maximum is \texttt{UINT32}, null extended to \texttt{UINT64}.\\
+\jsontableend{IA32/x64 IA32 Register State structure field table.}
+
+% IA32/x64 x64 Register State structure
+\subsection{IA32/x64 x64 Register State Structure}
+\label{subsection:ia32x64x64registerstatestructure}
+This structure describes a single IA32/x64 x64 register state, which is contained in IA32/x64 Processor Context Info structures (\ref{subsection:ia32x64processorcontextinfostructure}) when \texttt{registerContextType.value} has the value "3".
+\jsontable{table:ia32x64x64registerstatestructure}
+rax & uint64 & The RAX register.\\
+\hline
+rbx & uint64 & The RBX register.\\
+\hline
+rcx & uint64 & The RCX register.\\
+\hline
+rdx & uint64 & The RDX register.\\
+\hline
+rsi & uint64 & The RSI register.\\
+\hline
+rdi & uint64 & The RDI register.\\
+\hline
+rbp & uint64 & The RBP register.\\
+\hline
+rsp & uint64 & The RSP register.\\
+\hline
+r8 & uint64 & The R8 register.\\
+\hline
+r9 & uint64 & The R9 register.\\
+\hline
+r10 & uint64 & The R10 register.\\
+\hline
+r11 & uint64 & The R11 register.\\
+\hline
+r12 & uint64 & The R12 register.\\
+\hline
+r13 & uint64 & The R13 register.\\
+\hline
+r14 & uint64 & The R14 register.\\
+\hline
+r15 & uint64 & The R15 register.\\
+\hline
+cs & uint64 & The CS register.\\
+\hline
+ds & uint64 & The DS register.\\
+\hline
+ss & uint64 & The SS register.\\
+\hline
+es & uint64 & The ES register.\\
+\hline
+fs & uint64 & The FS register.\\
+\hline
+gs & uint64 & The GS register.\\
+\hline
+rflags & uint64 & The RFLAGS register.\\
+\hline
+eip & uint64 & The EIP register.\\
+\hline
+cr0 & uint64 & The CR0 register.\\
+\hline
+cr1 & uint64 & The CR1 register.\\
+\hline
+cr2 & uint64 & The CR2 register.\\
+\hline
+cr3 & uint64 & The CR3 register.\\
+\hline
+cr4 & uint64 & The CR4 register.\\
+\hline
+cr8 & uint64 & The CR8 register.\\
+\hline
+gdtr\_0 & uint64 & The first \texttt{UINT64} of the GDTR register.\\
+\hline
+gdtr\_1 & uint64 & The second \texttt{UINT64} of the GDTR register.\\
+\hline
+idtr\_0 & uint64 & The first \texttt{UINT64} of the IDTR register.\\
+\hline
+idtr\_1 & uint64 & The second \texttt{UINT64} of the IDTR register.\\
+\hline
+ldtr & uint64 & The LDTR register.\\
+\hline
+tr & uint64 & The TR register.\\
+\jsontableend{IA32/x64 x64 Register State structure field table.}
+
+% IA32/x64 IA32 Register State structure
+\subsection{IA32/x64 Unformatted Register State Structure}
+\label{subsection:ia32x64unformattedregisterstatestructure}
+This structure describes a single IA32/x64 unformatted register state, which is contained in IA32/x64 Processor Context Info structures (\ref{subsection:ia32x64processorcontextinfostructure}) when\\\texttt{registerContextType.value} has a value other than "2" or "3".
+\jsontable{table:ia32x64unformattedregisterstatestructure}
+data & string & A base64-formatted binary representation of the register array.\\
+\jsontableend{IA32/x64 Unformatted Register State structure field table.}
+
+% ARM processor error section.
+\section{ARM Processor Error Section}
+\label{section:armprocessorerrorsection}
+This section describes the JSON format for a single ARM Processor Error Section from a CPER record. The GUID used for ARM Processor Error Sections is \texttt{\{ 0xe19e3d16, 0xbc11, 0x11e4, \{ 0x9c, 0xaa, 0xc2, 0x05, 0x1d, 0x5d, 0x46, 0xb0 \}\}}.
+\jsontable{table:armprocessorerrorsection}
+validationBits & object & An ARM Processor Error Validation structure, as defined in Subsection .\\
+\hline
+errorInfoNum & int & The number of error info structures attached to this error.\\
+\hline
+contextInfoNum & int & The number of context info structures attached to this error.\\
+\hline
+sectionLength & uint64 & The total size (in bytes) of this error section.\\
+\hline
+errorAffinity.value & int & The raw value of the error affinity for this error.\\
+errorAffinity.type & string & The human readable type of the error affinity for this error. All values are vendor defined, so specific names cannot be provided.\\
+\hline
+mpidrEl1 & uint64 & The processor ID (\texttt{MPIDR\_EL1}) for this error.\\
+\hline
+midrEl1 & uint64 & The chip ID (\texttt{MIDR\_EL1}) for this error.\\
+\hline
+running & boolean & Whether the processor is running or not. If true, the \texttt{psciState} field is not included.\\
+\hline
+psciState & uint64 (\textbf{optional}) & The PSCI state of the processor. Only \textbf{optionally} included when the "running" field is false. Cannot be made human readable, as this could either be in the pre-PSCI 1.0 format, or the newer "Extended StateID" format. For more information, see the ARM PSCI specification.\\
+\hline
+errorInfo & array & Array of ARM Processor Error Info structures, as defined in Subsection \ref{subsection:armprocessorerrorinfostructure}.\\
+\hline
+contextInfo & array & Array of ARM Processor Context Info structures, as defined in Subsection \ref{subsection:armprocessorcontextinfostructure}.\\
+\hline
+vendorSpecificInfo.data & string & A base64-encoded binary representation of any attached vendor specific information.\\
+\jsontableend{ARM Processor Error structure field table.}
+
+% ARM Processor Error Validation structure
+\subsection{ARM Processor Error Validation Structure}
+\label{subsection:armprocessorerrorvalidationstructure}
+This structure describes which fields are valid in a single ARM Processor Error structure (\ref{section:armprocessorerrorsection}) with boolean fields.
+\jsontable{table:armprocessorerrorvalidationstructure}
+mpidrValid & boolean & Whether the "mpidrEl1" field in the ARM Processor Error structure (\ref{section:armprocessorerrorsection}) is valid.\\
+\hline
+errorAffinityLevelValid & boolean & Whether the "errorAffinity" field in the ARM Processor Error structure (\ref{section:armprocessorerrorsection}) is valid.\\
+\hline
+runningStateValid & boolean & Whether the "running" field in the ARM Processor Error structure (\ref{section:armprocessorerrorsection}) is valid.\\
+\hline
+vendorSpecificInfoValid & boolean & Whether the trailing vendor specific info (if present) in the ARM Processor Error Structure (\ref{section:armprocessorerrorsection}) is valid.\\
+\jsontableend{ARM Processor Error Validation structure field table.}
+
+% ARM Processor Error Info structure
+\subsection{ARM Processor Error Info Structure}
+\label{subsection:armprocessorerrorinfostructure}
+This structure describes a single ARM Processor Error Info structure, as part of a whole ARM Processor Error structure (\ref{section:armprocessorerrorsection}).
+\jsontable{table:armprocessorerrorinfostructure}
+version & int & The version of the structure that is implemented.\\
+\hline
+length & int & The length of the structure, in bytes. For version 0, this is 32.\\
+\hline
+validationBits & object & An ARM Processor Error Info Validation structure as defined in Subsection \ref{subsection:armprocessorerrorinfovalidationstructure}.\\
+\hline
+errorType.value & uint64 & The raw value of the error type this error info describes.\\
+errorType.name & string & The human readable name, if available, of the error type this error info describes.\\
+\hline
+multipleError.value & int & If the value of this field is 2 or greater, the raw value of the number of errors that occurred. Otherwise, the raw value of the multiple error status.\\
+multipleError.type & string & The human readable value, if available, of what type of multiple error this is (single error, multiple error).\\
+\hline
+flags & object & An ARM Processor Error Info Flags structure as defined in Subsection \ref{subsection:armprocessorerrorinfoflagsstructure}.\\ 
+\hline
+errorInformation & object & An error information structure, as defined in one of Subsections \ref{subsection:armprocessorerrorinfoerrorinformationcachetlbstructure} or \ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}. Which structure this is depends on the \texttt{errorType.value} field.\\
+\hline
+virtualFaultAddress & uint64 & Indicates a virtual fault address associated with the error, such as when an error occurs in virtually indexed cache.\\
+\hline
+physicalFaultAddress & uint64 & Indicates a physical fault address associated with the error.\\
+\jsontableend{ARM Processor Error Info structure field table.}
+
+% ARM Processor Error Info Validation structure
+\subsection{ARM Processor Error Info Validation Structure}
+\label{subsection:armprocessorerrorinfovalidationstructure}
+This structure describes the valid fields in a single ARM Processor Error Info structure (\ref{subsection:armprocessorerrorinfostructure}), using boolean fields.
+\jsontable{table:armprocessorerrorinfovalidationstructure}
+multipleErrorValid & boolean & Whether the "multipleError" field in the ARM Processor Error Info structure (\ref{subsection:armprocessorerrorinfostructure}) is valid.\\
+\hline
+flagsValid & boolean & Whether the "flags" field in the ARM Processor Error Info structure (\ref{subsection:armprocessorerrorinfostructure}) is valid.\\
+\hline
+errorInformationValid & boolean & Whether the "errorInformation" field in the ARM Processor Error Info structure (\ref{subsection:armprocessorerrorinfostructure}) is valid.\\
+\hline
+virtualFaultAddressValid & boolean & Whether the "virtualFaultAddress" field in the ARM Processor Error Info structure (\ref{subsection:armprocessorerrorinfostructure}) is valid.\\
+\hline
+physicalFaultAddressValid & boolean & Whether the "physicalFaultAddress" field in the ARM Processor Error Info structure (\ref{subsection:armprocessorerrorinfostructure}) is valid.\\
+\jsontableend{ARM Processor Error Info Validation structure field table.}
+
+% ARM Processor Error Info Validation structure
+\subsection{ARM Processor Error Info Flags Structure}
+\label{subsection:armprocessorerrorinfoflagsstructure}
+This structure describes the flags in a single ARM Processor Error Info structure (\ref{subsection:armprocessorerrorinfostructure}), using boolean fields.
+\jsontable{table:armprocessorerrorinfoflagsstructure}
+firstErrorCaptured & boolean & Whether this is the first error captured.\\
+\hline
+lastErrorCaptured & boolean & Whether this is the last error captured.\\
+\hline
+propagated & boolean & Whether the error has propagated.\\
+\hline
+overflow & boolean & Whether error buffer overflow was detected. This is usually from multiple errors occurring in a short timespan, and indicates loss of error data.\\
+\jsontableend{ARM Processor Error Info Flags structure field table.}
+
+% ARM Processor Error Info Error Information (Cache/TLB) structure
+\subsection{ARM Processor Error Info Cache/TLB Information Structure}
+\label{subsection:armprocessorerrorinfoerrorinformationcachetlbstructure}
+This structure describes cache/TLB error information for a single ARM Processor Error Info structure (\ref{subsection:armprocessorerrorinfostructure}).
+\jsontable{table:armprocessorerrorinfoerrorinformationcachetlbstructure}
+validationBits & object & An ARM Processor Info Cache/TLB Validation structure as defined in Subsection \ref{subsection:armprocessorerrorinfocachetlbvalidationstructure}.\\
+\hline
+transactionType.value & uint64 & The raw value of the type of cache/TLB error.\\
+transactionType.name & string & The human readable name, if available, of the type of cache/TLB error.\\
+\hline
+operation.value & uint64 & The raw value of the cache/TLB operation that caused the error.\\
+operation.name & string & The human readable name, if available, of the cache/TLB operation that caused the error.\\
+\hline
+level & int & The cache/TLB level that the error occurred at.\\
+\hline
+processorContextCorrupt & boolean & Whether the processor context may have been corrupted.\\
+\hline
+corrected & boolean & Whether the error was corrected.\\
+\hline
+precisePC & boolean & Whether the program counter is directly associated with the error.\\
+\hline
+restartablePC & boolean & Whether program execution can be restarted reliably at the program counter associated with the error.\\
+\jsontableend{ARM Processor Error Info Cache/TLB Information structure field table.}
+
+% ARM Processor Error Info Error Information (Cache/TLB) validation structure
+\subsection{ARM Processor Error Info Cache/TLB Validation Structure}
+\label{subsection:armprocessorerrorinfocachetlbvalidationstructure}
+This structure describes valid fields in a single ARM Processor Error Info Cache/TLB Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationcachetlbstructure}), as a set of boolean fields.
+\jsontable{table:armprocessorerrorinfocachetlbvalidationstructure}
+transactionTypeValid & boolean & Whether the "transactionType" field in the ARM Processor Info Cache/TLB Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationcachetlbstructure}) is valid.\\
+\hline
+operationValid & boolean & Whether the "operation" field in the ARM Processor Info Cache/TLB Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationcachetlbstructure}) is valid.\\
+\hline
+levelValid & boolean & Whether the "level" field in the ARM Processor Info Cache/TLB Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationcachetlbstructure}) is valid.\\
+\hline
+processorContextCorruptValid & boolean & Whether the "processorContextCorrupt" field in the ARM Processor Info Cache/TLB Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationcachetlbstructure}) is valid.\\
+\hline
+correctedValid & boolean & Whether the "corrected" field in the ARM Processor Info Cache/TLB Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationcachetlbstructure}) is valid.\\
+\hline
+precisePCValid & boolean & Whether the "precisePC" field in the ARM Processor Info Cache/TLB Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationcachetlbstructure}) is valid.\\
+\hline
+restartablePCValid & boolean & Whether the "restartablePC" field in the ARM Processor Info Cache/TLB Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationcachetlbstructure}) is valid.\\
+\jsontableend{ARM Processor Error Info Cache/TLB Validation structure field table.}
+
+% ARM Processor Error Info Error Information (Bus) structure
+\subsection{ARM Processor Error Info Bus Information Structure}
+\label{subsection:armprocessorerrorinfoerrorinformationbusstructure}
+This structure describes bus error information for a single ARM Processor Error Info structure (\ref{subsection:armprocessorerrorinfostructure}).
+\jsontable{table:armprocessorerrorinfoerrorinformationbusstructure}
+validationBits & object & An ARM Processor Info Bus Validation structure as defined in Subsection \ref{subsection:armprocessorerrorinfobusvalidationstructure}.\\
+\hline
+transactionType.value & uint64 & The raw value of the type of bus error.\\
+transactionType.name & string & The human readable name, if available, of the type of bus error.\\
+\hline
+operation.value & uint64 & The raw value of the bus operation that caused the error.\\
+operation.name & string & The human readable name, if available, of the bus operation that caused the error.\\
+\hline
+level & int & The affinity level that the bus error occurred at.\\
+\hline
+processorContextCorrupt & boolean & Whether the processor context may have been corrupted.\\
+\hline
+corrected & boolean & Whether the error was corrected.\\
+\hline
+precisePC & boolean & Whether the program counter is directly associated with the error.\\
+\hline
+restartablePC & boolean & Whether program execution can be restarted reliably at the program counter associated with the error.\\
+\hline
+timedOut & boolean & Whether the request timed out.\\
+\hline
+participationType.value & uint64 & The raw value of the type of participation that occurred in the bus error.\\
+participationType.name & string & The human readable name, if available, of the type of participation that occurred in the bus error.\\
+\hline
+addressSpace.value & uint64 & The raw value of the address space in which the bus error occurred.\\
+addressSpace.name & string & The human readable name, if available, of the address space in which the bus error occurred.\\
+\hline
+memoryAttributes & int & Memory access attributes for this bus error as described in the ARM ARM.\\
+\hline
+accessMode.value & int & The raw value of the access mode of the bus request (secure/normal).\\
+accessMode.name & string & The human readable name, if available, of the access mode of the bus request (secure/normal).\\
+\jsontableend{ARM Processor Error Info Bus Information structure field table.}
+
+% ARM Processor Error Info Error Information (Bus) validation structure
+\subsection{ARM Processor Error Info Bus Validation Structure}
+\label{subsection:armprocessorerrorinfobusvalidationstructure}
+This structure describes valid fields in a single ARM Processor Error Info Cache/TLB Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}), as a set of boolean fields.
+\jsontable{table:armprocessorerrorinfobusvalidationstructure}
+transactionTypeValid & boolean & Whether the "transactionType" field in the ARM Processor Info Bus Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}) is valid.\\
+\hline
+operationValid & boolean & Whether the "operation" field in the ARM Processor Info Bus Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}) is valid.\\
+\hline
+levelValid & boolean & Whether the "level" field in the ARM Processor Info Bus Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}) is valid.\\
+\hline
+processorContextCorruptValid & boolean & Whether the "processorContextCorrupt" field in the ARM Processor Info Bus Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}) is valid.\\
+\hline
+correctedValid & boolean & Whether the "corrected" field in the ARM Processor Info Bus Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}) is valid.\\
+\hline
+precisePCValid & boolean & Whether the "precisePC" field in the ARM Processor Info Bus Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}) is valid.\\
+\hline
+restartablePCValid & boolean & Whether the "restartablePC" field in the ARM Processor Info Bus Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}) is valid.\\
+\hline
+participationTypeValid & boolean & Whether the "participationType" field in the ARM Processor Info Bus Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}) is valid.\\
+\hline
+timedOutValid & boolean & Whether the "timedOut" field in the ARM Processor Info Bus Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}) is valid.\\
+\hline
+addressSpaceValid & boolean & Whether the "addressSpace" field in the ARM Processor Info Bus Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}) is valid.\\
+\hline
+memoryAttributesValid & boolean & Whether the "memoryAttributes" field in the ARM Processor Info Bus Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}) is valid.\\
+\hline
+accessModeValid & boolean & Whether the "accessMode" field in the ARM Processor Info Bus Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}) is valid.\\
+\jsontableend{ARM Processor Error Info Bus Validation structure field table.}
+
+% ARM Processor Context Info structure
+\subsection{ARM Processor Context Info Structure}
+\label{subsection:armprocessorcontextinfostructure}
+This structure describes a single ARM Processor Context Info structure, as part of a whole ARM Processor Error structure (\ref{section:armprocessorerrorsection}).
+\jsontable{table:armprocessorcontextinfostructure}
+registerContextType.value & uint64 & The raw value of the type of processor context state being reported.\\
+registerContextType.name & string & The human readable name, if available, of the type of processor context state being reported.\\
+\hline
+registerArraySize & uint64 & The size of the attached register array, in bytes.\\
+\hline
+registerArray & object & The attached register array, with registers encoded as object fields. Structured as shown in one of subsections \ref{subsection:armaarch32gprstructure}, \ref{subsection:armaarch32el1contextregistersstructure}, \ref{subsection:armaarch32el2contextregistersstructure}, \ref{subsection:armaarch32secureregistersstructure}, \ref{subsection:armaarch64gprstructure}, \ref{subsection:armaarch64el1contextregistersstructure}, \ref{subsection:armaarch64el2contextregistersstructure}, \ref{subsection:armaarch64el3contextregistersstructure}, \ref{subsection:armmiscregistersstructure} or \ref{subsection:armunknownregistersstructure}. Type of structure depends on the \texttt{registerContextType.value} field.\\
+\jsontableend{ARM Processor Context Info structure field table.}
+
+% ARM AARCH32 General Purpose Registers structure
+\subsection{ARM AARCH32 General Purpose Registers Structure}
+\label{subsection:armaarch32gprstructure}
+This structure describes the register array for AARCH32 GPRs as part of an ARM Processor Context Info Structure (\ref{subsection:armprocessorcontextinfostructure}). This structure is included when the field \texttt{registerContextType.value} has the value 0.
+\jsontable{table:armaarch32gprstructure}
+r0 & uint64 & Register R0. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+r1 & uint64 & Register R1. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+r2 & uint64 & Register R2. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+r3 & uint64 & Register R3. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+r4 & uint64 & Register R4. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+r5 & uint64 & Register R5. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+r6 & uint64 & Register R6. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+r7 & uint64 & Register R7. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+r8 & uint64 & Register R8. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+r9 & uint64 & Register R9. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+r10 & uint64 & Register R10. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+r11 & uint64 & Register R11. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+r12 & uint64 & Register R12. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+r13\_sp & uint64 & Register R13 (SP). \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+r14\_lr & uint64 & Register R14 (LR). \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+r15\_pc & uint64 & Register R15 (PC). \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\jsontableend{ARM AARCH32 General Purpose Registers structure field table.}
+
+% ARM AARCH32 EL1 Context Registers structure
+\subsection{ARM AARCH32 EL1 Context Registers Structure}
+\label{subsection:armaarch32el1contextregistersstructure}
+This structure describes the register array for AARCH32 EL1 context registers as part of an ARM Processor Context Info Structure (\ref{subsection:armprocessorcontextinfostructure}). This structure is included when the field \texttt{registerContextType.value} has the value 1.
+\jsontable{table:armaarch32el1contextregistersstructure}
+dfar & uint64 & Register DFAR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+dfsr & uint64 & Register DFSR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+ifar & uint64 & Register IFAR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+isr & uint64 & Register ISR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+mair0 & uint64 & Register MAIR0. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+mair1 & uint64 & Register MAIR1. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+midr & uint64 & Register MIDR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+mpidr & uint64 & Register MPIDR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+nmrr & uint64 & Register NMRR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+prrr & uint64 & Register PRRR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+sctlr\_ns & uint64 & Register SCTLR (NS). \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+spsr & uint64 & Register SPSR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+spsr\_abt & uint64 & Register SPSR (ABT). \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+spsr\_fiq & uint64 & Register SPSR (FIQ). \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+spsr\_irq & uint64 & Register SPSR (IRQ). \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+spsr\_svc & uint64 & Register SPSR (SVC). \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+spsr\_und & uint64 & Register SPSR (UND). \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+tpidrprw & uint64 & Register TPIDR (PRW). \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+tpidruro & uint64 & Register TPIDR (URO). \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+tpidrurw & uint64 & Register TPIDR (URW). \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+ttbcr & uint64 & Register TTBCR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+ttbr0 & uint64 & Register TTBR0. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+ttbr1 & uint64 & Register TTBR1. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+dacr & uint64 & Register DACR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\jsontableend{ARM AARCH32 EL1 Context Registers structure field table.}
+
+% ARM AARCH32 EL2 Context Registers structure
+\subsection{ARM AARCH32 EL2 Context Registers Structure}
+\label{subsection:armaarch32el2contextregistersstructure}
+This structure describes the register array for AARCH32 EL2 context registers as part of an ARM Processor Context Info Structure (\ref{subsection:armprocessorcontextinfostructure}). This structure is included when the field \texttt{registerContextType.value} has the value 2.
+\jsontable{table:armaarch32el2contextregistersstructure}
+elr\_hyp & uint64 & Register ELR\_HYP. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+hamair0 & uint64 & Register HAMAIR0. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+hamair1 & uint64 & Register HAMAIR1. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+hcr & uint64 & Register HCR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+hcr2 & uint64 & Register HCR2. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+hdfar & uint64 & Register HDFAR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+hifar & uint64 & Register HIFAR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+hpfar & uint64 & Register HPFAR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+hsr & uint64 & Register HSR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+htcr & uint64 & Register HTCR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+htpidr & uint64 & Register HTPIDR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+httbr & uint64 & Register HTTBR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+spsr\_hyp & uint64 & Register SPSR (HYP). \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+vtcr & uint64 & Register VTCR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+vttbr & uint64 & Register VTTBR. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+dacr32\_el2 & uint64 & Register DACR32 (EL2). \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+\jsontableend{ARM AARCH32 EL2 Context Registers structure field table.}
+
+% ARM AARCH32 Secure Registers structure
+\subsection{ARM AARCH32 Secure Registers Structure}
+\label{subsection:armaarch32secureregistersstructure}
+This structure describes the register array for AARCH32 secure registers as part of an ARM Processor Context Info Structure (\ref{subsection:armprocessorcontextinfostructure}). This structure is included when the field \texttt{registerContextType.value} has the value 3.
+\jsontable{table:armaarch32secureregistersstructure}
+sctlr\_s & uint64 & Register SCTLR\_S. \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\hline
+spsr\_mon & uint64 & Register SPSR (MON). \texttt{UINT32} value null extended to \texttt{UINT64}.\\
+\jsontableend{ARM AARCH32 Secure Registers structure field table.}
+
+% ARM AARCH64 General Purpose Registers structure
+\subsection{ARM AARCH64 General Purpose Registers Structure}
+\label{subsection:armaarch64gprstructure}
+This structure describes the register array for AARCH64 GPRs as part of an ARM Processor Context Info Structure (\ref{subsection:armprocessorcontextinfostructure}). This structure is included when the field \texttt{registerContextType.value} has the value 4.
+\jsontable{table:armaarch64gprstructure}
+x0 & uint64 & Register X0.\\
+\hline
+x1 & uint64 & Register X1.\\
+\hline
+x2 & uint64 & Register X2.\\
+\hline
+x3 & uint64 & Register X3.\\
+\hline
+x4 & uint64 & Register X4.\\
+\hline
+x5 & uint64 & Register X5.\\
+\hline
+x6 & uint64 & Register X6.\\
+\hline
+x7 & uint64 & Register X7.\\
+\hline
+x8 & uint64 & Register X8.\\
+\hline
+x9 & uint64 & Register X9.\\
+\hline
+x10 & uint64 & Register X10.\\
+\hline
+x11 & uint64 & Register X11.\\
+\hline
+x12 & uint64 & Register X12.\\
+\hline
+x13 & uint64 & Register X13.\\
+\hline
+x14 & uint64 & Register X14.\\
+\hline
+x15 & uint64 & Register X15.\\
+\hline
+x16 & uint64 & Register X16.\\
+\hline
+x17 & uint64 & Register X17.\\
+\hline
+x18 & uint64 & Register X18.\\
+\hline
+x19 & uint64 & Register X19.\\
+\hline
+x20 & uint64 & Register X20.\\
+\hline
+x21 & uint64 & Register X21.\\
+\hline
+x22 & uint64 & Register X22.\\
+\hline
+x23 & uint64 & Register X23.\\
+\hline
+x24 & uint64 & Register X24.\\
+\hline
+x25 & uint64 & Register X25.\\
+\hline
+x26 & uint64 & Register X26.\\
+\hline
+x27 & uint64 & Register X27.\\
+\hline
+x28 & uint64 & Register X28.\\
+\hline
+x29 & uint64 & Register X29.\\
+\hline
+x30 & uint64 & Register X30.\\
+\hline
+sp & uint64 & Register SP.\\
+\jsontableend{ARM AARCH64 General Purpose Registers structure field table.}
+
+% ARM AARCH64 EL1 Context Registers structure
+\subsection{ARM AARCH64 EL1 Context Registers Structure}
+\label{subsection:armaarch64el1contextregistersstructure}
+This structure describes the register array for AARCH64 EL1 context registers as part of an ARM Processor Context Info Structure (\ref{subsection:armprocessorcontextinfostructure}). This structure is included when the field \texttt{registerContextType.value} has the value 5.
+\jsontable{table:armaarch64el1contextregistersstructure}
+elr\_el1 & uint64 & Register ELR (EL1).\\
+\hline
+esr\_el1 & uint64 & Register ESR (EL1).\\
+\hline
+far\_el1 & uint64 & Register FAR (EL1).\\
+\hline
+isr\_el1 & uint64 & Register ISR (EL1).\\
+\hline
+mair\_el1 & uint64 & Register MAIR (EL1).\\
+\hline
+midr\_el1 & uint64 & Register MIDR (EL1).\\
+\hline
+mpidr\_el1 & uint64 & Register MPIDR (EL1).\\
+\hline
+sctlr\_el1 & uint64 & Register SCTLR (EL1).\\
+\hline
+sp\_el0 & uint64 & Register SP (EL0).\\
+\hline
+sp\_el1 & uint64 & Register SP (EL1).\\
+\hline
+spsr\_el1 & uint64 & Register SPSR (EL1).\\
+\hline
+tcr\_el1 & uint64 & Register TCR (EL1).\\
+\hline
+tpidr\_el0 & uint64 & Register TPIDR (EL0).\\
+\hline
+tpidr\_el1 & uint64 & Register TPIDR (EL1).\\
+\hline
+tpidrro\_el0 & uint64 & Register TPIDRRO (EL0).\\
+\hline
+ttbr0\_el1 & uint64 & Register TTBR0 (EL1).\\
+\hline
+ttbr1\_el1 & uint64 & Register TTBR1 (EL1).\\
+\jsontableend{ARM AARCH64 EL1 Context Registers structure field table.}
+
+% ARM AARCH64 EL2 Context Registers structure
+\subsection{ARM AARCH64 EL2 Context Registers Structure}
+\label{subsection:armaarch64el2contextregistersstructure}
+This structure describes the register array for AARCH64 EL2 context registers as part of an ARM Processor Context Info Structure (\ref{subsection:armprocessorcontextinfostructure}). This structure is included when the field \texttt{registerContextType.value} has the value 6.
+\jsontable{table:armaarch64el2contextregistersstructure}
+elr\_el2 & uint64 & Register ELR (EL2).\\
+\hline
+esr\_el2 & uint64 & Register ESR (EL2).\\
+\hline
+far\_el2 & uint64 & Register FAR (EL2).\\
+\hline
+hacr\_el2 & uint64 & Register HACR (EL2).\\
+\hline
+hcr\_el2 & uint64 & Register HCR (EL2).\\
+\hline
+hpfar\_el2 & uint64 & Register HPFAR (EL2).\\
+\hline
+mair\_el2 & uint64 & Register MAIR (EL2).\\
+\hline
+sctlr\_el2 & uint64 & Register SCTLR (EL2).\\
+\hline
+sp\_el2 & uint64 & Register SP (EL2).\\
+\hline
+spsr\_el2 & uint64 & Register SPSR (EL2).\\
+\hline
+tcr\_el2 & uint64 & Register TCR (EL2).\\
+\hline
+tpidr\_el2 & uint64 & Register TPIDR (EL2).\\
+\hline
+ttbr0\_el2 & uint64 & Register TTBR0 (EL2).\\
+\hline
+vtcr\_el2 & uint64 & Register VTCR (EL2).\\
+\hline
+vttbr\_el2 & uint64 & Register VTTBR (EL2).\\
+\jsontableend{ARM AARCH64 EL2 Context Registers structure field table.}
+
+% ARM AARCH64 EL3 Context Registers structure
+\subsection{ARM AARCH64 EL3 Context Registers Structure}
+\label{subsection:armaarch64el3contextregistersstructure}
+This structure describes the register array for AARCH64 EL3 context registers as part of an ARM Processor Context Info Structure (\ref{subsection:armprocessorcontextinfostructure}). This structure is included when the field \texttt{registerContextType.value} has the value 7.
+\jsontable{table:armaarch64el3contextregistersstructure}
+elr\_el3 & uint64 & Register ELR (EL3).\\
+\hline
+esr\_el3 & uint64 & Register ESR (EL3).\\
+\hline
+far\_el3 & uint64 & Register FAR (EL3).\\
+\hline
+mair\_el3 & uint64 & Register MAIR (EL3).\\
+\hline
+sctlr\_el3 & uint64 & Register SCTLR (EL3).\\
+\hline
+sp\_el3 & uint64 & Register SP (EL3).\\
+\hline
+spsr\_el3 & uint64 & Register SPSR (EL3).\\
+\hline
+tcr\_el3 & uint64 & Register TCR (EL3).\\
+\hline
+tpidr\_el3 & uint64 & Register TPIDR (EL3).\\
+\hline
+ttbr0\_el3 & uint64 & Register TTBR0 (EL3).\\
+\jsontableend{ARM AARCH64 EL3 Context Registers structure field table.}
+
+% ARM AARCH64 Miscellaneous Registers structure
+\subsection{ARM AARCH64 Miscellaneous Registers Structure}
+\label{subsection:armmiscregistersstructure}
+This structure describes the register array for miscellaneous ARM registers as part of an ARM Processor Context Info Structure (\ref{subsection:armprocessorcontextinfostructure}). This structure is included when the field \texttt{registerContextType.value} has the value 8.
+\jsontable{table:armmiscregistersstructure}
+mrsEncoding.op2 & uint64 & MRS Encoding OP2.\\
+\hline
+mrsEncoding.crm & uint64 & MRS Encoding CRm.\\
+\hline
+mrsEncoding.crn & uint64 & MRS Encoding CRn.\\
+\hline
+mrsEncoding.op1 & uint64 & MRS Encoding Op1.\\
+\hline
+mrsEncoding.o0 & uint64 & MRS Encoding O0.\\
+\hline
+value & uint64 & Value of the single register.\\
+\jsontableend{ARM AARCH64 Miscellaneous Registers structure field table.}
+
+% ARM AARCH64 Unknown Registers structure
+\subsection{ARM AARCH64 Unknown Registers Structure}
+\label{subsection:armunknownregistersstructure}
+This structure describes the register array for unknown ARM registers as part of an ARM Processor Context Info Structure (\ref{subsection:armprocessorcontextinfostructure}). This structure is included when the field \texttt{registerContextType.value} has any value other than 0-8 (inclusive).
+\jsontable{table:armunknownregistersstructure}
+data & string & A base64 representation of the unknown binary register array data.\\
+\jsontableend{ARM AARCH64 Unknown Registers structure field table.}
+
 
 \end{document}

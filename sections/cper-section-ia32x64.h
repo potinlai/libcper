@@ -5,12 +5,15 @@
 #include "../edk/Cper.h"
 
 #define IA32X64_PROCESSOR_ERROR_VALID_BITFIELD_NAMES (const char*[]) \
-    {"checkInfoValid", "targetAddressIdentifierValid", "requestorIdentifierValid", "responderIdentifierValid", \
+    {"checkInfoValid", "targetAddressIDValid", "requestorIDValid", "responderIDValid", \
     "instructionPointerValid"}
 #define IA32X64_CHECK_INFO_VALID_BITFIELD_NAMES (const char*[]) \
     {"transactionTypeValid", "operationValid", "levelValid", "processorContextCorruptValid", "uncorrectedValid" \
-    "preciseIPValid", "restartableIPValid", "overflowValid", "participationTypeValid", "timeOutValid" \
+    "preciseIPValid", "restartableIPValid", "overflowValid", "participationTypeValid", "timedOutValid" \
     "addressSpaceValid"}
+#define IA32X64_CHECK_INFO_MS_CHECK_VALID_BITFIELD_NAMES (const char*[]) \
+    {"errorTypeValid", "processorContextCorruptValid", "uncorrectedValid", "preciseIPValid", "restartableIPValid", \
+    "overflowValid"}
 #define IA32X64_CHECK_INFO_TRANSACTION_TYPES_KEYS (int []){0, 1, 2}
 #define IA32X64_CHECK_INFO_TRANSACTION_TYPES_VALUES (const char*[]){"Instruction", "Data Access", "Generic"}
 #define IA32X64_CHECK_INFO_OPERATION_TYPES_KEYS (int []){0, 1, 2, 3, 4, 5, 6, 7, 8}
