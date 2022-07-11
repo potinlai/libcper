@@ -5,7 +5,7 @@
 #include "../edk/Cper.h"
 
 #define CXL_PROTOCOL_ERROR_VALID_BITFIELD_NAMES (const char*[]) {"cxlAgentTypeValid", "cxlAgentAddressValid", \
-    "deviceIDValid", "deviceSerialNumberValid", "capabilityStructureValid", "cxlDvsecValid", "cslErrorLogValid"}
+    "deviceIDValid", "deviceSerialValid", "capabilityStructureValid", "cxlDVSECValid", "cxlErrorLogValid"}
 #define CXL_PROTOCOL_ERROR_AGENT_TYPES_KEYS (int []){0, 1}
 #define CXL_PROTOCOL_ERROR_AGENT_TYPES_VALUES (const char*[]){"CXL 1.1 Device", "CXL 1.1 Host Downstream Port"}
 #define CXL_PROTOCOL_ERROR_DEVICE_AGENT 0

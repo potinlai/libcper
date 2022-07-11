@@ -29,10 +29,10 @@ json_object* cper_section_cxl_protocol_to_ir(void* section, EFI_ERROR_SECTION_DE
     json_object_object_add(section_ir, "agentType", agent_type);
 
     //CXL agent address, depending on the agent type.
+    json_object* agent_address = json_object_new_object();
     if (cxl_protocol_error->CxlAgentType == CXL_PROTOCOL_ERROR_DEVICE_AGENT)
     {
         //Address is a CXL1.1 device agent.
-        json_object* agent_address = json_object_new_object();
         json_object_object_add(agent_address, "functionNumber", 
             json_object_new_uint64(cxl_protocol_error->CxlAgentAddress.DeviceAddress.FunctionNumber));
         json_object_object_add(agent_address, "deviceNumber", 
@@ -41,15 +41,14 @@ json_object* cper_section_cxl_protocol_to_ir(void* section, EFI_ERROR_SECTION_DE
             json_object_new_uint64(cxl_protocol_error->CxlAgentAddress.DeviceAddress.BusNumber));
         json_object_object_add(agent_address, "segmentNumber", 
             json_object_new_uint64(cxl_protocol_error->CxlAgentAddress.DeviceAddress.SegmentNumber));
-
-        json_object_object_add(section_ir, "cxlAgentAddress", agent_address);
     }
     else if (cxl_protocol_error->CxlAgentType == CXL_PROTOCOL_ERROR_HOST_DOWNSTREAM_PORT_AGENT)
     {
         //Address is a CXL port RCRB base address.
-        json_object_object_add(section_ir, "cxlAgentAddress", 
+        json_object_object_add(agent_address, "value", 
             json_object_new_uint64(cxl_protocol_error->CxlAgentAddress.PortRcrbBaseAddress));
     }
+    json_object_object_add(section_ir, "cxlAgentAddress", agent_address);
 
     //Device ID.
     json_object* device_id = json_object_new_object();
@@ -86,16 +85,18 @@ json_object* cper_section_cxl_protocol_to_ir(void* section, EFI_ERROR_SECTION_DE
 
     //CXL DVSEC
     //For CXL 1.1 devices, this is the "CXL DVSEC For Flex Bus Device" structure as in CXL 1.1 spec.
+    //For CXL 1.1 host downstream ports, this is the "CXL DVSEC For Flex Bus Port" structure as in CXL 1.1 spec.
     unsigned char* cur_pos = (unsigned char*)(cxl_protocol_error + 1);
     char* encoded = b64_encode(cur_pos, cxl_protocol_error->CxlDvsecLength);
-    json_object_object_add(section_ir, "capabilityStructure", json_object_new_uint64(cxl_protocol_error->DeviceSerial));
+    json_object_object_add(section_ir, "cxlDVSEC", json_object_new_string(encoded));
     free(encoded);
     cur_pos += cxl_protocol_error->CxlDvsecLength;
 
-    //For CXL 1.1 host downstream ports, this is the "CXL DVSEC For Flex Bus Port" structure as in CXL 1.1 spec.
-
     //CXL Error Log
-    //This as the "CXL RAS Capability Structure" as in CXL 1.1 spec.
+    //This is the "CXL RAS Capability Structure" as in CXL 1.1 spec.
+    encoded = b64_encode(cur_pos, cxl_protocol_error->CxlErrorLogLength);
+    json_object_object_add(section_ir, "cxlErrorLog", json_object_new_string(encoded));
+    free(encoded);
     
     return section_ir;
 }

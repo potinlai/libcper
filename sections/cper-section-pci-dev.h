@@ -5,7 +5,7 @@
 #include "../edk/Cper.h"
 
 #define PCI_DEV_ERROR_VALID_BITFIELD_NAMES (const char*[]) {"errorStatusValid", "idInfoValid", "memoryNumberValid", \
-    "ioNumberValid", "registerDataPairValid"}
+    "ioNumberValid", "registerDataPairsValid"}
 
 ///
 /// PCI/PCI-X Device Error Section

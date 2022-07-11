@@ -401,7 +401,7 @@ responderIDValid & boolean & Whether the "responderID" field in the Processor Er
 \hline
 instructionPointerValid & boolean & Whether the "instructionPointer" field in the Processor Error Info structure (\ref{subsection:ia32x64processorerrorinfostructure}) is valid.\\
 \hline
-\jsontableend{IA32/x64 Processor Error Info Validation structure field table.}
+\jsontableend{IA32/x64 Processor Error Info validation structure field table.}
 
 % IA32/x64 Processor Error Check Info (Cache/TLB Error)
 \subsection{IA32/x64 Processor Error Check Info (Cache/TLB Error) Structure}
@@ -511,7 +511,7 @@ overflowValid & boolean & Whether the "overflow" field in a Processor Error Chec
 participationTypeValid & boolean (\textbf{optional}) & Whether the "participationType" field in the Processor Error Check Info (Bus Error) structure (\ref{subsection:ia32x64processorerrorcheckinfobusstructure}) is valid. \textbf{This field is only present on bus related check info structures.}\\
 \hline
 timedOutValid & boolean (\textbf{optional}) & Whether the "timeOut" field in the Processor Error Check Info (Bus Error) structure (\ref{subsection:ia32x64processorerrorcheckinfobusstructure}) is valid. \textbf{This field is only present on bus related check info structures.}\\
-\jsontableend{IA32/x64 Processor Error Check Info (Cache/TLB/Bus) Validation structure field table.}
+\jsontableend{IA32/x64 Processor Error Check Info (Cache/TLB/Bus) validation structure field table.}
 
 % IA32/x64 Processor Error Check Info (MS Check) Validation structure.
 \subsection{IA32/x64 Processor Error Check Info (MS Check) Validation Structure}
@@ -529,7 +529,7 @@ preciseIPValid & boolean & Whether the "preciseIP" field in a Processor Error Ch
 restartableIPValid & boolean & Whether the "restartableIP" field in a Processor Error Check Info (MS Check) (\ref{subsection:ia32x64processorerrorcheckinfomscheckstructure}) structure is valid.\\
 \hline
 overflowValid & boolean & Whether the "overflow" field in a Processor Error Check Info (MS Check) (\ref{subsection:ia32x64processorerrorcheckinfomscheckstructure}) structure is valid.\\
-\jsontableend{IA32/x64 Processor Error Check Info (MS Check) Validation structure field table.}
+\jsontableend{IA32/x64 Processor Error Check Info (MS Check) validation structure field table.}
 
 % IA32/x64 Processor Context Info structure.
 \subsection{IA32/x64 Processor Context Info Structure}
@@ -733,7 +733,7 @@ errorAffinityLevelValid & boolean & Whether the "errorAffinity" field in the ARM
 runningStateValid & boolean & Whether the "running" field in the ARM Processor Error structure (\ref{section:armprocessorerrorsection}) is valid.\\
 \hline
 vendorSpecificInfoValid & boolean & Whether the trailing vendor specific info (if present) in the ARM Processor Error Structure (\ref{section:armprocessorerrorsection}) is valid.\\
-\jsontableend{ARM Processor Error Validation structure field table.}
+\jsontableend{ARM Processor Error validation structure field table.}
 
 % ARM Processor Error Info structure
 \subsection{ARM Processor Error Info Structure}
@@ -775,7 +775,7 @@ errorInformationValid & boolean & Whether the "errorInformation" field in the AR
 virtualFaultAddressValid & boolean & Whether the "virtualFaultAddress" field in the ARM Processor Error Info structure (\ref{subsection:armprocessorerrorinfostructure}) is valid.\\
 \hline
 physicalFaultAddressValid & boolean & Whether the "physicalFaultAddress" field in the ARM Processor Error Info structure (\ref{subsection:armprocessorerrorinfostructure}) is valid.\\
-\jsontableend{ARM Processor Error Info Validation structure field table.}
+\jsontableend{ARM Processor Error Info validation structure field table.}
 
 % ARM Processor Error Info Validation structure
 \subsection{ARM Processor Error Info Flags Structure}
@@ -833,7 +833,7 @@ correctedValid & boolean & Whether the "corrected" field in the ARM Processor In
 precisePCValid & boolean & Whether the "precisePC" field in the ARM Processor Info Cache/TLB Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationcachetlbstructure}) is valid.\\
 \hline
 restartablePCValid & boolean & Whether the "restartablePC" field in the ARM Processor Info Cache/TLB Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationcachetlbstructure}) is valid.\\
-\jsontableend{ARM Processor Error Info Cache/TLB Validation structure field table.}
+\jsontableend{ARM Processor Error Info Cache/TLB validation structure field table.}
 
 % ARM Processor Error Info Error Information (Bus) structure
 \subsection{ARM Processor Error Info Bus Information Structure}
@@ -900,7 +900,7 @@ addressSpaceValid & boolean & Whether the "addressSpace" field in the ARM Proces
 memoryAttributesValid & boolean & Whether the "memoryAttributes" field in the ARM Processor Info Bus Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}) is valid.\\
 \hline
 accessModeValid & boolean & Whether the "accessMode" field in the ARM Processor Info Bus Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}) is valid.\\
-\jsontableend{ARM Processor Error Info Bus Validation structure field table.}
+\jsontableend{ARM Processor Error Info Bus validation structure field table.}
 
 % ARM Processor Context Info structure
 \subsection{ARM Processor Context Info Structure}
@@ -1343,7 +1343,7 @@ bankGroupValid & boolean & Whether the "bank.group" field of a Memory Error (\re
 bankAddressValid & boolean & Whether the "bank.address" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
 \hline
 chipIdentificationValid & boolean & Whether the "extended.chipIdentification" field of a Memory Error (\ref{section:memoryerrorsection}) is valid.\\
-\jsontableend{Memory Error Validation structure field table.}
+\jsontableend{Memory Error validation structure field table.}
 
 % Memory error normal bank addressing structure.
 \subsection{Memory Error Standard Bank Address Structure}
@@ -1400,7 +1400,7 @@ bitPosition & uint64 & The bit position at which the error occurred.\\
 \hline
 rank & uint64 & The rank number of the error location.\\
 \hline
-chipID & uint64 & Chip identifier. Encoded field used to address the die in 3DS packages.\\
+chipID & uint64 & Chip identMrsOp2ifier. Encoded field used to address the die in 3DS packages.\\
 \hline
 requestorID & uint64 & Hardware address of the device that initiated the errored transaction.\\
 \hline
@@ -1461,7 +1461,7 @@ moduleHandleValid & boolean & Whether the "moduleSmbiosHandle" field of a Memory
 bankGroupValid & boolean & Whether the "bankGroup" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
 \hline
 bankAddressValid & boolean & Whether the "bankAddress" field of a Memory Error 2 (\ref{section:memoryerror2section}) is valid.\\
-\jsontableend{Memory Error 2 Validation structure field table.}
+\jsontableend{Memory Error 2 validation structure field table.}
 
 % Memory error 2 normal bank addressing structure.
 \subsection{Memory Error 2 Standard Bank Address Structure}
@@ -1480,5 +1480,489 @@ address & uint64 & The address of the bank.\\
 \hline
 group & uint64 & The group of the bank.\\
 \jsontableend{Memory Error 2 Address/Group Bank Address structure field table.}
+
+% PCIe error section.
+\section{PCIe Error Section}
+\label{section:pcieerrorsection}
+This section describes the JSON format for a single PCIe Error Section from a CPER record. The GUID used for PCIe Error Sections is \texttt{\{ 0xd995e954, 0xbbc1, 0x430f, \{ 0xad, 0x91, 0xb4, 0x4d, 0xcb, 0x3c, 0x6f, 0x35 \}\}}.
+\jsontable{table:pcieerrorsection}
+validationBits & object & A PCIe Error Validation structure as defined in Subsection \ref{subsection:pcieerrorvalidationstructure}.\\
+\hline
+portType.value & uint64 & The raw value of the port type for this error.\\
+portType.name & string & The human readable name, if available, of the port type for this error.\\
+\hline
+version.major & int & The major version number for the PCIe specification supported.\\
+version.minor & int & The minor version number for the PCIe specification supported.\\
+\hline
+commandStatus.commandRegister & uint64 & The PCI command register value.\\
+commandStatus.statusRegister & uint64 & The PCI status register value.\\
+\hline
+deviceID & object & A PCIe Device ID structure as defined in Subsection \ref{pciedeviceidstructure}.\\
+\hline
+deviceSerialNumber & uint64 & The serial number of the device.\\
+\hline
+bridgeControlStatus.secondaryStatusRegister & uint64 & The bridge secondary status register. \emph{This field is valid for bridges only.}\\
+\hline
+bridgeControlStatus.controlRegister & uint64 & The bridge control register. \emph{This field is valid for bridges only.}\\
+\hline
+capabilityStructure.data & string & A base-64 formatted binary dump of the PCIe capability structure for this device. The structure could either be a PCIe 1.1 Capability Structure (36-byte, padded to 60 bytes) or a PCIe 2.0 Capability Structure (60-byte).\\
+\hline
+aerInfo & object & A PCIe AER Extended Capability structure, as defined in Subsection \ref{subsection:pcieaerecstructure}.\\
+\jsontableend{PCIe Error structure field table.}
+
+% PCIe error validation structure.
+\subsection{PCIe Error Validation Structure}
+\label{subsection:pcieerrorvalidationstructure}
+This structure describes which fields within a PCIe Error section (\ref{section:pcieerrorsection}) are valid, using boolean fields.
+\jsontable{table:pcieerrorvalidationstructure}
+portTypeValid & boolean & Whether the "portType" field within a PCIe Error section (\ref{section:pcieerrorsection}) is valid.\\
+\hline
+versionValid & boolean & Whether the "version" field within a PCIe Error section (\ref{section:pcieerrorsection}) is valid.\\
+\hline
+commandStatusValid & boolean & Whether the "commandStatus" field within a PCIe Error section (\ref{section:pcieerrorsection}) is valid.\\
+\hline
+deviceIDValid & boolean & Whether the "deviceID" field within a PCIe Error section (\ref{section:pcieerrorsection}) is valid.\\
+\hline
+deviceSerialNumber & boolean & Whether the "deviceSerialNumber" field within a PCIe Error section (\ref{section:pcieerrorsection}) is valid.\\
+\hline
+bridgeControlStatusValid & boolean & Whether the "bridgeControlStatus" field within a PCIe Error section (\ref{section:pcieerrorsection}) is valid.\\
+\hline
+capabilityStructureStatusValid & boolean & Whether the "capabilityStructure" field within a PCIe Error section (\ref{section:pcieerrorsection}) is valid.\\
+\hline
+aerInfoValid & boolean & Whether the "aerInfo" field within a PCIe Error section (\ref{section:pcieerrorsection}) is valid.\\
+\hline
+\jsontableend{PCIe Error validation structure field table.}
+
+% PCIe Device ID structure.
+\subsection{PCIe Device ID Structure}
+\label{subsection:pciedeviceidstructure}
+This structure describes a PCIe device ID, for use in a PCI Error section (\ref{table:pcieerrorsection}).
+\jsontable{table:pciedeviceidstructure}
+vendorID & uint64 & The vendor ID of the PCIe device.\\
+\hline
+deviceID & uint64 & The device ID of the PCIe device.\\
+\hline
+classCode & uint64 & The class code of the PCIe device.\\
+\hline
+functionNumber & uint64 & The function number of the PCIe device.\\
+\hline
+deviceNumber & uint64 & The device number of the PCIe device.\\
+\hline
+segmentNumber & uint64 & The segment number of the PCIe device.\\
+\hline
+primaryOrDeviceBusNumber & uint64 & The root port/bridge primary bus number or device bus number of the PCIe device.\\
+\hline
+secondaryBusNumber & uint64 & The root port/bridge secondary bus number of the PCIe device.\\
+\hline
+slotNumber & uint64 & The slot number of the PCIe device.\\
+\jsontableend{PCIe Device ID structure field table.}
+
+% PCIe Advanced Error Reporting Extended Capability structure.
+\subsection{PCIe AER Extended Capability Structure}
+\label{subsection:pcieaerecstructure}
+This structure describes a PCIe Advanced Error Reporting Extended Capability structure, for use in a PCI Error section (\ref{table:pcieerrorsection}).
+\jsontable{table:pcieaerecstructure}
+capabilityID & uint64 & The capability ID for this AER structure.\\
+\hline
+capabilityVersion & uint64 & The capability structure version for this AER structure.\\
+\hline
+uncorrectableErrorStatusRegister & uint64 & The uncorrectable error status register value.\\
+\hline
+uncorrectableErrorMaskRegister & uint64 & The uncorrectable error mask register value.\\
+\hline
+uncorrectableErrorSeverityRegister & uint64 & The uncorrectable error severity register value.\\
+\hline
+uncorrectableErrorMaskRegister & uint64 & The uncorrectable error mask register value.\\
+\hline
+aeccReg & uint64 & The AECC register value.\\
+\hline
+headerLogRegister & string & A base64-encoded binary dump of the header log register.\\
+\hline
+rootErrorCommand & uint64 & The root error command.\\
+\hline
+rootErrorStatus & uint64 & The root error status.\\
+\hline
+errorSourceIDRegister & uint64 & The error source ID register.\\
+\hline
+correctableErrorSourceIDRegister & uint64 & The correctable error source ID register.\\
+\jsontableend{PCIe AER Extended Capability structure field table.}
+
+% PCI/PCI-X Bus error section.
+\section{PCI/PCI-X Bus Error Section}
+\label{section:pcibuserrorsection}
+This section describes the JSON format for a single PCI/PCI-X Bus Error Section from a CPER record. The GUID used for PCI/PCI-X Bus Error Sections is \texttt{\{ 0xc5753963, 0x3b84, 0x4095, \{ 0xbf, 0x78, 0xed, 0xda, 0xd3, 0xf9, 0xc9, 0xdd \}\}}.
+\jsontable{table:pcibuserrorsection}
+validationBits & object & A PCI/PCI-X Bus Error Validation structure, as described in Subsection \ref{subsection:pcibuserrorvalidationstructure}.\\
+\hline
+errorStatus & object & A CPER Generic Error Status structure, as described in Subsection \ref{subsection:genericerrorstatusstructure}.\\
+\hline
+errorType.value & uint64 & The raw value of the error type for this bus error.\\
+errorType.name & string & The human readable name, if available, of the error type for this bus error.\\
+\hline
+busID.busNumber & int & The bus number of this bus ID.\\
+busID.segmentNumber & int & The segment number of this bus ID.\\
+\hline
+busAddress & uint64 & The memory or I/O address on the bus at the time of the error.\\
+\hline
+busData & uint64 & Data on the bus at the time of the error.\\
+\hline
+busCommandType & string & The type of command at the time of the error. Either "PCI" or "PCI-X".\\
+\hline
+busRequestorID & uint64 & The PCI bus requestor ID for the error.\\
+\hline
+busCompleterID & uint64 & The PCI bus completer ID for the error.\\
+\hline
+targetID & uint64 & The PCI bus intended target ID for the error.\\
+\jsontableend{PCI/PCI-X Bus Error structure field table.}
+
+% PCI/PCI-X Bus error validation structure.
+\subsection{PCI/PCI-X Bus Error Validation Structure}
+\label{subsection:pcibuserrorvalidationstructure}
+This structure describes which fields within a PCI/PCI-X Bus Error section (\ref{section:pcibuserrorsection}) are valid, using boolean fields.
+\jsontable{table:pcibuserrorvalidationstructure}
+errorStatusValid & boolean & Whether the "errorStatus" field of the PCI/PCI-X Bus Error section (\ref{section:pcibuserrorsection}) is valid.\\
+\hline
+errorTypeValid & boolean & Whether the "errorType" field of the PCI/PCI-X Bus Error section (\ref{section:pcibuserrorsection}) is valid.\\
+\hline
+busIDValid & boolean & Whether the "busID" field of the PCI/PCI-X Bus Error section (\ref{section:pcibuserrorsection}) is valid.\\
+\hline
+busAddressValid & boolean & Whether the "busAddress" field of the PCI/PCI-X Bus Error section (\ref{section:pcibuserrorsection}) is valid.\\
+\hline
+busDataValid & boolean & Whether the "busData" field of the PCI/PCI-X Bus Error section (\ref{section:pcibuserrorsection}) is valid.\\
+\hline
+commandValid & boolean & Whether the "busCommandType" field of the PCI/PCI-X Bus Error section (\ref{section:pcibuserrorsection}) is valid.\\
+\hline
+requestorIDValid & boolean & Whether the "busRequestorID" field of the PCI/PCI-X Bus Error section (\ref{section:pcibuserrorsection}) is valid.\\
+\hline
+completerIDValid & boolean & Whether the "busCompleterID" field of the PCI/PCI-X Bus Error section (\ref{section:pcibuserrorsection}) is valid.\\
+\hline
+targetIDValid & boolean & Whether the "targetID" field of the PCI/PCI-X Bus Error section (\ref{section:pcibuserrorsection}) is valid.\\
+\jsontableend{PCI/PCI-X Bus Error validation structure field table.}
+
+% PCI/PCI-X Component error section.
+\section{PCI/PCI-X Component Error Section}
+\label{section:pcicomponenterrorsection}
+This section describes the JSON format for a single PCI/PCI-X Component Error Section from a CPER record. The GUID used for PCI/PCI-X Component Error Sections is \texttt{\{ 0xeb5e4685, 0xca66, 0x4769, \{ 0xb6, 0xa2, 0x26, 0x06, 0x8b, 0x00, 0x13, 0x26 \}\}}.
+\jsontable{table:pcicomponenterrorsection}
+validationBits & object & A PCI/PCI-X Component Error Validation structure, as defined in Subsection \ref{subsection:pcicomponenterrorvalidationstructure}.\\
+\hline
+idInfo & object & A PCI/PCI-X Component ID structure, as defined in Subsection \ref{subsection:pcicomponentidstructure}.\\
+\hline
+memoryNumber & uint64 & The number of PCI/PCI-X component memory mapped register address/data pair values are present in this structure.\\
+\hline
+ioNumber & uint64 & The number of PCI/PCI-X component programmed I/O register address/data pair values are present in this structure.\\
+\hline
+registerDataPairs & array & An array of PCI/PCI-X Component Register Pair structures, as defined in Subsection \ref{subsection:pcicomponentregisterpairstructure}. The length corresponds to the amounts listed in fields \texttt{memoryNumber} and \texttt{ioNumber}.\\
+\jsontableend{PCI/PCI-X Component Error structure field table.}
+
+% PCI/PCI-X Component error validation structure.
+\subsection{PCI/PCI-X Component Error Validation Structure}
+\label{subsection:pcicomponenterrorvalidationstructure}
+This structure describes which fields within a PCI/PCI-X Component Error section (\ref{section:pcicomponenterrorsection}) are valid, using boolean fields.
+\jsontable{table:pcicomponenterrorvalidationstructure}
+errorStatusValid & boolean & Whether the "errorStatus" field of the PCI/PCI-X Component Error section (\ref{section:pcicomponenterrorsection}) is valid.\\
+\hline
+idInfoValid & boolean & Whether the "idInfo" field of the PCI/PCI-X Component Error section (\ref{section:pcicomponenterrorsection}) is valid.\\
+\hline
+memoryNumberValid & boolean & Whether the "memoryNumber" field of the PCI/PCI-X Component Error section (\ref{section:pcicomponenterrorsection}) is valid.\\
+\hline
+ioNumberValid & boolean & Whether the "ioNumber" field of the PCI/PCI-X Component Error section (\ref{section:pcicomponenterrorsection}) is valid.\\
+\hline
+registerDataPairsValid & boolean & Whether the "registerDataPairs" field of the PCI/PCI-X Component Error section (\ref{section:pcicomponenterrorsection}) is valid.\\
+\jsontableend{PCI/PCI-X Component Error validation structure field table.}
+
+% PCI/PCI-X Component ID structure.
+\subsection{PCI/PCI-X Component ID Structure}
+\label{subsection:pcicomponentidstructure}
+This structure describes the ID of a single PCI/PCI-X component for use in a PCI/PCI-X Component Error section (\ref{section:pcicomponenterrorsection}).
+\jsontable{table:pcicomponentidstructure}
+vendorID & uint64 & The vendor ID of this PCI/PCI-X component.\\
+\hline
+deviceID & uint64 & The device ID of this PCI/PCI-X component.\\
+\hline
+classCode & uint64 & The class code of this PCI/PCI-X component.\\
+\hline
+functionNumber & uint64 & The function number of this PCI/PCI-X component.\\
+\hline
+deviceNumber & uint64 & The device number of this PCI/PCI-X component.\\
+\hline
+busNumber & uint64 & The bus number of this PCI/PCI-X component.\\
+\hline
+segmentNumber & uint64 & The segment number of this PCI/PCI-X component.\\
+\jsontableend{PCI/PCI-X Component ID structure field table.}
+
+% PCI/PCI-X Component Register Pair structure.
+\subsection{PCI/PCI-X Component Register Pair Structure}
+\label{subsection:pcicomponentregisterpairstructure}
+This structure describes a single pair of registers from a PCI/PCI-X component for use in a PCI/PCI-X Component Error section (\ref{section:pcicomponenterrorsection}). The actual "pairs" of address and data aren't necessarily all 16 bytes allocated long, and there is no field to indicate their length, so do not assume that the address is in the first field and the data in the second.
+\jsontable{table:pcicomponentregisterpairstructure}
+firstHalf & uint64 & The first 8 bytes of the 16 byte register pair structure.\\
+\hline
+secondHalf & uint64 & The second 8 bytes of the 16 byte register pair structure.\\
+\jsontableend{PCI/PCI-X Component Register Pair structure field table.}
+
+% Firmware error section.
+\section{Firmware Error Section}
+\label{section:firmwareerrorsection}
+This section describes the JSON format for a single Firmware Error Section from a CPER record. The GUID used for Firmware Error Sections is \texttt{\{ 0x81212a96, 0x09ed, 0x4996, \{ 0x94, 0x71, 0x8d, 0x72, 0x9c, 0x8e, 0x69, 0xed \}\}}.
+\jsontable{table:firmwareerrorsection}
+errorRecordType.value & uint64 & The raw value of the type of firmware error record this is.\\
+errorRecordType.name & string & The human readable name, if available, of the type of firmware error record this is.\\
+\hline
+revision & int & The header revision of this record. For the referenced UEFI specification, this value is 2.\\
+\hline
+recordID & uint64 & Identifier for the referenced firmware error record. When the \texttt{revision} field is greater than 1 (which is expected here), this value will be null.\\
+\hline
+recordIDGUID & string & GUID of the firmware error record referenced by this section. \textbf{This field is only valid when the \texttt{errorRecordType} field has a value of 2.} Otherwise, this field is ignored.\\
+\jsontableend{Firmware Error structure field table.}
+
+% Generic DMAr error section.
+\section{Generic DMAr Error Section}
+\label{section:dmargenericerrorsection}
+This section describes the JSON format for a single Generic DMAr Error Section from a CPER record. The GUID used for Generic DMAr Error Sections is \texttt{\{ 0x5b51fef7, 0xc79d, 0x4434, \{ 0x8f, 0x1b, 0xaa, 0x62, 0xde, 0x3e, 0x2c, 0x64 \}\}}.
+\jsontable{table:dmargenericerrorsection}
+requesterID & int & The device ID associated with the fault condition.\\
+\hline
+segmentNumber & int & The segment number associated with the device.\\
+\hline
+faultReason.value & uint64 & The raw value of the reason for the fault.\\
+faultReason.name & string & The human readable name, if available, of the reason for the fault.\\
+faultReason.description & string & A human readable description, if available, of the reason for the fault.\\
+\hline
+accessType.value & uint64 & The raw value of the access type that caused the fault.\\
+accessType.name & string & The human readable name, if available, of the access type that caused the fault.\\
+\hline
+addressType.value & uint64 & The raw value of the addressing type that caused the fault.\\
+addressType.name & string & The human readable name, if available, of the addressing type that caused the fault.\\
+\hline
+architectureType.value & uint64 & The raw value of the DMAr architecture type.\\
+architectureType.name & string & The human readable name, if available, of the DMAr architecture type.\\
+\hline
+deviceAddress & uint64 & The 64-bit device virtual address contained in the faulted DMA request.\\
+\jsontableend{Generic DMAr Error structure field table.}
+
+% VT-d DMAr error section.
+\section{VT-d DMAr Error Section}
+\label{section:vtddmarerrorsection}
+This section describes the JSON format for a single VT-d DMAr Error Section from a CPER record. The GUID used for VT-d DMAr Error Sections is \texttt{\{ 0x71761d37, 0x32b2, 0x45cd, \{ 0xa7, 0xd0, 0xb0, 0xfe, 0xdd, 0x93, 0xe8, 0xcf \}\}}.
+\jsontable{table:vtddmarerrorsection}
+version & int & Version register value as defined in the VT-d specification.\\
+\hline
+revision & int & Revision field in VT-d specific DMA remapping reporting structure.\\
+\hline
+oemID & uint64 & OEM ID field in VT-d specific DMA remapping reporting structure.\\
+\hline
+capabilityRegister & uint64 & Value of VT-d capability register.\\
+\hline
+extendedCapabilityRegister & uint64 & Value of VT-d extended capability register.\\
+\hline
+globalCommandRegister & uint64 & Value of VT-d global command register.\\
+\hline
+globalStatusRegister & uint64 & Value of VT-d global status register.\\
+\hline
+faultStatusRegister & uint64 & Value of VT-d fault status register.\\
+\hline
+faultRecord & object & A VT-d DMAR Fault Record structure, as defined in Subsection .\\
+\hline
+rootEntry & string & A base64-represented binary dump of the root entry table for the associated requester ID.\\
+\hline
+contextEntry & string & A base64-represented binary dump of the context entry table for the associated requester ID.\\
+\hline
+pageTableEntry\_Level6 & uint64 & The page table entry for the device virtual address in page level 6.\\
+\hline
+pageTableEntry\_Level5 & uint64 & The page table entry for the device virtual address in page level 5.\\
+\hline
+pageTableEntry\_Level4 & uint64 & The page table entry for the device virtual address in page level 4.\\
+\hline
+pageTableEntry\_Level3 & uint64 & The page table entry for the device virtual address in page level 3.\\
+\hline
+pageTableEntry\_Level2 & uint64 & The page table entry for the device virtual address in page level 2.\\
+\hline
+pageTableEntry\_Level1 & uint64 & The page table entry for the device virtual address in page level 1.\\
+\jsontableend{VT-d DMAr Error structure field table.}
+
+% VT-d DMAR Fault Record structure.
+\subsection{VT-d DMAR Fault Record Structure}
+\label{subsection:vtddmarfaultrecordstructure}
+This structure describes a fault record, which forms part of a single VT-d DMAr Error section (\ref{section:vtddmarerrorsection}).
+\jsontable{table:vtddmarfaultrecordstructure}
+faultInformation & uint64 & Fault information field as defined in the VT-d specification.\\
+\hline
+sourceIdentifier & uint64 & Identifier of the source of the VT-d fault.\\
+\hline
+privelegeModeRequested & boolean & Whether privelege mode was requested.\\
+\hline
+executePermissionRequested & boolean & Whether execute permission was requested.\\
+\hline
+pasidPresent & boolean & Whether the "pasidValue" field contains valid data.\\
+\hline
+faultReason & uint64 & The reason for the VT-d fault, as defined in the VT-d specification.\\
+\hline
+pasidValue & uint64 & The PASID associated with the fault.\\
+\hline
+addressType & uint64 & The addressing type of the fault, as defined by the VT-d specification.\\
+\hline
+type.value & uint64 & The raw value of the type of VT-d fault record.\\
+type.name & string & The human readable name, if available, of the type of VT-d fault record.\\
+\jsontableend{VT-d DMAR Fault Record structure field table.}
+
+% IOMMU DMAr error section.
+\section{IOMMU DMAr Error Section}
+\label{section:iommudmarerrorsection}
+This section describes the JSON format for a single IOMMU DMAr Error Section from a CPER record. The GUID used for IOMMU DMAr Error Sections is \texttt{\{ 0x036f84e1, 0x7f37, 0x428c, \{ 0xa7, 0x9e, 0x57, 0x5f, 0xdf, 0xaa, 0x84, 0xec \}\}}.
+\jsontable{table:iommudmarerrorsection}
+revision & int & The IOMMU specification revision.\\
+\hline
+controlRegister & uint64 & The IOMMU control register value.\\
+\hline
+statusRegister & uint64 & The IOMMU status register value.\\
+\hline
+eventLogEntry & string & A base-64 binary dump of the IOMMU fault-related event log entry, as defined in the IOMMU specification.\\
+\hline
+deviceTableEntry & string & A base-64 representation of the value from the device table for a given requester ID.\\
+\hline
+pageTableEntry\_Level6 & uint64 & Page table entry for device virtual address in page level 6.\\
+\hline
+pageTableEntry\_Level5 & uint64 & Page table entry for device virtual address in page level 5.\\
+\hline
+pageTableEntry\_Level4 & uint64 & Page table entry for device virtual address in page level 4.\\
+\hline
+pageTableEntry\_Level3 & uint64 & Page table entry for device virtual address in page level 3.\\
+\hline
+pageTableEntry\_Level2 & uint64 & Page table entry for device virtual address in page level 2.\\
+\hline
+pageTableEntry\_Level1 & uint64 & Page table entry for device virtual address in page level 1.\\
+\jsontableend{IOMMU DMAr Error structure field table.}
+
+% CCIX PER error section.
+\section{CCIX PER Error Section}
+\label{section:ccixpererrorsection}
+This section describes the JSON format for a single CCIX PER Error Section from a CPER record. The GUID used for CCIX PER Error Sections is \texttt{\{ 0x91335EF6, 0xEBFB, 0x4478, \{0xA6, 0xA6, 0x88, 0xB7, 0x28, 0xCF, 0x75, 0xD7 \}\}}.
+\jsontable{table:ccixpererrorsection}
+length & uint64 & The length (in bytes) of the entire structure.\\
+\hline
+validationBits & object & A CCIX PER Validation structure as described in Subsection \ref{subsection:vtddmarfaultrecordstructure}.\\
+\hline
+ccixSourceID & int & If the agent is an HA, SA, or RA, this indicates the CCIX Agent ID of the reporting component. Otherwise, this is the CCIX Device ID.\\
+\hline
+ccixPortID & int & The CCIX Port ID that reported this error.\\
+\hline
+ccixPERLog & string & A base64-represented binary dump of the CCIX PER Log structure, as defined in Section 7.3.2 of the CCIX Base Specification (Rev. 1.0).\\
+\jsontableend{CCIX PER Error structure field table.}
+
+% CCIX PER Validation structure.
+\subsection{CCIX PER Validation Structure}
+\label{subsection:ccixpervalidationstructure}
+This structure describes which fields are valid in a CCIX PER Error section (\ref{section:ccixpererrorsection}) using boolean fields.
+\jsontable{table:ccixpervalidationstructure}
+ccixSourceIDValid & boolean & Whether the "ccixSourceID" field in the CCIX PER Error Section (\ref{section:ccixpererrorsection}) is valid.\\
+\hline
+ccixPortIDValid & boolean & Whether the "ccixPortID" field in the CCIX PER Error Section (\ref{section:ccixpererrorsection}) is valid.\\
+\hline
+ccixPERLogValid & boolean & Whether the "ccixPERLog" field in the CCIX PER Error Section (\ref{section:ccixpererrorsection}) is valid.\\
+\jsontableend{CCIX PER validation structure field table.}
+
+% CXL Protocol error section.
+\section{CXL Protocol Error Section}
+\label{section:cxlprotocolerrorsection}
+This section describes the JSON format for a single CXL Protocol Error Section from a CPER record. The GUID used for CXL Protocol Error Sections is \texttt{\{ 0x80B9EFB4, 0x52B5, 0x4DE3, \{ 0xA7, 0x77, 0x68, 0x78, 0x4B, 0x77, 0x10, 0x48 \}\}}.
+\jsontable{table:cxlprotocolerrorsection}
+validationBits & object & A CXL Protocol Validation structure as defined in Subsection \ref{subsection:cxlprotocolvalidationstructure}.\\
+\hline
+agentType.value & uint64 & The raw value of the detecting CXL agent type.\\
+agentType.name & string & The human readable name, if available, of the CXL agent type.\\
+\hline
+agentAddress & object & One of the structures described in Subsection \ref{subsection:cxlprotocoldeviceagentaddressstructure} or Subsection \ref{subsection:cxlprotocolrcrbaddressstructure}. Included structure is dependent on the \texttt{agentType.value} field.\\
+\hline
+deviceID & object & A CXL Device ID structure, as defined in Subsection \ref{subsection:cxlprotocoldeviceidstructure}.\\
+\hline
+deviceSerial & object (\textbf{optional}) & The CXL device serial number. Only included if the detecting device is a CXL device (field \texttt{agentType.value} has value 0).\\
+\hline
+capabilityStructure & string & A base64-encoded binary dump of the CXL device's PCIe capability structure. This could either be a PCIe 1.1 Capability Structure (36-byte, padded to 60 bytes), or a PCIe 2.0 Capability Structure (60-byte). Only included if the detecting device is a CXL device (field \texttt{agentType.value} has value 0).\\
+\hline
+dvsecLength & int & Length (in bytes) of the CXL DVSEC structure.\\
+\hline
+errorLogLength & int & Length (in bytes) of the CXL Error Log structure.\\
+\hline
+cxlDVSEC & string & A base64-encoded dump of the CXL DVSEC structure. For CXL 1.1 devices, this is a "CXL DVSEC For Flex Bus Devices" structure as defined in the CXL 1.1 specification. For CXL 1.1 host downstream ports, this is the "CXL DVSEC For Flex Bus Port" structure as defined in the CXL 1.1 specification.\\
+\hline
+cxlErrorLog & string & A base64-encoded dump of the CXL error log. This field contains a copy of "CXL RAS Capability Structure", as defined in the CXL 1.1 specification.\\
+\jsontableend{CXL Protocol Error structure field table.}
+
+% CXL Protocol Validation structure.
+\subsection{CXL Protocol Validation Structure}
+\label{subsection:cxlprotocolvalidationstructure}
+This structure describes which fields are valid in a CXL Protocol Error section (\ref{section:cxlprotocolerrorsection}) using boolean fields.
+\jsontable{table:cxlprotocolvalidationstructure}
+cxlAgentTypeValid & boolean & Whether the "cxlAgentType" field in the CXL Protocol Error section (\ref{section:cxlprotocolerrorsection}) is valid.\\
+\hline
+cxlAgentAddressValid & boolean & Whether the "cxlAgentAddress" field in the CXL Protocol Error section (\ref{section:cxlprotocolerrorsection}) is valid.\\
+\hline
+deviceID & boolean & Whether the "deviceID" field in the CXL Protocol Error section (\ref{section:cxlprotocolerrorsection}) is valid.\\
+\hline
+deviceSerialValid & boolean & Whether the "deviceSerial" field in the CXL Protocol Error section (\ref{section:cxlprotocolerrorsection}) is valid.\\
+\hline
+capabiltyStructureValid & boolean & Whether the "capabilityStructure" field in the CXL Protocol Error section (\ref{section:cxlprotocolerrorsection}) is valid.\\
+\hline
+cxlDVSECValid & boolean & Whether the "cxlDVSEC" field in the CXL Protocol Error section (\ref{section:cxlprotocolerrorsection}) is valid.\\
+\hline
+cxlErrorLogValid & boolean & Whether the "cxlErrorLog" field in the CXL Protocol Error section (\ref{section:cxlprotocolerrorsection}) is valid.\\
+\jsontableend{CXL Protocol validation structure field table.}
+
+% CXL Protocol Device Agent Address structure.
+\subsection{CXL Protocol Device Agent Address Structure}
+\label{subsection:cxlprotocoldeviceagentaddressstructure}
+This structure describes the address of a single CXL device agent, for use in a CXL Protocol Error section (\ref{section:cxlprotocolerrorsection}). Included when the \texttt{agentType.value} field has the value "0".
+\jsontable{table:cxlprotocoldeviceagentaddressstructure}
+functionNumber & uint64 & The function number of the CXL device.\\
+\hline
+deviceNumber & uint64 & The device number of the CXL device.\\
+\hline
+busNumber & uint64 & The bus number of the CXL device.\\
+\hline
+segmentNumber & uint64 & The segment number of the CXL device.\\
+\jsontableend{CXL Protocol Device Agent Address structure field table.}
+
+% CXL Protocol RCRB Base Address structure.
+\subsection{CXL Protocol RCRB Base Address Structure}
+\label{subsection:cxlprotocolrcrbaddressstructure}
+This structure describes an RCRB base address, for use in a CXL Protocol Error section (\ref{section:cxlprotocolerrorsection}). Included when the \texttt{agentType.value} field has the value "1".
+\jsontable{table:cxlprotocolrcrbaddressstructure}
+value & uint64 & The CXL port RCRB base address.\\
+\jsontableend{CXL Protocol RCRB Base Address structure field table.}
+
+% CXL Protocol Device ID structure.
+\subsection{CXL Protocol Device ID Structure}
+\label{subsection:cxlprotocoldeviceidstructure}
+This structure describes the ID of a CXL device, for use in a CXL Protocol Error section (\ref{section:cxlprotocolerrorsection}).
+\jsontable{table:cxlprotocoldeviceidstructure}
+vendorID & uint64 & The vendor ID of the CXL device.\\
+\hline
+deviceID & uint64 & The device ID of the CXL device.\\
+\hline
+subsystemVendorID & uint64 & The subsystem vendor ID of the CXL device.\\
+\hline
+subsystemDeviceID & uint64 & The subsystem device ID of the CXL device.\\
+\hline
+classCode & uint64 & The class code of the CXL device.\\
+\hline
+slotNumber & uint64 & The slot number of the CXL device.\\
+\jsontableend{CXL Protocol Device ID structure field table.}
+
+% CXL Component error section.
+\section{CXL Component Error Section}
+\label{section:cxlcomponenterrorsection}
+This section describes the JSON format for a single CXL Component Error Section from a CPER record. There are several GUIDs used for CXL Component Error Sections, of which defined are:\\
+\begin{itemize}
+    \item CXL General Media Error (\texttt{\{ 0xfbcd0a77, 0xc260, 0x417f, \{ 0x85, 0xa9, 0x08, 0x8b, 0x16, 0x21, 0xeb, 0xa6 \}\}})\\
+    \item CXL DRAM Event Error (\texttt{\{ 0x601dcbb3, 0x9c06, 0x4eab, \{ 0xb8, 0xaf, 0x4e, 0x9b, 0xfb, 0x5c, 0x96, 0x24 \}\}})\\
+    \item CXL Memory Module Error (\texttt{\{ 0xfe927475, 0xdd59, 0x4339, \{ 0xa5, 0x86, 0x79, 0xba, 0xb1, 0x13, 0xb7, 0x74 \}\}})\\
+    \item CXL Physical Switch Error (\texttt{\{ 0x77cf9271, 0x9c02, 0x470b, \{ 0x9f, 0xe4, 0xbc, 0x7b, 0x75, 0xf2, 0xda, 0x97 \}\}})\\
+    \item CXL Virtual Switch Error (\texttt{\{ 0x40d26425, 0x3396, 0x4c4d, \{ 0xa5, 0xda, 0x3d, 0x47, 0x26, 0x3a, 0xf4, 0x25 \}\}})\\
+    \item CXL MLD Port Error (\texttt{\{ 0x8dc44363, 0x0c96, 0x4710, \{ 0xb7, 0xbf, 0x04, 0xbb, 0x99, 0x53, 0x4c, 0x3f \}\}})\\
+\end{itemize}
+\jsontable{table:cxlcomponenterrorsection}
+
+\jsontableend{CXL Protocol Error structure field table.}
 
 \end{document}
