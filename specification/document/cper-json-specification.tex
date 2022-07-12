@@ -47,7 +47,7 @@ This document lays out a structure for representing UEFI CPER records, as descri
  in a human-readable JSON format, intended to be interoperable with standard CPER binary.
 \\\\
 The C library released with this specification allows for the conversion between UEFI CPER records, an intermediate format, and the JSON structures
-defined in this document.
+defined in this document. There is also a comprehensive JSON schema\footnote{As defined by \href{https://json-schema.org/draft/2020-12/json-schema-core.html}{JSON schema Draft (2020/12)}} included within the same repository, at \texttt{specification/json}.
 
 % Specification section.
 \chapter{Main Structure Specification}
@@ -241,7 +241,7 @@ This chapter defines section body formats for all of the sections defined within
 % Generic processor error section.
 \section{Generic Processor Error Section}
 \label{section:genericprocessorerrorsection}
-This section describes the JSON format for a single Generic Processor Error Section from a CPER record. The GUID used for Generic Processor Error Sections is \texttt{\{x9876CCAD, 0x47B4, 0x4bdb, \{0xB6, 0x5E, 0x16, 0xF1, 0x93, 0xC4, 0xF3, 0xDB\}\}}.
+This section describes the JSON format for a single Generic Processor Error Section from a CPER record. The GUID used for Generic Processor Error Sections is \texttt{\{0x9876CCAD, 0x47B4, 0x4bdb, \{0xB6, 0x5E, 0x16, 0xF1, 0x93, 0xC4, 0xF3, 0xDB\}\}}.
 \jsontable{table:genericprocessorerrorsection}
 validationBits & object & A Generic Processor Error Validation Structure, as described in Subsection \ref{subsection:genericprocessorvalidationstructure}.\\
 \hline
@@ -301,7 +301,7 @@ cpuIDValid & boolean & Whether the "cpuID" field of the Generic Processor Error 
 \hline
 targetAddressValid & boolean & Whether the "targetAddress" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
 \hline
-requesterIDValid & boolean & Whether the "requesterID" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
+requestorIDValid & boolean & Whether the "requestorID" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
 \hline
 responderIDValid & boolean & Whether the "responderID" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
 \hline
@@ -345,7 +345,7 @@ This structure describes the validation bitfield structure of an IA32/x64 Error 
 \jsontable{table:ia32x64processorflagsstructure}
 localAPICIDValid & boolean & Whether the "localAPICID" field of the IA32/x64 Error section (\ref{section:ia32x64errorsection}) is valid.\\
 \hline
-cpuIDInfoValid & boolean & Whether the "cpuIDInfo" field of the IA32/x64 Error section (\ref{section:ia32x64errorsection}) is valid.\\ 
+cpuIDInfoValid & boolean & Whether the "cpuidInfo" field of the IA32/x64 Error section (\ref{section:ia32x64errorsection}) is valid.\\ 
 \hline
 processorErrorInfoNum & int & The number of IA32/x64 Processor Error Info Structures (\ref{subsection:ia32x64processorerrorinfostructure}) that are included with this error section.\\
 \hline
@@ -695,7 +695,7 @@ data & string & A base64-formatted binary representation of the register array.\
 \label{section:armprocessorerrorsection}
 This section describes the JSON format for a single ARM Processor Error Section from a CPER record. The GUID used for ARM Processor Error Sections is \texttt{\{ 0xe19e3d16, 0xbc11, 0x11e4, \{ 0x9c, 0xaa, 0xc2, 0x05, 0x1d, 0x5d, 0x46, 0xb0 \}\}}.
 \jsontable{table:armprocessorerrorsection}
-validationBits & object & An ARM Processor Error Validation structure, as defined in Subsection .\\
+validationBits & object & An ARM Processor Error Validation structure, as defined in Subsection \ref{subsection:armprocessorerrorvalidationstructure}.\\
 \hline
 errorInfoNum & int & The number of error info structures attached to this error.\\
 \hline
@@ -718,7 +718,7 @@ errorInfo & array & Array of ARM Processor Error Info structures, as defined in 
 \hline
 contextInfo & array & Array of ARM Processor Context Info structures, as defined in Subsection \ref{subsection:armprocessorcontextinfostructure}.\\
 \hline
-vendorSpecificInfo.data & string & A base64-encoded binary representation of any attached vendor specific information.\\
+vendorSpecificInfo.data & string (\textbf{optional}) & If it exists, a base64-encoded binary representation of any attached vendor specific information.\\
 \jsontableend{ARM Processor Error structure field table.}
 
 % ARM Processor Error Validation structure
@@ -1497,7 +1497,7 @@ version.minor & int & The minor version number for the PCIe specification suppor
 commandStatus.commandRegister & uint64 & The PCI command register value.\\
 commandStatus.statusRegister & uint64 & The PCI status register value.\\
 \hline
-deviceID & object & A PCIe Device ID structure as defined in Subsection \ref{pciedeviceidstructure}.\\
+deviceID & object & A PCIe Device ID structure as defined in Subsection \ref{subsection:pciedeviceidstructure}.\\
 \hline
 deviceSerialNumber & uint64 & The serial number of the device.\\
 \hline
@@ -1523,7 +1523,7 @@ commandStatusValid & boolean & Whether the "commandStatus" field within a PCIe E
 \hline
 deviceIDValid & boolean & Whether the "deviceID" field within a PCIe Error section (\ref{section:pcieerrorsection}) is valid.\\
 \hline
-deviceSerialNumber & boolean & Whether the "deviceSerialNumber" field within a PCIe Error section (\ref{section:pcieerrorsection}) is valid.\\
+deviceSerialNumberValid & boolean & Whether the "deviceSerialNumber" field within a PCIe Error section (\ref{section:pcieerrorsection}) is valid.\\
 \hline
 bridgeControlStatusValid & boolean & Whether the "bridgeControlStatus" field within a PCIe Error section (\ref{section:pcieerrorsection}) is valid.\\
 \hline
@@ -1572,7 +1572,9 @@ uncorrectableErrorMaskRegister & uint64 & The uncorrectable error mask register 
 \hline
 uncorrectableErrorSeverityRegister & uint64 & The uncorrectable error severity register value.\\
 \hline
-uncorrectableErrorMaskRegister & uint64 & The uncorrectable error mask register value.\\
+correctableErrorStatusRegister & uint64 & The correctable error status register value.\\
+\hline
+correctableErrorMaskRegister & uint64 & The correctable error mask register value.\\
 \hline
 aeccReg & uint64 & The AECC register value.\\
 \hline
@@ -1645,6 +1647,8 @@ targetIDValid & boolean & Whether the "targetID" field of the PCI/PCI-X Bus Erro
 This section describes the JSON format for a single PCI/PCI-X Component Error Section from a CPER record. The GUID used for PCI/PCI-X Component Error Sections is \texttt{\{ 0xeb5e4685, 0xca66, 0x4769, \{ 0xb6, 0xa2, 0x26, 0x06, 0x8b, 0x00, 0x13, 0x26 \}\}}.
 \jsontable{table:pcicomponenterrorsection}
 validationBits & object & A PCI/PCI-X Component Error Validation structure, as defined in Subsection \ref{subsection:pcicomponenterrorvalidationstructure}.\\
+\hline
+errorStatus & object & A CPER Generic Error Status structure, as described in Subsection \ref{subsection:genericerrorstatusstructure}.\\
 \hline
 idInfo & object & A PCI/PCI-X Component ID structure, as defined in Subsection \ref{subsection:pcicomponentidstructure}.\\
 \hline
@@ -1762,7 +1766,7 @@ globalStatusRegister & uint64 & Value of VT-d global status register.\\
 \hline
 faultStatusRegister & uint64 & Value of VT-d fault status register.\\
 \hline
-faultRecord & object & A VT-d DMAR Fault Record structure, as defined in Subsection .\\
+faultRecord & object & A VT-d DMAR Fault Record structure, as defined in Subsection \ref{subsection:vtddmarfaultrecordstructure}.\\
 \hline
 rootEntry & string & A base64-represented binary dump of the root entry table for the associated requester ID.\\
 \hline
@@ -1841,7 +1845,7 @@ This section describes the JSON format for a single CCIX PER Error Section from 
 \jsontable{table:ccixpererrorsection}
 length & uint64 & The length (in bytes) of the entire structure.\\
 \hline
-validationBits & object & A CCIX PER Validation structure as described in Subsection \ref{subsection:vtddmarfaultrecordstructure}.\\
+validationBits & object & A CCIX PER Validation structure as described in Subsection \ref{subsection:ccixpervalidationstructure}.\\
 \hline
 ccixSourceID & int & If the agent is an HA, SA, or RA, this indicates the CCIX Agent ID of the reporting component. Otherwise, this is the CCIX Device ID.\\
 \hline
@@ -1876,7 +1880,7 @@ agentAddress & object & One of the structures described in Subsection \ref{subse
 \hline
 deviceID & object & A CXL Device ID structure, as defined in Subsection \ref{subsection:cxlprotocoldeviceidstructure}.\\
 \hline
-deviceSerial & object (\textbf{optional}) & The CXL device serial number. Only included if the detecting device is a CXL device (field \texttt{agentType.value} has value 0).\\
+deviceSerial & uint64 (\textbf{optional}) & The CXL device serial number. Only included if the detecting device is a CXL device (field \texttt{agentType.value} has value 0).\\
 \hline
 capabilityStructure & string & A base64-encoded binary dump of the CXL device's PCIe capability structure. This could either be a PCIe 1.1 Capability Structure (36-byte, padded to 60 bytes), or a PCIe 2.0 Capability Structure (60-byte). Only included if the detecting device is a CXL device (field \texttt{agentType.value} has value 0).\\
 \hline
@@ -1898,7 +1902,7 @@ cxlAgentTypeValid & boolean & Whether the "cxlAgentType" field in the CXL Protoc
 \hline
 cxlAgentAddressValid & boolean & Whether the "cxlAgentAddress" field in the CXL Protocol Error section (\ref{section:cxlprotocolerrorsection}) is valid.\\
 \hline
-deviceID & boolean & Whether the "deviceID" field in the CXL Protocol Error section (\ref{section:cxlprotocolerrorsection}) is valid.\\
+deviceIDValid & boolean & Whether the "deviceID" field in the CXL Protocol Error section (\ref{section:cxlprotocolerrorsection}) is valid.\\
 \hline
 deviceSerialValid & boolean & Whether the "deviceSerial" field in the CXL Protocol Error section (\ref{section:cxlprotocolerrorsection}) is valid.\\
 \hline

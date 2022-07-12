@@ -14,7 +14,7 @@
 #define GENERIC_OPERATION_TYPES_VALUES (const char*[]){"Unknown or generic", "Data Read", "Data Write", "Instruction Execution"}
 #define GENERIC_VALIDATION_BITFIELD_NAMES (const char*[]) \
     {"processorTypeValid", "processorISAValid", "processorErrorTypeValid", "operationValid", "flagsValid" \
-    "levelValid", "cpuVersionValid", "cpuBrandInfoValid", "cpuIDValid", "targetAddressValid", "requesterIDValid" \
+    "levelValid", "cpuVersionValid", "cpuBrandInfoValid", "cpuIDValid", "targetAddressValid", "requestorIDValid" \
     "responderIDValid", "instructionIPValid"}
 #define GENERIC_FLAGS_BITFIELD_NAMES (const char*[]) \
     {"restartable", "preciseIP", "overflow", "corrected"}

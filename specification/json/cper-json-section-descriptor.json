@@ -1,0 +1,103 @@
+{
+    "$id": "cper-json-section-descriptor",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["sectionOffset", "sectionLength", "revision", "validationBits", "flags", "sectionType", "severity"],
+    "additionalProperties": false,
+    "properties": {
+        "sectionOffset": {
+            "type": "integer"
+        },
+        "sectionLength": {
+            "type": "integer"
+        },
+        "revision": {
+            "type": "object",
+            "required": ["major", "minor"],
+            "properties": {
+                "major": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "minor": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "validationBits": {
+            "type": "object",
+            "required": ["fruIDValid", "fruStringValid"],
+            "properties": {
+                "fruIDValid": {
+                    "type": "boolean"
+                },
+                "fruStringValid": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "flags": {
+            "type": "object",
+            "required": ["primary", "containmentWarning", "reset", "errorThresholdExceeded", "resourceNotAccessible", "latentError", "propagated", "overflow"],
+            "properties": {
+                "primary": {
+                    "type": "boolean"
+                },
+                "containmentWarning": {
+                    "type": "boolean"
+                },
+                "reset": {
+                    "type": "boolean"
+                },
+                "errorThresholdExceeded": {
+                    "type": "boolean"
+                },
+                "resourceNotAccessible": {
+                    "type": "boolean"
+                },
+                "latentError": {
+                    "type": "boolean"
+                },
+                "propagated": {
+                    "type": "boolean"
+                },
+                "overflow": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "sectionType": {
+            "type": "object",
+            "required": ["data", "name"],
+            "properties": {
+                "data": {
+                    "type": "string",
+                    "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{16}$"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "fruID": {
+            "type": "string"
+        },
+        "severity": {
+            "type": "object",
+            "required": ["code", "name"],
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "fruText": {
+            "type": "string"
+        }
+    }
+}

@@ -1,0 +1,45 @@
+{
+    "$id": "cper-json-error-status",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["errorType", "addressSignal", "controlSignal", "dataSignal", "detectedByResponder", "detectedByRequester", "firstError", "overflowDroppedLogs"],
+    "additionalProperties": false,
+    "properties": {
+        "errorType": {
+            "type": "object",
+            "required": ["name", "value", "description"],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                }
+            }
+        },
+        "addressSignal": {
+            "type": "boolean"
+        },
+        "controlSignal": {
+            "type": "boolean"
+        },
+        "dataSignal": {
+            "type": "boolean"
+        },
+        "detectedByResponder": {
+            "type": "boolean"
+        },
+        "detectedByRequester": {
+            "type": "boolean"
+        },
+        "firstError": {
+            "type": "boolean"
+        },
+        "overflowDroppedLogs": {
+            "type": "boolean"
+        }
+    }
+}

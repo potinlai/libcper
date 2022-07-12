@@ -1,0 +1,97 @@
+{
+    "$id": "cper-json-header",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": ["revision", "sectionCount", "severity", "validationBits", "recordLength", "creatorID", "notificationType", "recordID", "flags", "persistenceInfo"],
+    "additionalProperties": false,
+    "properties": {
+        "revision": {
+            "type": "object",
+            "required": ["major", "minor"],
+            "properties": {
+                "major": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "minor": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "sectionCount": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "severity": {
+            "type": "object",
+            "required": ["name", "code"],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "validationBits": {
+            "type": "object",
+            "required": ["platformIDValid", "timestampValid", "partitionIDValid"],
+            "properties": {
+                "platformIDValid": {
+                    "type": "boolean"
+                },
+                "timestampValid": {
+                    "type": "boolean"
+                },
+                "partitionIDValid": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "recordLength": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "timestamp": {
+            "type": "string"
+        },
+        "timestampIsPrecise": {
+            "type": "boolean"
+        },
+        "platformID": {
+            "type": "string"
+        },
+        "partitionID": {
+            "type": "string"
+        },
+        "creatorID": {
+            "type": "string"
+        },
+        "notificationType": {
+            "type": "object",
+            "required": ["guid", "type"],
+            "properties": {
+                "guid": {
+                    "type": "string",
+                    "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{16}$"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "recordID": {
+            "type": "integer"
+        },
+        "flags": {
+            "type": "object",
+            "$ref": "./common/cper-json-nvp.json"
+        },
+        "persistenceInfo": {
+            "type": "integer"
+        }
+    }
+}
