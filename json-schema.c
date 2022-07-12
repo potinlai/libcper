@@ -122,6 +122,8 @@ int validate_field(const char* field_name, json_object* schema, json_object* obj
         return 0;
     }
 
+    //todo: support oneOf
+
     //Switch and validate each type in turn.
     switch (json_object_get_type(object))
     {
@@ -233,5 +235,17 @@ int validate_object(const char* field_name, json_object* schema, json_object* ob
 //Validates a single array value according to the given specification.
 int validate_array(const char* field_name, json_object* schema, json_object* object, char* error_message)
 {
+    //Iterate all items in the array, and validate according to the "items" schema.
+    json_object* items_schema = json_object_object_get(schema, "items");
+    if (items_schema != NULL && json_object_get_type(items_schema) == json_type_object)
+    {
+        int array_len = json_object_array_length(object);
+        for (int i=0; i<array_len; i++)
+        {
+            if (!validate_field(field_name, items_schema, json_object_array_get_idx(object, i), error_message))
+                return 0;
+        }
+    }
+
     return 1;
 }
