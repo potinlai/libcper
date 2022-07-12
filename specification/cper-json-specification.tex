@@ -1962,7 +1962,45 @@ This section describes the JSON format for a single CXL Component Error Section 
     \item CXL MLD Port Error (\texttt{\{ 0x8dc44363, 0x0c96, 0x4710, \{ 0xb7, 0xbf, 0x04, 0xbb, 0x99, 0x53, 0x4c, 0x3f \}\}})\\
 \end{itemize}
 \jsontable{table:cxlcomponenterrorsection}
+validationBits & object & A CXL Component Validation structure as described in Subsection \ref{subsection:cxlcomponentvalidationstructure}.\\
+\hline
+deviceID & object & A CXL Component Device ID structure as described in Subsection \ref{subsection:cxlcomponentdeviceidstructure}.\\
+\hline
+deviceSerial & uint64 & The serial of the CXL component.\\
+\hline
+cxlComponentEventLog.data & string (\textbf{optional}) & If a CXL component event log is attached (\texttt{validationBits.cxlComponentEventLogValid} is true), this is a base64-represented binary dump of the CXL Component Event Log as described within CXL Specification Section 8.2.9.1.\\
+\jsontableend{CXL Component Error structure field table.}
 
-\jsontableend{CXL Protocol Error structure field table.}
+% CXL Component Validation structure.
+\subsection{CXL Component Validation Structure}
+\label{subsection:cxlcomponentvalidationstructure}
+This structure describes which fields are valid in a CXL Component Error section (\ref{section:cxlcomponenterrorsection}) using boolean fields.
+\jsontable{table:cxlcomponentvalidationstructure}
+deviceIDValid & boolean & Whether the "deviceID" field of the CXL Component Error section (\ref{section:cxlcomponenterrorsection}) is valid.\\
+\hline
+deviceSerialValid & boolean & Whether the "deviceSerial" field of the CXL Component Error section (\ref{section:cxlcomponenterrorsection}) is valid.\\
+\hline
+cxlComponentEventLogValid & boolean & Whether the "cxlComponentEventLog" field of the CXL Component Error section (\ref{section:cxlcomponenterrorsection}) is valid.\\
+\jsontableend{CXL Component validation structure field table.}
+
+% CXL Component Device ID structure.
+\subsection{CXL Component Device ID Structure}
+\label{subsection:cxlcomponentdeviceidstructure}
+This structure describes the ID of a CXL component, for use in a CXL Component Error section (\ref{section:cxlcomponenterrorsection}).
+\jsontable{table:cxlcomponentdeviceidstructure}
+vendorID & uint64 & The vendor ID of the CXL component.\\
+\hline
+deviceID & uint64 & The device ID of the CXL component.\\
+\hline
+functionNumber & uint64 & The function number of the CXL component.\\
+\hline
+deviceNumber & uint64 & The device number of the CXL component.\\
+\hline
+busNumber & uint64 & The bus of the CXL component.\\
+\hline
+segmentNumber & uint64 & The segment of the CXL component.\\
+\hline
+slotNumber & uint64 & The slot number of the CXL component.\\
+\jsontableend{CXL Component Device ID structure field table.}
 
 \end{document}
