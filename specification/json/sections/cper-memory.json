@@ -67,7 +67,7 @@
         },
         "errorStatus": {
             "type": "object",
-            "$ref": "../common/cper-json-error-status.json"
+            "$ref": "./common/cper-json-error-status.json"
         },
         "bank": {
             "type": "object",
@@ -97,7 +97,7 @@
         },
         "memoryErrorType": {
             "type": "object",
-            "$ref": "../common/cper-json-nvp.json"
+            "$ref": "./common/cper-json-nvp.json"
         },
         "extended": {
             "type": "object",

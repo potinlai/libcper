@@ -52,19 +52,19 @@
         },
         "processorType": {
             "type": "object",
-            "$ref": "../common/cper-json-nvp.json"
+            "$ref": "./common/cper-json-nvp.json"
         },
         "processorISA": {
             "type": "object",
-            "$ref": "../common/cper-json-nvp.json"
+            "$ref": "./common/cper-json-nvp.json"
         },
         "errorType": {
             "type": "object",
-            "$ref": "../common/cper-json-nvp.json"
+            "$ref": "./common/cper-json-nvp.json"
         },
         "operation": {
             "type": "object",
-            "$ref": "../common/cper-json-nvp.json"
+            "$ref": "./common/cper-json-nvp.json"
         },
         "flags": {
             "type": "object",

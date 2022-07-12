@@ -40,11 +40,11 @@
         },
         "errorStatus": {
             "type": "object",
-            "$ref": "../common/cper-json-error-status.json"
+            "$ref": "./common/cper-json-error-status.json"
         },
         "errorType": {
             "type": "object",
-            "$ref": "../common/cper-json-nvp.json"
+            "$ref": "./common/cper-json-nvp.json"
         },
         "busID": {
             "type": "object",

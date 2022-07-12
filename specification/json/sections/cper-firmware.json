@@ -7,7 +7,7 @@
     "properties": {
         "errorRecordType": {
             "type": "object",
-            "$ref": "../common/cper-json-nvp.json"
+            "$ref": "./common/cper-json-nvp.json"
         },
         "revision": {
             "type": "integer"

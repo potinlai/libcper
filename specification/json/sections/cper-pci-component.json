@@ -28,7 +28,7 @@
         },
         "errorStatus": {
             "type": "object",
-            "$ref": "../common/cper-json-error-status.json"
+            "$ref": "./common/cper-json-error-status.json"
         },
         "idInfo": {
             "type": "object",

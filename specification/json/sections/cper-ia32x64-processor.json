@@ -118,11 +118,11 @@
                                     },
                                     "transactionType": {
                                         "type": "object",
-                                        "$ref": "../common/cper-json-nvp.json"
+                                        "$ref": "./common/cper-json-nvp.json"
                                     },
                                     "operation": {
                                         "type": "object",
-                                        "$ref": "../common/cper-json-nvp.json"
+                                        "$ref": "./common/cper-json-nvp.json"
                                     },
                                     "level": {
                                         "type": "integer",
@@ -188,11 +188,11 @@
                                     },
                                     "transactionType": {
                                         "type": "object",
-                                        "$ref": "../common/cper-json-nvp.json"
+                                        "$ref": "./common/cper-json-nvp.json"
                                     },
                                     "operation": {
                                         "type": "object",
-                                        "$ref": "../common/cper-json-nvp.json"
+                                        "$ref": "./common/cper-json-nvp.json"
                                     },
                                     "level": {
                                         "type": "integer",
@@ -215,11 +215,11 @@
                                     },
                                     "participationType": {
                                         "type": "object",
-                                        "$ref": "../common/cper-json-nvp.json"
+                                        "$ref": "./common/cper-json-nvp.json"
                                     },
                                     "addressSpace": {
                                         "type": "object",
-                                        "$ref": "../common/cper-json-nvp.json"
+                                        "$ref": "./common/cper-json-nvp.json"
                                     },
                                     "timedOut": {
                                         "type": "boolean"
@@ -257,7 +257,7 @@
                                     },
                                     "errorType": {
                                         "type": "object",
-                                        "$ref": "../common/cper-json-nvp.json"
+                                        "$ref": "./common/cper-json-nvp.json"
                                     },
                                     "processorContextCorrupt": {
                                         "type": "boolean"
@@ -302,7 +302,7 @@
                 "properties": {
                     "registerContextType": {
                         "type": "object",
-                        "$ref": "../common/cper-json-nvp.json"
+                        "$ref": "./common/cper-json-nvp.json"
                     },
                     "registerArraySize": {
                         "type": "integer"

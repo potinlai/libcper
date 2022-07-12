@@ -28,15 +28,15 @@
         },
         "accessType": {
             "type": "object",
-            "$ref": "../common/cper-json-nvp.json"
+            "$ref": "./common/cper-json-nvp.json"
         },
         "addressType": {
             "type": "object",
-            "$ref": "../common/cper-json-nvp.json"
+            "$ref": "./common/cper-json-nvp.json"
         },
         "architectureType": {
             "type": "object",
-            "$ref": "../common/cper-json-nvp.json"
+            "$ref": "./common/cper-json-nvp.json"
         },
         "deviceAddress": {
             "type" : "integer"

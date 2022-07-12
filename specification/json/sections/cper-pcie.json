@@ -37,7 +37,7 @@
         },
         "portType": {
             "type": "object",
-            "$ref": "../common/cper-json-nvp.json"
+            "$ref": "./common/cper-json-nvp.json"
         },
         "version": {
             "type": "object",
