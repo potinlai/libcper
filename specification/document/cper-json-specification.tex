@@ -2007,4 +2007,12 @@ segmentNumber & uint64 & The segment of the CXL component.\\
 slotNumber & uint64 & The slot number of the CXL component.\\
 \jsontableend{CXL Component Device ID structure field table.}
 
+% Undefined error section.
+\section{Undefined Error Section}
+\label{section:undefinederrorsection}
+This section describes the JSON format for a single undefined CPER section. This structure is used for all CPER sections that have \texttt{errorType} GUIDs which are not defined in UEFI Appendix N.
+\jsontable{table:ccixpererrorsection}
+data & string & A base64-encoded binary dump of the undefined CPER section.\\
+\jsontableend{Undefined Error structure field table.}
+
 \end{document}

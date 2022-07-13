@@ -106,6 +106,13 @@ json_object* integer_to_readable_pair_with_desc(int value, int len, int keys[], 
     return result;
 }
 
+//Returns a single UINT64 value from the given readable pair object.
+//Assumes the integer value is held in the "value" field.
+UINT64 readable_pair_to_integer(json_object* pair)
+{
+    return json_object_get_uint64(json_object_object_get(pair, "value"));
+}
+
 //Converts the given 64 bit bitfield to IR, assuming bit 0 starts on the left.
 json_object* bitfield_to_ir(UINT64 bitfield, int num_fields, const char* names[])
 {
@@ -113,6 +120,19 @@ json_object* bitfield_to_ir(UINT64 bitfield, int num_fields, const char* names[]
     for (int i=0; i<num_fields; i++)
     {
         json_object_object_add(result, names[i], json_object_new_boolean((bitfield >> i) & 0b1));
+    }
+
+    return result;
+}
+
+//Converts the given IR bitfield into a standard UINT64 bitfield, with fields beginning from bit 0.
+UINT64 ir_to_bitfield(json_object* ir, int num_fields, const char* names[])
+{
+    UINT64 result = 0x0;
+    for (int i=0; i<num_fields; i++)
+    {
+        if (json_object_get_boolean(json_object_object_get(ir, names[i])))
+            result |= (0x1 << i);
     }
 
     return result;
@@ -142,6 +162,33 @@ const char* severity_to_string(UINT8 severity)
     return severity < 4 ? CPER_SEVERITY_TYPES[severity] : "Unknown";
 }
 
+//Converts a single EFI timestamp to string, at the given output.
+//Output must be at least TIMESTAMP_LENGTH bytes long.
+void timestamp_to_string(char* out, EFI_ERROR_TIME_STAMP* timestamp)
+{
+    sprintf(out, "%02d%02d-%02d-%02dT%02d:%02d:%02d.000", 
+            timestamp->Century,
+            timestamp->Year,
+            timestamp->Month,
+            timestamp->Day,
+            timestamp->Hours,
+            timestamp->Minutes,
+            timestamp->Seconds);
+}
+
+//Converts a single timestamp string to an EFI timestamp.
+void string_to_timestamp(EFI_ERROR_TIME_STAMP* out, const char* timestamp)
+{
+    sscanf(timestamp, "%02d%02d-%02d-%02dT%02d:%02d:%02d.000", 
+            &out->Century,
+            &out->Year,
+            &out->Month,
+            &out->Day,
+            &out->Hours,
+            &out->Minutes,
+            &out->Seconds);
+}
+
 //Helper function to convert an EDK EFI GUID into a string for intermediate use.
 void guid_to_string(char* out, EFI_GUID* guid)
 {
@@ -157,6 +204,23 @@ void guid_to_string(char* out, EFI_GUID* guid)
         guid->Data4[5],
         guid->Data4[6],
         guid->Data4[7]);
+}
+
+//Helper function to convert a string into an EDK EFI GUID.
+void string_to_guid(EFI_GUID* out, const char* guid)
+{
+    sscanf(guid, "%08x-%04x-%04x-%02x%02x%02x%02x%02x%02x%02x%02x", 
+        &out->Data1, 
+        &out->Data2, 
+        &out->Data3,
+        out->Data4,
+        out->Data4 + 1,
+        out->Data4 + 2,
+        out->Data4 + 3,
+        out->Data4 + 4,
+        out->Data4 + 5,
+        out->Data4 + 6,
+        out->Data4 + 7);
 }
 
 //Returns one if two EFI GUIDs are equal, zero otherwise.
