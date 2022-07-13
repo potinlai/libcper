@@ -10,9 +10,13 @@
 #include <unistd.h>
 #include <libgen.h>
 #include <limits.h>
+#include <stdarg.h>
 #include "json.h"
 #include "json-schema.h"
 #include "edk/BaseTypes.h"
+
+//Field definitions.
+int json_validator_debug = 0;
 
 //Private pre-definitions.
 int validate_field(const char* name, json_object* schema, json_object* object, char* error_message);
@@ -20,6 +24,9 @@ int validate_integer(const char* field_name, json_object* schema, json_object* o
 int validate_string(const char* field_name, json_object* schema, json_object* object, char* error_message);
 int validate_object(const char* field_name, json_object* schema, json_object* object, char* error_message);
 int validate_array(const char* field_name, json_object* schema, json_object* object, char* error_message);
+void log_validator_error(char* error_message, const char* format, ...);
+void log_validator_debug(const char* format, ...);
+void log_validator_msg(const char* format, va_list args);
 
 //Validates a single JSON object against a provided schema file, returning 1 on success and 0 on failure to validate.
 //Error message space must be allocated prior to call.
@@ -29,7 +36,7 @@ int validate_schema_from_file(const char* schema_file, json_object* object, char
     json_object* schema_ir = json_object_from_file(schema_file);
     if (schema_ir == NULL)
     {
-        sprintf(error_message, "Failed to load schema from file '%s'.", schema_file);
+        log_validator_error(error_message, "Failed to load schema from file '%s'.", schema_file);
         return 0;
     }
 
@@ -55,7 +62,7 @@ int validate_schema(json_object* schema, char* schema_directory, json_object* ob
     json_object* schema_ver = json_object_object_get(schema, "$schema");
     if (schema_ver == NULL || strcmp(json_object_get_string(schema_ver), JSON_SCHEMA_VERSION))
     {
-        sprintf(error_message, "Provided schema is not of the same version that is referenced by this validator, or is not a schema.");
+        log_validator_error(error_message, "Provided schema is not of the same version that is referenced by this validator, or is not a schema.");
         return 0;
     }
 
@@ -63,12 +70,12 @@ int validate_schema(json_object* schema, char* schema_directory, json_object* ob
     char* original_cwd = malloc(PATH_MAX);
     if (getcwd(original_cwd, PATH_MAX) == NULL)
     {
-        sprintf(error_message, "Failed fetching the current directory.");
+        log_validator_error(error_message, "Failed fetching the current directory.");
         return 0;
     }
     if (chdir(schema_directory))
     {
-        sprintf(error_message, "Failed to chdir into schema directory.");
+        log_validator_error(error_message, "Failed to chdir into schema directory.");
         return 0;
     }
 
@@ -83,28 +90,35 @@ int validate_schema(json_object* schema, char* schema_directory, json_object* ob
 }
 
 //Validates a single JSON field given a schema/object.
+//Returns -1 on fatal/error failure, 0 on validation failure, and 1 on validation.
 int validate_field(const char* field_name, json_object* schema, json_object* object, char* error_message)
 {
+    log_validator_debug("Validating field '%s'...", field_name);
+
     //If there is a "$ref" field, attempt to load the referenced schema.
     json_object* ref_schema = json_object_object_get(schema, "$ref");
     if (ref_schema != NULL && json_object_get_type(ref_schema) == json_type_string)
     {
+        log_validator_debug("$ref schema detected for field '%s'.", field_name);
+
         //Attempt to load. If loading fails, report error.
         const char* ref_path = json_object_get_string(ref_schema);
         schema = json_object_from_file(ref_path);
         if (schema == NULL)
         {
-            sprintf(error_message, "Failed to open referenced schema file '%s'.", ref_path);
-            return 0;
+            log_validator_error(error_message, "Failed to open referenced schema file '%s'.", ref_path);
+            return -1;
         }
+
+        log_validator_debug("loaded schema path '%s' for field '%s'.", ref_path, field_name);
     }
 
     //Get the schema field type.
     json_object* desired_field_type = json_object_object_get(schema, "type");
     if (desired_field_type == NULL || !json_object_is_type(desired_field_type, json_type_string))
     {
-        sprintf(error_message, "Desired field type not provided within schema/is not a string for field '%s' (schema violation).", field_name);
-        return 0;
+        log_validator_error(error_message, "Desired field type not provided within schema/is not a string for field '%s' (schema violation).", field_name);
+        return -1;
     }
 
     //Check the field types are actually equal.
@@ -118,11 +132,44 @@ int validate_field(const char* field_name, json_object* schema, json_object* obj
         || (!strcmp(desired_field_type_str, "double") && json_object_is_type(object, json_type_double))
     ))
     {
-        sprintf(error_message, "Field type match failed for field '%s'.", field_name);
+        log_validator_error(error_message, "Field type match failed for field '%s'.", field_name);
         return 0;
     }
 
-    //todo: support oneOf
+    //If the schema contains a "oneOf" array, we need to validate the field against each of the
+    //possible options in turn.
+    json_object* one_of = json_object_object_get(schema, "oneOf");
+    if (one_of != NULL && json_object_get_type(one_of) == json_type_array)
+    {
+        log_validator_debug("oneOf options detected for field '%s'.", field_name);
+
+        int len = json_object_array_length(one_of);
+        int validated = 0;
+        for (int i=0; i<len; i++)
+        {
+            //If the "oneOf" member isn't an object, warn on schema violation.
+            json_object* one_of_option = json_object_array_get_idx(one_of, i);
+            if (one_of_option == NULL || json_object_get_type(one_of_option) != json_type_object)
+            {
+                log_validator_debug("Schema Warning: 'oneOf' member for field '%s' is not an object, schema violation.", field_name);
+                continue;
+            }
+
+            //Validate field with schema.
+            validated = validate_field(field_name, one_of_option, object, error_message);
+            if (validated == -1)
+                return -1;
+            if (validated)
+                break;
+        }
+
+        //Return if failed all checks.
+        if (!validated) 
+        {
+            log_validator_error(error_message, "No schema object structures matched provided object for field '%s'.", field_name);
+            return 0;
+        }
+    }
 
     //Switch and validate each type in turn.
     switch (json_object_get_type(object))
@@ -134,10 +181,11 @@ int validate_field(const char* field_name, json_object* schema, json_object* obj
         case json_type_object:
             return validate_object(field_name, schema, object, error_message);
         case json_type_array:
-            return validate_object(field_name, schema, object, error_message);
+            return validate_array(field_name, schema, object, error_message);
 
         //We don't perform extra validation on this type.
         default:
+            log_validator_debug("validation passed for '%s' (no extra validation).", field_name);
             return 1;
     }
 }
@@ -153,7 +201,7 @@ int validate_integer(const char* field_name, json_object* schema, json_object* o
         int min_value_int = json_object_get_int(min_value);
         if (json_object_get_uint64(object) < min_value_int)
         {
-            sprintf(error_message, "Failed to validate integer field '%s'. Value was below minimum of %d.", field_name, min_value_int);
+            log_validator_error(error_message, "Failed to validate integer field '%s'. Value was below minimum of %d.", field_name, min_value_int);
             return 0;
         }
     }
@@ -165,7 +213,7 @@ int validate_integer(const char* field_name, json_object* schema, json_object* o
         int max_value_int = json_object_get_int(max_value);
         if (json_object_get_uint64(object) > max_value_int)
         {
-            sprintf(error_message, "Failed to validate integer field '%s'. Value was above maximum of %d.", field_name, max_value_int);
+            log_validator_error(error_message, "Failed to validate integer field '%s'. Value was above maximum of %d.", field_name, max_value_int);
             return 0;
         }
     }
@@ -187,6 +235,8 @@ int validate_object(const char* field_name, json_object* schema, json_object* ob
     json_object* required_fields = json_object_object_get(schema, "required");
     if (required_fields != NULL && json_object_get_type(required_fields) == json_type_array)
     {
+        log_validator_debug("Required fields found for '%s', matching...", field_name);
+
         int len = json_object_array_length(required_fields);
         for (int i=0; i<len; i++)
         {
@@ -194,7 +244,7 @@ int validate_object(const char* field_name, json_object* schema, json_object* ob
             json_object* required_field = json_object_array_get_idx(required_fields, i);
             if (json_object_get_type(required_field) != json_type_string)
             {
-                sprintf(error_message, "Required field for object '%s' is not a string (schema violation).", field_name);
+                log_validator_error(error_message, "Required field for object '%s' is not a string (schema violation).", field_name);
                 return 0;
             }
 
@@ -202,7 +252,7 @@ int validate_object(const char* field_name, json_object* schema, json_object* ob
             const char* required_field_str = json_object_get_string(required_field);
             if (json_object_object_get(object, required_field_str) == NULL)
             {
-                sprintf(error_message, "Required field '%s' was not present in object '%s'.", required_field_str, field_name);
+                log_validator_error(error_message, "Required field '%s' was not present in object '%s'.", required_field_str, field_name);
                 return 0;
             }
         }
@@ -248,4 +298,52 @@ int validate_array(const char* field_name, json_object* schema, json_object* obj
     }
 
     return 1;
+}
+
+//Enables/disables debugging globally for the JSON validator.
+void validate_schema_debug_enable() { json_validator_debug = 1; }
+void validate_schema_debug_disable() { json_validator_debug = 0; }
+
+//Logs an error message to the given character and (optionally) provides debug output.
+void log_validator_error(char* error_message, const char* format, ...)
+{
+    va_list args;
+
+    //Log error to error out.
+    va_start(args, format);
+    vsnprintf(error_message, JSON_ERROR_MSG_MAX_LEN, format, args);
+    va_end(args);
+    
+    //Debug message if necessary.
+    va_start(args, format);
+    log_validator_msg(format, args);
+    va_end(args);
+}
+
+//Logs a debug message to the given character and (optionally) provides debug output.
+void log_validator_debug(const char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    log_validator_msg(format, args);
+    va_end(args);
+}
+
+//Logs a single validator debug/error message.
+void log_validator_msg(const char* format, va_list args)
+{
+    //Print debug output if debug is on.
+    if (json_validator_debug)
+    {
+        //Make new format string for error.
+        const char* header = "json_validator: ";
+        char* new_format = malloc(strlen(header) + strlen(format) + 2);
+        strcpy(new_format, header);
+        strcat(new_format, format);
+        strcat(new_format, "\n");
+
+        //Print & free format.
+        vfprintf(stdout, new_format, args);
+        free(new_format);
+    }
 }

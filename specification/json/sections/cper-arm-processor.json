@@ -96,7 +96,16 @@
                     },
                     "multipleError": {
                         "type": "object",
-                        "$ref": "./common/cper-json-nvp.json"
+                        "required": ["type", "value"],
+                        "additionalProperties": false,
+                        "properties": {
+                            "type": {
+                                "type": "string"
+                            },
+                            "value": {
+                                "type": "integer"
+                            }
+                        }
                     },
                     "flags": {
                         "type": "object",

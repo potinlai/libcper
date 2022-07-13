@@ -22,7 +22,8 @@ int main(int argc, char* argv[]) {
     if (argc >= 3)
     {
         printf("Validating output with specification %s...\n", argv[2]);
-        char* error_message = malloc(300);
+        validate_schema_debug_enable();
+        char* error_message = malloc(JSON_ERROR_MSG_MAX_LEN);
         if (!validate_schema_from_file(argv[2], ir, error_message))
         {
             printf("Validation failed: %s\n", error_message);
