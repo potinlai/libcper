@@ -6,6 +6,7 @@
  **/
 
 #include <stdio.h>
+#include <string.h>
 #include "json.h"
 #include "../edk/Cper.h"
 #include "../cper-utils.h"
@@ -74,4 +75,44 @@ json_object* cper_section_generic_to_ir(void* section, EFI_ERROR_SECTION_DESCRIP
     json_object_object_add(section_ir, "instructionIP", json_object_new_uint64(section_generic->InstructionIP));
 
     return section_ir;
+}
+
+//Converts the given CPER-JSON processor-generic error section into CPER binary,
+//outputting to the provided stream.
+void ir_section_generic_to_cper(json_object* section, FILE* out)
+{
+    EFI_PROCESSOR_GENERIC_ERROR_DATA* section_cper = 
+        (EFI_PROCESSOR_GENERIC_ERROR_DATA*)calloc(1, sizeof(EFI_PROCESSOR_GENERIC_ERROR_DATA));
+
+    //Validation bits.
+    section_cper->ValidFields = ir_to_bitfield(json_object_object_get(section, "validationBits"), 
+        11, GENERIC_VALIDATION_BITFIELD_NAMES);
+        
+    //Various name/value pair fields.
+    section_cper->Type = (UINT8)readable_pair_to_integer(json_object_object_get(section, "processorType"));
+    section_cper->Isa = (UINT8)readable_pair_to_integer(json_object_object_get(section, "processorISA"));
+    section_cper->ErrorType = (UINT8)readable_pair_to_integer(json_object_object_get(section, "errorType"));
+    section_cper->Operation = (UINT8)readable_pair_to_integer(json_object_object_get(section, "operation"));
+
+    //Flags.
+    section_cper->Flags = (UINT8)ir_to_bitfield(json_object_object_get(section, "flags"), 4, GENERIC_FLAGS_BITFIELD_NAMES);
+
+    //Various numeric/string fields.
+    section_cper->Level = (UINT8)json_object_get_int(json_object_object_get(section, "level"));
+    section_cper->VersionInfo = json_object_get_uint64(json_object_object_get(section, "cpuVersionInfo"));
+    section_cper->ApicId = json_object_get_uint64(json_object_object_get(section, "processorID"));
+    section_cper->TargetAddr = json_object_get_uint64(json_object_object_get(section, "targetAddress"));
+    section_cper->RequestorId = json_object_get_uint64(json_object_object_get(section, "requestorID"));
+    section_cper->ResponderId = json_object_get_uint64(json_object_object_get(section, "responderID"));
+    section_cper->InstructionIP = json_object_get_uint64(json_object_object_get(section, "instructionIP"));
+
+    //CPU brand string.
+    const char* brand_string = json_object_get_string(json_object_object_get(section, "cpuBrandString"));
+    if (brand_string != NULL)
+        strncpy(section_cper->BrandString, brand_string, 127);
+
+    //Write & flush out to file, free memory.
+    fwrite(section_cper, sizeof(EFI_PROCESSOR_GENERIC_ERROR_DATA), 1, out);
+    fflush(out);
+    free(section_cper);   
 }

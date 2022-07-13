@@ -207,9 +207,7 @@ json_object* cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR* section
     json_object_object_add(section_descriptor_ir, "revision", revision_to_ir(section_descriptor->Revision));
 
     //Validation bits.
-    json_object* validation_bits = json_object_new_object();
-    json_object_object_add(validation_bits, "fruIDValid", json_object_new_boolean(section_descriptor->SecValidMask & 0b1));
-    json_object_object_add(validation_bits, "fruStringValid", json_object_new_boolean((section_descriptor->SecValidMask & 0b10) >> 1));
+    json_object* validation_bits = bitfield_to_ir(section_descriptor->SecValidMask, 2, CPER_SECTION_DESCRIPTOR_VALID_BITFIELD_NAMES);
     json_object_object_add(section_descriptor_ir, "validationBits", validation_bits);
 
     //Flag bits.

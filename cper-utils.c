@@ -179,7 +179,11 @@ void timestamp_to_string(char* out, EFI_ERROR_TIME_STAMP* timestamp)
 //Converts a single timestamp string to an EFI timestamp.
 void string_to_timestamp(EFI_ERROR_TIME_STAMP* out, const char* timestamp)
 {
-    sscanf(timestamp, "%02d%02d-%02d-%02dT%02d:%02d:%02d.000", 
+    //Ignore invalid timestamps.
+    if (timestamp == NULL)
+        return;
+
+    sscanf(timestamp, "%02hhd%02hhd-%02hhd-%02hhdT%02hhd:%02hhd:%02hhd.000", 
             &out->Century,
             &out->Year,
             &out->Month,
@@ -209,7 +213,11 @@ void guid_to_string(char* out, EFI_GUID* guid)
 //Helper function to convert a string into an EDK EFI GUID.
 void string_to_guid(EFI_GUID* out, const char* guid)
 {
-    sscanf(guid, "%08x-%04x-%04x-%02x%02x%02x%02x%02x%02x%02x%02x", 
+    //Ignore invalid GUIDs.
+    if (guid == NULL)
+        return;
+
+    sscanf(guid, "%08x-%04hx-%04hx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx", 
         &out->Data1, 
         &out->Data2, 
         &out->Data3,

@@ -20,5 +20,6 @@
     {"restartable", "preciseIP", "overflow", "corrected"}
 
 json_object* cper_section_generic_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor);
+void ir_section_generic_to_cper(json_object* section, FILE* out);
 
 #endif
