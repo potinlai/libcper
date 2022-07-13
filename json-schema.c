@@ -258,9 +258,11 @@ int validate_object(const char* field_name, json_object* schema, json_object* ob
         }
     }
 
-    //If the boolean field "additionalProperties" exists and is set to false, ensure there are no
-    //extra properties apart from those required in the object.
-    //... todo
+    //Get additional properties value in advance.
+    json_object* additional_properties = json_object_object_get(schema, "additionalProperties");
+    int additional_properties_allowed = 0;
+    if (additional_properties != NULL && json_object_get_type(additional_properties) == json_type_boolean)
+        additional_properties_allowed = json_object_get_boolean(additional_properties);
 
     //Run through the "properties" object and validate each of those in turn.
     json_object* properties = json_object_object_get(schema, "properties");
@@ -276,6 +278,21 @@ int validate_object(const char* field_name, json_object* schema, json_object* ob
             //Validate against the schema.
             if (!validate_field(key, value, object_prop, error_message))
                 return 0;
+        }
+
+        //If additional properties are banned, validate that no additional properties exist.
+        if (!additional_properties_allowed)
+        {
+            json_object_object_foreach(object, key, value) {
+
+                //If the given property name does not exist on the schema object, fail validation.
+                json_object* schema_prop = json_object_object_get(properties, key);
+                if (schema_prop == NULL)
+                {
+                    log_validator_error(error_message, "Invalid additional property '%s' detected on field '%s'.", key, field_name);
+                    return 0;
+                }
+            }
         }
     }
 
