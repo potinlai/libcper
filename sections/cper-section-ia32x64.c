@@ -543,11 +543,88 @@ void ir_ia32x64_context_info_to_cper(json_object* context_info, FILE* out)
 //Converts a single CPER-JSON IA32 register array into CPER binary, outputting to the given stream.
 void ir_ia32x64_ia32_registers_to_cper(json_object* registers, FILE* out)
 {
-    //...
+    EFI_CONTEXT_IA32_REGISTER_STATE register_state;
+    register_state.Eax = (UINT32)json_object_get_uint64(json_object_object_get(registers, "eax"));
+    register_state.Ebx = (UINT32)json_object_get_uint64(json_object_object_get(registers, "ebx"));
+    register_state.Ecx = (UINT32)json_object_get_uint64(json_object_object_get(registers, "ecx"));
+    register_state.Edx = (UINT32)json_object_get_uint64(json_object_object_get(registers, "edx"));
+    register_state.Esi = (UINT32)json_object_get_uint64(json_object_object_get(registers, "esi"));
+    register_state.Edi = (UINT32)json_object_get_uint64(json_object_object_get(registers, "edi"));
+    register_state.Ebp = (UINT32)json_object_get_uint64(json_object_object_get(registers, "ebp"));
+    register_state.Esp = (UINT32)json_object_get_uint64(json_object_object_get(registers, "esp"));
+    register_state.Cs = (UINT32)json_object_get_uint64(json_object_object_get(registers, "cs"));
+    register_state.Ds = (UINT32)json_object_get_uint64(json_object_object_get(registers, "ds"));
+    register_state.Ss = (UINT32)json_object_get_uint64(json_object_object_get(registers, "ss"));
+    register_state.Es = (UINT32)json_object_get_uint64(json_object_object_get(registers, "es"));
+    register_state.Fs = (UINT32)json_object_get_uint64(json_object_object_get(registers, "fs"));
+    register_state.Gs = (UINT32)json_object_get_uint64(json_object_object_get(registers, "gs"));
+    register_state.Eflags = (UINT32)json_object_get_uint64(json_object_object_get(registers, "eflags"));
+    register_state.Eip = (UINT32)json_object_get_uint64(json_object_object_get(registers, "eip"));
+    register_state.Cr0 = (UINT32)json_object_get_uint64(json_object_object_get(registers, "cr0"));
+    register_state.Cr1 = (UINT32)json_object_get_uint64(json_object_object_get(registers, "cr1"));
+    register_state.Cr2 = (UINT32)json_object_get_uint64(json_object_object_get(registers, "cr2"));
+    register_state.Cr3 = (UINT32)json_object_get_uint64(json_object_object_get(registers, "cr3"));
+    register_state.Cr4 = (UINT32)json_object_get_uint64(json_object_object_get(registers, "cr4"));
+
+    //64-bit registers are split into two 32-bit parts.
+    UINT64 gdtr = json_object_get_uint64(json_object_object_get(registers, "gdtr"));
+    register_state.Gdtr[0] = gdtr >> 32;
+    register_state.Gdtr[1] = gdtr & 0xFFFFFFFF;
+    UINT64 idtr = json_object_get_uint64(json_object_object_get(registers, "idtr"));
+    register_state.Idtr[0] = idtr >> 32;
+    register_state.Idtr[1] = idtr & 0xFFFFFFFF;
+
+    //16-bit registers.
+    register_state.Ldtr = (UINT16)json_object_get_uint64(json_object_object_get(registers, "ldtr"));
+    register_state.Tr = (UINT16)json_object_get_uint64(json_object_object_get(registers, "tr"));
+
+    //Write out to stream.
+    fwrite(&register_state, sizeof(EFI_CONTEXT_IA32_REGISTER_STATE), 1, out);
+    fflush(out);
 }
 
 //Converts a single CPER-JSON x64 register array into CPER binary, outputting to the given stream.
 void ir_ia32x64_x64_registers_to_cper(json_object* registers, FILE* out)
 {
-    //...
+    EFI_CONTEXT_X64_REGISTER_STATE register_state;
+    register_state.Rax = json_object_get_uint64(json_object_object_get(registers, "rax"));
+    register_state.Rbx = json_object_get_uint64(json_object_object_get(registers, "rbx"));
+    register_state.Rcx = json_object_get_uint64(json_object_object_get(registers, "rcx"));
+    register_state.Rdx = json_object_get_uint64(json_object_object_get(registers, "rdx"));
+    register_state.Rsi = json_object_get_uint64(json_object_object_get(registers, "rsi"));
+    register_state.Rdi = json_object_get_uint64(json_object_object_get(registers, "rdi"));
+    register_state.Rbp = json_object_get_uint64(json_object_object_get(registers, "rbp"));
+    register_state.Rsp = json_object_get_uint64(json_object_object_get(registers, "rsp"));
+    register_state.R8 = json_object_get_uint64(json_object_object_get(registers, "r8"));
+    register_state.R9 = json_object_get_uint64(json_object_object_get(registers, "r9"));
+    register_state.R10 = json_object_get_uint64(json_object_object_get(registers, "r10"));
+    register_state.R11 = json_object_get_uint64(json_object_object_get(registers, "r11"));
+    register_state.R12 = json_object_get_uint64(json_object_object_get(registers, "r12"));
+    register_state.R13 = json_object_get_uint64(json_object_object_get(registers, "r13"));
+    register_state.R14 = json_object_get_uint64(json_object_object_get(registers, "r14"));
+    register_state.R15 = json_object_get_uint64(json_object_object_get(registers, "r15"));
+    register_state.Cs = json_object_get_uint64(json_object_object_get(registers, "cs"));
+    register_state.Ds = json_object_get_uint64(json_object_object_get(registers, "ds"));
+    register_state.Ss = json_object_get_uint64(json_object_object_get(registers, "ss"));
+    register_state.Es = json_object_get_uint64(json_object_object_get(registers, "es"));
+    register_state.Fs = json_object_get_uint64(json_object_object_get(registers, "fs"));
+    register_state.Gs = json_object_get_uint64(json_object_object_get(registers, "gs"));
+    register_state.Rflags = json_object_get_uint64(json_object_object_get(registers, "rflags"));
+    register_state.Rip = json_object_get_uint64(json_object_object_get(registers, "eip"));
+    register_state.Cr0 = json_object_get_uint64(json_object_object_get(registers, "cr0"));
+    register_state.Cr1 = json_object_get_uint64(json_object_object_get(registers, "cr1"));
+    register_state.Cr2 = json_object_get_uint64(json_object_object_get(registers, "cr2"));
+    register_state.Cr3 = json_object_get_uint64(json_object_object_get(registers, "cr3"));
+    register_state.Cr4 = json_object_get_uint64(json_object_object_get(registers, "cr4"));
+    register_state.Cr8 = json_object_get_uint64(json_object_object_get(registers, "cr8"));
+    register_state.Gdtr[0] = json_object_get_uint64(json_object_object_get(registers, "gdtr_0"));
+    register_state.Gdtr[1] = json_object_get_uint64(json_object_object_get(registers, "gdtr_1"));
+    register_state.Idtr[0] = json_object_get_uint64(json_object_object_get(registers, "idtr_0"));
+    register_state.Idtr[1] = json_object_get_uint64(json_object_object_get(registers, "idtr_1"));
+    register_state.Ldtr = (UINT16)json_object_get_uint64(json_object_object_get(registers, "ldtr"));
+    register_state.Tr = (UINT16)json_object_get_uint64(json_object_object_get(registers, "tr"));
+
+    //Write out to stream.
+    fwrite(&register_state, sizeof(EFI_CONTEXT_IA32_REGISTER_STATE), 1, out);
+    fflush(out);
 }
