@@ -65,8 +65,8 @@ void ir_to_cper(json_object* ir, FILE* out)
         //Find the correct section type, and parse.
         if (guid_equal(&descriptors[i]->SectionType, &gEfiProcessorGenericErrorSectionGuid))
             ir_section_generic_to_cper(section, out);
-        // else if (guid_equal(&descriptors[i]->SectionType, &gEfiIa32X64ProcessorErrorSectionGuid))
-        //     ir_section_ia32x64_to_cper(section, out);
+        else if (guid_equal(&descriptors[i]->SectionType, &gEfiIa32X64ProcessorErrorSectionGuid))
+            ir_section_ia32x64_to_cper(section, out);
         // else if (guid_equal(&descriptors[i]->SectionType, &gEfiIpfProcessorErrorSectionGuid))
         //     ir_section_ipf_to_cper(section, out);
         // else if (guid_equal(&descriptors[i]->SectionType, &gEfiArmProcessorErrorSectionGuid))

@@ -20,6 +20,17 @@ json_object* cper_ia32x64_ms_check_to_ir(EFI_IA32_X64_MS_CHECK_INFO* ms_check);
 json_object* cper_ia32x64_processor_context_info_to_ir(EFI_IA32_X64_PROCESSOR_CONTEXT_INFO* context_info, void** cur_pos);
 json_object* cper_ia32x64_register_32bit_to_ir(EFI_CONTEXT_IA32_REGISTER_STATE* registers);
 json_object* cper_ia32x64_register_64bit_to_ir(EFI_CONTEXT_X64_REGISTER_STATE* registers);
+void ir_ia32x64_error_info_to_cper(json_object* error_info, FILE* out);
+void ir_ia32x64_context_info_to_cper(json_object* context_info, FILE* out);
+void ir_ia32x64_cache_tlb_check_error_to_cper(json_object* check_info, EFI_IA32_X64_CACHE_CHECK_INFO* check_info_cper);
+void ir_ia32x64_bus_check_error_to_cper(json_object* check_info, EFI_IA32_X64_BUS_CHECK_INFO* check_info_cper);
+void ir_ia32x64_ms_check_error_to_cper(json_object* check_info, EFI_IA32_X64_MS_CHECK_INFO* check_info_cper);
+void ir_ia32x64_ia32_registers_to_cper(json_object* registers, FILE* out);
+void ir_ia32x64_x64_registers_to_cper(json_object* registers, FILE* out);
+
+//////////////////
+/// CPER TO IR ///
+//////////////////
 
 //Converts the IA32/x64 error section described in the given descriptor into intermediate format.
 json_object* cper_section_ia32x64_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor)
@@ -241,13 +252,13 @@ json_object* cper_ia32x64_processor_context_info_to_ir(EFI_IA32_X64_PROCESSOR_CO
 
     //Register array.
     json_object* register_array = NULL;
-    if (context_info->RegisterType == 2) 
+    if (context_info->RegisterType == EFI_REG_CONTEXT_TYPE_IA32) 
     {
         EFI_CONTEXT_IA32_REGISTER_STATE* register_state = (EFI_CONTEXT_IA32_REGISTER_STATE*)(context_info + 1);
         register_array = cper_ia32x64_register_32bit_to_ir(register_state);
         *cur_pos = (void*)(register_state + 1);
     }
-    else if (context_info->RegisterType == 3) 
+    else if (context_info->RegisterType == EFI_REG_CONTEXT_TYPE_X64) 
     {
         EFI_CONTEXT_X64_REGISTER_STATE* register_state = (EFI_CONTEXT_X64_REGISTER_STATE*)(context_info + 1);
         register_array = cper_ia32x64_register_64bit_to_ir(register_state);
@@ -345,4 +356,198 @@ json_object* cper_ia32x64_register_64bit_to_ir(EFI_CONTEXT_X64_REGISTER_STATE* r
     json_object_object_add(x64_registers, "tr", json_object_new_int(registers->Tr));
 
     return x64_registers;
+}
+
+//////////////////
+/// IR TO CPER ///
+//////////////////
+
+//Converts a single IA32/x64 CPER-JSON section into CPER binary, outputting to the provided stream.
+void ir_section_ia32x64_to_cper(json_object* section, FILE* out)
+{
+    EFI_IA32_X64_PROCESSOR_ERROR_RECORD* section_cper = 
+        (EFI_IA32_X64_PROCESSOR_ERROR_RECORD*)calloc(1, sizeof(EFI_IA32_X64_PROCESSOR_ERROR_RECORD));
+
+    //Validation bits.
+    json_object* validation = json_object_object_get(section, "validationBits");
+    section_cper->ValidFields = 0x0;
+    section_cper->ValidFields |= json_object_get_boolean(json_object_object_get(validation, "localAPICIDValid"));
+    section_cper->ValidFields |= json_object_get_boolean(json_object_object_get(validation, "cpuIDInfoValid")) << 1;
+    int proc_error_info_num = json_object_get_int(json_object_object_get(validation, "processorErrorInfoNum")) & 0b111111;
+    int proc_ctx_info_num = json_object_get_int(json_object_object_get(validation, "processorContextInfoNum")) & 0b111111;
+    section_cper->ValidFields |= proc_error_info_num << 2;
+    section_cper->ValidFields |= proc_ctx_info_num << 8;
+
+    //Local APIC ID.
+    section_cper->ApicId = json_object_get_uint64(json_object_object_get(section, "localAPICID"));
+    
+    //CPUID info.
+    json_object* cpuid_info = json_object_object_get(section, "cpuidInfo");
+    EFI_IA32_X64_CPU_ID* cpuid_info_cper = (EFI_IA32_X64_CPU_ID*)section_cper->CpuIdInfo;
+    cpuid_info_cper->Eax = json_object_get_uint64(json_object_object_get(cpuid_info, "eax"));
+    cpuid_info_cper->Ebx = json_object_get_uint64(json_object_object_get(cpuid_info, "ebx"));
+    cpuid_info_cper->Ecx = json_object_get_uint64(json_object_object_get(cpuid_info, "ecx"));
+    cpuid_info_cper->Edx = json_object_get_uint64(json_object_object_get(cpuid_info, "edx"));
+
+    //Flush the header to file before dealing w/ info sections.
+    fwrite(section_cper, sizeof(EFI_IA32_X64_PROCESSOR_ERROR_RECORD), 1, out);
+    fflush(out);
+    free(section_cper);
+
+    //Iterate and deal with sections.
+    json_object* error_info = json_object_object_get(section, "processorErrorInfo");
+    json_object* context_info = json_object_object_get(section, "processorContextInfo");
+    for (int i=0; i<proc_error_info_num; i++)
+        ir_ia32x64_error_info_to_cper(json_object_array_get_idx(error_info, i), out);
+    for (int i=0; i<proc_ctx_info_num; i++)
+        ir_ia32x64_context_info_to_cper(json_object_array_get_idx(context_info, i), out);
+}
+
+//Converts a single CPER-JSON IA32/x64 error information structure into CPER binary, outputting to the
+//provided stream.
+void ir_ia32x64_error_info_to_cper(json_object* error_info, FILE* out)
+{
+    EFI_IA32_X64_PROCESS_ERROR_INFO* error_info_cper = 
+        (EFI_IA32_X64_PROCESS_ERROR_INFO*)calloc(1, sizeof(EFI_IA32_X64_PROCESS_ERROR_INFO));
+
+    //Error structure type.
+    string_to_guid(&error_info_cper->ErrorType, json_object_get_string(json_object_object_get(error_info, "type")));
+
+    //Validation bits.
+    error_info_cper->ValidFields = ir_to_bitfield(json_object_object_get(error_info, "validationBits"), 
+        5, IA32X64_PROCESSOR_ERROR_VALID_BITFIELD_NAMES);
+
+    //Check information, parsed based on the error type.
+    json_object* check_info = json_object_object_get(error_info, "checkInfo");
+    if (guid_equal(&error_info_cper->ErrorType, &gEfiIa32x64ErrorTypeCacheCheckGuid)
+        || guid_equal(&error_info_cper->ErrorType, &gEfiIa32x64ErrorTypeTlbCheckGuid))
+    {
+        ir_ia32x64_cache_tlb_check_error_to_cper(check_info, (EFI_IA32_X64_CACHE_CHECK_INFO*)&error_info_cper->CheckInfo);
+    }
+    else if (guid_equal(&error_info_cper->ErrorType, &gEfiIa32x64ErrorTypeBusCheckGuid))
+        ir_ia32x64_bus_check_error_to_cper(check_info, (EFI_IA32_X64_BUS_CHECK_INFO*)&error_info_cper->CheckInfo);
+    else if (guid_equal(&error_info_cper->ErrorType, &gEfiIa32x64ErrorTypeMsCheckGuid))
+        ir_ia32x64_ms_check_error_to_cper(check_info, (EFI_IA32_X64_MS_CHECK_INFO*)&error_info_cper->CheckInfo);
+
+    //Miscellaneous numeric fields.
+    error_info_cper->TargetId = json_object_get_uint64(json_object_object_get(error_info, "targetAddressID"));
+    error_info_cper->RequestorId = json_object_get_uint64(json_object_object_get(error_info, "requestorID"));
+    error_info_cper->ResponderId = json_object_get_uint64(json_object_object_get(error_info, "responderID"));
+    error_info_cper->InstructionIP = json_object_get_uint64(json_object_object_get(error_info, "instructionPointer"));
+
+    //Write out to stream, then free resources.
+    fwrite(error_info_cper, sizeof(EFI_IA32_X64_PROCESS_ERROR_INFO), 1, out);
+    fflush(out);
+    free(error_info_cper);
+}
+
+//Converts a single CPER-JSON IA32/x64 cache/TLB check error info structure to CPER binary.
+void ir_ia32x64_cache_tlb_check_error_to_cper(json_object* check_info, EFI_IA32_X64_CACHE_CHECK_INFO* check_info_cper)
+{
+    //Validation bits.
+    check_info_cper->ValidFields = ir_to_bitfield(json_object_object_get(check_info, "validationBits"), 
+        8, IA32X64_CHECK_INFO_VALID_BITFIELD_NAMES);
+
+    //Transaction type, operation.
+    check_info_cper->TransactionType = readable_pair_to_integer(json_object_object_get(check_info, "transactionType"));
+    check_info_cper->Operation = readable_pair_to_integer(json_object_object_get(check_info, "operation"));
+
+    //Miscellaneous raw value fields.
+    check_info_cper->Level = json_object_get_uint64(json_object_object_get(check_info, "level"));
+    check_info_cper->ContextCorrupt = json_object_get_boolean(json_object_object_get(check_info, "processorContextCorrupt"));
+    check_info_cper->ErrorUncorrected = json_object_get_boolean(json_object_object_get(check_info, "uncorrected"));
+    check_info_cper->PreciseIp = json_object_get_boolean(json_object_object_get(check_info, "preciseIP"));
+    check_info_cper->RestartableIp = json_object_get_boolean(json_object_object_get(check_info, "restartableIP"));
+    check_info_cper->Overflow = json_object_get_boolean(json_object_object_get(check_info, "overflow"));
+}
+
+//Converts a single CPER-JSON IA32/x64 bus error info structure to CPER binary.
+void ir_ia32x64_bus_check_error_to_cper(json_object* check_info, EFI_IA32_X64_BUS_CHECK_INFO* check_info_cper)
+{
+    //Validation bits.
+    check_info_cper->ValidFields = ir_to_bitfield(json_object_object_get(check_info, "validationBits"), 
+        11, IA32X64_CHECK_INFO_VALID_BITFIELD_NAMES);
+
+    //Readable pair fields.
+    check_info_cper->TransactionType = readable_pair_to_integer(json_object_object_get(check_info, "transactionType"));
+    check_info_cper->Operation = readable_pair_to_integer(json_object_object_get(check_info, "operation"));
+    check_info_cper->ParticipationType = readable_pair_to_integer(json_object_object_get(check_info, "participationType"));
+    check_info_cper->AddressSpace = readable_pair_to_integer(json_object_object_get(check_info, "addressSpace"));
+
+    //Miscellaneous raw value fields.
+    check_info_cper->Level = json_object_get_uint64(json_object_object_get(check_info, "level"));
+    check_info_cper->ContextCorrupt = json_object_get_boolean(json_object_object_get(check_info, "processorContextCorrupt"));
+    check_info_cper->ErrorUncorrected = json_object_get_boolean(json_object_object_get(check_info, "uncorrected"));
+    check_info_cper->PreciseIp = json_object_get_boolean(json_object_object_get(check_info, "preciseIP"));
+    check_info_cper->RestartableIp = json_object_get_boolean(json_object_object_get(check_info, "restartableIP"));
+    check_info_cper->Overflow = json_object_get_boolean(json_object_object_get(check_info, "overflow"));
+    check_info_cper->TimeOut = json_object_get_boolean(json_object_object_get(check_info, "timedOut"));
+}
+
+//Converts a single CPER-JSON IA32/x64 MS error info structure to CPER binary.
+void ir_ia32x64_ms_check_error_to_cper(json_object* check_info, EFI_IA32_X64_MS_CHECK_INFO* check_info_cper)
+{
+    //Validation bits.
+    check_info_cper->ValidFields = ir_to_bitfield(json_object_object_get(check_info, "validationBits"), 
+        6, IA32X64_CHECK_INFO_MS_CHECK_VALID_BITFIELD_NAMES);
+
+    //Type of MS check error.
+    check_info_cper->ErrorType = readable_pair_to_integer(json_object_object_get(check_info, "errorType"));
+
+    //Miscellaneous raw value fields.
+    check_info_cper->ContextCorrupt = json_object_get_boolean(json_object_object_get(check_info, "processorContextCorrupt"));
+    check_info_cper->ErrorUncorrected = json_object_get_boolean(json_object_object_get(check_info, "uncorrected"));
+    check_info_cper->PreciseIp = json_object_get_boolean(json_object_object_get(check_info, "preciseIP"));
+    check_info_cper->RestartableIp = json_object_get_boolean(json_object_object_get(check_info, "restartableIP"));
+    check_info_cper->Overflow = json_object_get_boolean(json_object_object_get(check_info, "overflow"));
+}
+
+//Converts a single CPER-JSON IA32/x64 context information structure into CPER binary, outputting to the
+//provided stream.
+void ir_ia32x64_context_info_to_cper(json_object* context_info, FILE* out)
+{
+    EFI_IA32_X64_PROCESSOR_CONTEXT_INFO* context_info_cper = 
+        (EFI_IA32_X64_PROCESSOR_CONTEXT_INFO*)calloc(1, sizeof(EFI_IA32_X64_PROCESSOR_CONTEXT_INFO));
+
+    //Register context type.
+    context_info_cper->RegisterType = (UINT16)readable_pair_to_integer(json_object_object_get(context_info, "registerContextType"));
+
+    //Miscellaneous numeric fields.
+    context_info_cper->ArraySize = (UINT16)json_object_get_uint64(json_object_object_get(context_info, "registerArraySize"));
+    context_info_cper->MsrAddress = (UINT16)json_object_get_uint64(json_object_object_get(context_info, "msrAddress"));
+    context_info_cper->MmRegisterAddress = (UINT16)json_object_get_uint64(json_object_object_get(context_info, "mmRegisterAddress"));
+
+    //Flush header to stream.
+    fwrite(context_info_cper, sizeof(EFI_IA32_X64_PROCESSOR_CONTEXT_INFO), 1, out);
+    fflush(out);
+
+    //Handle the register array, depending on type provided.
+    json_object* register_array = json_object_object_get(context_info, "registerArray");
+    switch (context_info_cper->RegisterType)
+    {
+        case EFI_REG_CONTEXT_TYPE_IA32:
+            ir_ia32x64_ia32_registers_to_cper(register_array, out);
+            break;
+        case EFI_REG_CONTEXT_TYPE_X64:
+            ir_ia32x64_ia32_registers_to_cper(register_array, out);
+            break;
+        default:
+            //Unknown/undefined.
+            break;
+    }
+
+    //Free remaining resources.
+    free(context_info_cper);
+}
+
+//Converts a single CPER-JSON IA32 register array into CPER binary, outputting to the given stream.
+void ir_ia32x64_ia32_registers_to_cper(json_object* registers, FILE* out)
+{
+    //...
+}
+
+//Converts a single CPER-JSON x64 register array into CPER binary, outputting to the given stream.
+void ir_ia32x64_x64_registers_to_cper(json_object* registers, FILE* out)
+{
+    //...
 }
