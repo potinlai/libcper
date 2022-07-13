@@ -325,5 +325,6 @@ typedef struct {
 } EFI_ARM_MISC_CONTEXT_REGISTER;
 
 json_object* cper_section_arm_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor);
+void ir_section_arm_to_cper(json_object* section, FILE* out);
 
 #endif

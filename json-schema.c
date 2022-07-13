@@ -321,7 +321,7 @@ int validate_array(const char* field_name, json_object* schema, json_object* obj
 void validate_schema_debug_enable() { json_validator_debug = 1; }
 void validate_schema_debug_disable() { json_validator_debug = 0; }
 
-//Logs an error message to the given character and (optionally) provides debug output.
+//Logs an error message to the given error message location and (optionally) provides debug output.
 void log_validator_error(char* error_message, const char* format, ...)
 {
     va_list args;
@@ -337,7 +337,7 @@ void log_validator_error(char* error_message, const char* format, ...)
     va_end(args);
 }
 
-//Logs a debug message to the given character and (optionally) provides debug output.
+//Logs a debug message to stdout, if validator debug is enabled.
 void log_validator_debug(const char* format, ...)
 {
     va_list args;

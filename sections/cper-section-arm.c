@@ -18,6 +18,8 @@ json_object* cper_arm_processor_context_to_ir(EFI_ARM_CONTEXT_INFORMATION_HEADER
 json_object* cper_arm_cache_tlb_error_to_ir(EFI_ARM_CACHE_ERROR_STRUCTURE* cache_tlb_error, EFI_ARM_ERROR_INFORMATION_ENTRY* error_info);
 json_object* cper_arm_bus_error_to_ir(EFI_ARM_BUS_ERROR_STRUCTURE* bus_error);
 json_object* cper_arm_misc_register_array_to_ir(EFI_ARM_MISC_CONTEXT_REGISTER* misc_register);
+void ir_arm_error_info_to_cper(json_object* error_info, FILE* out);
+void ir_arm_context_info_to_cper(json_object* context_info, FILE* out);
 
 //Converts the given processor-generic CPER section into JSON IR.
 json_object* cper_section_arm_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor)
@@ -331,4 +333,97 @@ json_object* cper_arm_misc_register_array_to_ir(EFI_ARM_MISC_CONTEXT_REGISTER* m
     json_object_object_add(register_array, "value", json_object_new_uint64(misc_register->Value));
 
     return register_array;
+}
+
+//Converts a single CPER-JSON ARM error section into CPER binary, outputting to the given stream.
+void ir_section_arm_to_cper(json_object* section, FILE* out)
+{
+    EFI_ARM_ERROR_RECORD* section_cper = (EFI_ARM_ERROR_RECORD*)calloc(1, sizeof(EFI_ARM_ERROR_RECORD));
+
+    //Validation bits.
+    section_cper->ValidFields = ir_to_bitfield(json_object_object_get(section, "validationBits"), 
+        4, ARM_ERROR_VALID_BITFIELD_NAMES);
+
+    //Count of error/context info structures.
+    section_cper->ErrInfoNum = json_object_get_int(json_object_object_get(section, "errorInfoNum"));
+    section_cper->ContextInfoNum = json_object_get_int(json_object_object_get(section, "contextInfoNum"));
+
+    //Miscellaneous raw value fields.
+    section_cper->SectionLength = json_object_get_uint64(json_object_object_get(section, "sectionLength"));
+    section_cper->ErrorAffinityLevel = readable_pair_to_integer(json_object_object_get(section, "errorAffinity"));
+    section_cper->MPIDR_EL1 = json_object_get_uint64(json_object_object_get(section, "mpidrEl1"));
+    section_cper->MIDR_EL1 = json_object_get_uint64(json_object_object_get(section, "midrEl1"));
+    section_cper->RunningState = json_object_get_boolean(json_object_object_get(section, "running"));
+
+    //Optional PSCI state.
+    json_object* psci_state = json_object_object_get(section, "psciState");
+    if (psci_state != NULL)
+        section_cper->PsciState = json_object_get_uint64(psci_state);
+
+    //Flush header to stream.
+    fwrite(section_cper, sizeof(EFI_ARM_ERROR_RECORD), 1, out);
+    fflush(out);
+
+    //Error info structure array.
+    json_object* error_info = json_object_object_get(section, "errorInfo");
+    for (int i=0; i<section_cper->ErrInfoNum; i++)
+        ir_arm_error_info_to_cper(json_object_array_get_idx(error_info, i), out);
+
+    //Context info structure array.
+    json_object* context_info = json_object_object_get(section, "contextInfo");
+    for (int i=0; i<section_cper->ContextInfoNum; i++)
+        ir_arm_context_info_to_cper(json_object_array_get_idx(context_info, i), out);
+
+    //Vendor specific error info.
+    json_object* vendor_specific_info = json_object_object_get(section, "vendorSpecificInfo");
+    if (vendor_specific_info != NULL)
+    {
+        int vendor_specific_len = json_object_get_string_len(vendor_specific_info);
+        UINT8* decoded = b64_decode(json_object_get_string(vendor_specific_info), vendor_specific_len);
+        fwrite(decoded, vendor_specific_len / 4 * 3, 1, out); //b64 length to byte length
+        fflush(out);
+        free(decoded);
+    }
+
+    //Free remaining resources.
+    free(section_cper);
+}
+
+//Converts a single ARM error information structure into CPER binary, outputting to the given stream.
+void ir_arm_error_info_to_cper(json_object* error_info, FILE* out)
+{
+    EFI_ARM_ERROR_INFORMATION_ENTRY error_info_cper;
+
+    //Version, length.
+    error_info_cper.Version = json_object_get_int(json_object_object_get(error_info, "version"));
+    error_info_cper.Length = json_object_get_int(json_object_object_get(error_info, "version"));
+
+    //Validation bits.
+    error_info_cper.ValidationBits = ir_to_bitfield(json_object_object_get(error_info, "validationBits"), 
+        5, ARM_ERROR_INFO_ENTRY_VALID_BITFIELD_NAMES);
+
+    //Type, multiple error.
+    error_info_cper.Type = (UINT8)readable_pair_to_integer(json_object_object_get(error_info, "type"));
+    error_info_cper.Type = (UINT8)readable_pair_to_integer(json_object_object_get(error_info, "multipleError"));
+
+    //Flags object.
+    error_info_cper.Flags = ir_to_bitfield(json_object_object_get(error_info, "flags"), 
+        4, ARM_ERROR_INFO_ENTRY_FLAGS_NAMES);
+
+    //Error information.
+    //...
+
+    //Virtual/physical fault address.
+    error_info_cper.VirtualFaultAddress = json_object_get_uint64(json_object_object_get(error_info, "virtualFaultAddress"));
+    error_info_cper.PhysicalFaultAddress = json_object_get_uint64(json_object_object_get(error_info, "physicalFaultAddress"));
+
+    //Write out to stream.
+    fwrite(&error_info_cper, sizeof(EFI_ARM_ERROR_INFORMATION_ENTRY), 1, out);
+    fflush(out);
+}
+
+//Converts a single ARM context information structure into CPER binary, outputting to the given stream.
+void ir_arm_context_info_to_cper(json_object* context_info, FILE* out)
+{
+
 }
