@@ -66,6 +66,28 @@ json_object* uniform_struct_to_ir(UINT32* start, int len, const char* names[])
     return result;
 }
 
+//Converts a single object containing UINT32s into a uniform struct.
+void ir_to_uniform_struct64(json_object* ir, UINT64* start, int len, const char* names[])
+{
+    UINT64* cur = start;
+    for (int i=0; i<len; i++)
+    {
+        *cur = json_object_get_uint64(json_object_object_get(ir, names[i]));
+        cur++;
+    }
+}
+
+//Converts a single object containing UINT32s into a uniform struct.
+void ir_to_uniform_struct(json_object* ir, UINT32* start, int len, const char* names[])
+{
+    UINT32* cur = start;
+    for (int i=0; i<len; i++)
+    {
+        *cur = (UINT32)json_object_get_uint64(json_object_object_get(ir, names[i]));
+        cur++;
+    }
+}
+
 //Converts a single integer value to an object containing a value, and a readable name if possible.
 json_object* integer_to_readable_pair(UINT64 value, int len, int keys[], const char* values[], const char* default_value)
 {

@@ -69,8 +69,8 @@ void ir_to_cper(json_object* ir, FILE* out)
             ir_section_ia32x64_to_cper(section, out);
         // else if (guid_equal(&descriptors[i]->SectionType, &gEfiIpfProcessorErrorSectionGuid))
         //     ir_section_ipf_to_cper(section, out);
-        // else if (guid_equal(&descriptors[i]->SectionType, &gEfiArmProcessorErrorSectionGuid))
-        //     ir_section_arm_to_cper(section, out);
+        else if (guid_equal(&descriptors[i]->SectionType, &gEfiArmProcessorErrorSectionGuid))
+            ir_section_arm_to_cper(section, out);
         // else if (guid_equal(&descriptors[i]->SectionType, &gEfiPlatformMemoryErrorSectionGuid))
         //     ir_section_platform_memory_to_cper(section, out);
         // else if (guid_equal(&descriptors[i]->SectionType, &gEfiPlatformMemoryError2SectionGuid))

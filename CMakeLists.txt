@@ -32,3 +32,4 @@ add_executable(CPERParseTest testing/cper-test.c)
 # Link library.
 target_link_libraries(CPERParseLibrary json-c b64c)
 target_link_libraries(CPERParseTest CPERParseLibrary)
+target_compile_options(CPERParseLibrary PRIVATE -Wno-address-of-packed-member)

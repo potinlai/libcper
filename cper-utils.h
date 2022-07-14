@@ -7,6 +7,8 @@
 json_object* cper_generic_error_status_to_ir(EFI_GENERIC_ERROR_STATUS* error_status);
 json_object* uniform_struct_to_ir(UINT32* start, int len, const char* names[]);
 json_object* uniform_struct64_to_ir(UINT64* start, int len, const char* names[]);
+void ir_to_uniform_struct(json_object* ir, UINT32* start, int len, const char* names[]);
+void ir_to_uniform_struct64(json_object* ir, UINT64* start, int len, const char* names[]);
 json_object* integer_to_readable_pair(UINT64 value, int len, int keys[], const char* values[], const char* default_value);
 json_object* integer_to_readable_pair_with_desc(int value, int len, int keys[], const char* values[], const char* descriptions[], const char* default_value);
 UINT64 readable_pair_to_integer(json_object* pair);

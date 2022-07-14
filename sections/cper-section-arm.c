@@ -20,6 +20,18 @@ json_object* cper_arm_bus_error_to_ir(EFI_ARM_BUS_ERROR_STRUCTURE* bus_error);
 json_object* cper_arm_misc_register_array_to_ir(EFI_ARM_MISC_CONTEXT_REGISTER* misc_register);
 void ir_arm_error_info_to_cper(json_object* error_info, FILE* out);
 void ir_arm_context_info_to_cper(json_object* context_info, FILE* out);
+void ir_arm_error_cache_tlb_info_to_cper(json_object* error_information, EFI_ARM_CACHE_ERROR_STRUCTURE* error_info_cper);
+void ir_arm_error_bus_info_to_cper(json_object* error_information, EFI_ARM_BUS_ERROR_STRUCTURE* error_info_cper);
+void ir_arm_aarch32_gpr_to_cper(json_object* registers, FILE* out);
+void ir_arm_aarch32_el1_to_cper(json_object* registers, FILE* out);
+void ir_arm_aarch32_el2_to_cper(json_object* registers, FILE* out);
+void ir_arm_aarch32_secure_to_cper(json_object* registers, FILE* out);
+void ir_arm_aarch64_gpr_to_cper(json_object* registers, FILE* out);
+void ir_arm_aarch64_el1_to_cper(json_object* registers, FILE* out);
+void ir_arm_aarch64_el2_to_cper(json_object* registers, FILE* out);
+void ir_arm_aarch64_el3_to_cper(json_object* registers, FILE* out);
+void ir_arm_misc_registers_to_cper(json_object* registers, FILE* out);
+void ir_arm_unknown_register_to_cper(json_object* registers, EFI_ARM_CONTEXT_INFORMATION_HEADER* header, FILE* out);
 
 //Converts the given processor-generic CPER section into JSON IR.
 json_object* cper_section_arm_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor)
@@ -128,12 +140,18 @@ json_object* cper_arm_error_info_to_ir(EFI_ARM_ERROR_INFORMATION_ENTRY* error_in
     json_object* error_subinfo = NULL;
     switch (error_info->Type)
     {
-        case 0: //Cache
-        case 1: //TLB
+        case ARM_ERROR_INFORMATION_TYPE_CACHE: //Cache
+        case ARM_ERROR_INFORMATION_TYPE_TLB: //TLB
             error_subinfo = cper_arm_cache_tlb_error_to_ir((EFI_ARM_CACHE_ERROR_STRUCTURE*)&error_info->ErrorInformation, error_info);
             break;
-        case 2: //Bus
+        case ARM_ERROR_INFORMATION_TYPE_BUS: //Bus
             error_subinfo = cper_arm_bus_error_to_ir((EFI_ARM_BUS_ERROR_STRUCTURE*)&error_info->ErrorInformation);
+            break;
+
+        default:
+            //Unknown/microarch, so can't be made readable. Simply dump as a uint64 data object.
+            error_subinfo = json_object_new_object();
+            json_object_object_add(error_subinfo, "data", json_object_new_uint64(*((UINT64*)&error_info->ErrorInformation)));
             break;
     }
     json_object_object_add(error_info_ir, "errorInformation", error_subinfo);
@@ -252,6 +270,9 @@ json_object* cper_arm_bus_error_to_ir(EFI_ARM_BUS_ERROR_STRUCTURE* bus_error)
 json_object* cper_arm_processor_context_to_ir(EFI_ARM_CONTEXT_INFORMATION_HEADER* header, void** cur_pos)
 {
     json_object* context_ir = json_object_new_object();
+
+    //Version.
+    json_object_object_add(context_ir, "version", json_object_new_int(header->Version));
 
     //Add the context type.
     json_object* context_type = integer_to_readable_pair(header->RegisterContextType, 9,
@@ -396,7 +417,7 @@ void ir_arm_error_info_to_cper(json_object* error_info, FILE* out)
 
     //Version, length.
     error_info_cper.Version = json_object_get_int(json_object_object_get(error_info, "version"));
-    error_info_cper.Length = json_object_get_int(json_object_object_get(error_info, "version"));
+    error_info_cper.Length = json_object_get_int(json_object_object_get(error_info, "length"));
 
     //Validation bits.
     error_info_cper.ValidationBits = ir_to_bitfield(json_object_object_get(error_info, "validationBits"), 
@@ -404,14 +425,31 @@ void ir_arm_error_info_to_cper(json_object* error_info, FILE* out)
 
     //Type, multiple error.
     error_info_cper.Type = (UINT8)readable_pair_to_integer(json_object_object_get(error_info, "type"));
-    error_info_cper.Type = (UINT8)readable_pair_to_integer(json_object_object_get(error_info, "multipleError"));
+    error_info_cper.MultipleError = (UINT16)readable_pair_to_integer(json_object_object_get(error_info, "multipleError"));
 
     //Flags object.
-    error_info_cper.Flags = ir_to_bitfield(json_object_object_get(error_info, "flags"), 
+    error_info_cper.Flags = (UINT8)ir_to_bitfield(json_object_object_get(error_info, "flags"), 
         4, ARM_ERROR_INFO_ENTRY_FLAGS_NAMES);
 
     //Error information.
-    //...
+    json_object* error_info_information = json_object_object_get(error_info, "errorInformation");
+    switch (error_info_cper.Type)
+    {
+        case ARM_ERROR_INFORMATION_TYPE_CACHE:
+        case ARM_ERROR_INFORMATION_TYPE_TLB:
+            ir_arm_error_cache_tlb_info_to_cper(error_info_information, &error_info_cper.ErrorInformation.CacheError);
+            break;
+
+        case ARM_ERROR_INFORMATION_TYPE_BUS:
+            ir_arm_error_bus_info_to_cper(error_info_information, &error_info_cper.ErrorInformation.BusError);
+            break;
+
+        default:
+            //Unknown error information type.
+            *((UINT64*)&error_info_cper.ErrorInformation) = 
+                json_object_get_uint64(json_object_object_get(error_info_information, "data"));
+            break;
+    }
 
     //Virtual/physical fault address.
     error_info_cper.VirtualFaultAddress = json_object_get_uint64(json_object_object_get(error_info, "virtualFaultAddress"));
@@ -422,8 +460,234 @@ void ir_arm_error_info_to_cper(json_object* error_info, FILE* out)
     fflush(out);
 }
 
+//Converts a single ARM cache/TLB error information structure into a CPER structure.
+void ir_arm_error_cache_tlb_info_to_cper(json_object* error_information, EFI_ARM_CACHE_ERROR_STRUCTURE* error_info_cper)
+{
+    //Validation bits.
+    error_info_cper->ValidationBits = ir_to_bitfield(json_object_object_get(error_information, "validationBits"), 
+        7, ARM_CACHE_TLB_ERROR_VALID_BITFIELD_NAMES);
+
+    //Miscellaneous value fields.
+    error_info_cper->TransactionType = readable_pair_to_integer(json_object_object_get(error_information, "transactionType"));
+    error_info_cper->Operation = readable_pair_to_integer(json_object_object_get(error_information, "operation"));
+    error_info_cper->Level = json_object_get_uint64(json_object_object_get(error_information, "level"));
+    error_info_cper->ProcessorContextCorrupt = 
+        json_object_get_boolean(json_object_object_get(error_information, "processorContextCorrupt"));
+    error_info_cper->Corrected = json_object_get_boolean(json_object_object_get(error_information, "corrected"));
+    error_info_cper->PrecisePC = json_object_get_boolean(json_object_object_get(error_information, "precisePC"));
+    error_info_cper->RestartablePC = json_object_get_boolean(json_object_object_get(error_information, "restartablePC"));
+    error_info_cper->Reserved = 0;
+}
+
+//Converts a single ARM bus error information structure into a CPER structure.
+void ir_arm_error_bus_info_to_cper(json_object* error_information, EFI_ARM_BUS_ERROR_STRUCTURE* error_info_cper)
+{
+    //Validation bits.
+    error_info_cper->ValidationBits = ir_to_bitfield(json_object_object_get(error_information, "validationBits"), 
+        7, ARM_BUS_ERROR_VALID_BITFIELD_NAMES);
+
+    //Miscellaneous value fields.
+    error_info_cper->TransactionType = readable_pair_to_integer(json_object_object_get(error_information, "transactionType"));
+    error_info_cper->Operation = readable_pair_to_integer(json_object_object_get(error_information, "operation"));
+    error_info_cper->Level = json_object_get_uint64(json_object_object_get(error_information, "level"));
+    error_info_cper->ProcessorContextCorrupt = 
+        json_object_get_boolean(json_object_object_get(error_information, "processorContextCorrupt"));
+    error_info_cper->Corrected = json_object_get_boolean(json_object_object_get(error_information, "corrected"));
+    error_info_cper->PrecisePC = json_object_get_boolean(json_object_object_get(error_information, "precisePC"));
+    error_info_cper->RestartablePC = json_object_get_boolean(json_object_object_get(error_information, "restartablePC"));
+    error_info_cper->ParticipationType = 
+        readable_pair_to_integer(json_object_object_get(error_information, "participationType"));
+    error_info_cper->AddressSpace = readable_pair_to_integer(json_object_object_get(error_information, "addressSpace"));
+    error_info_cper->AccessMode = readable_pair_to_integer(json_object_object_get(error_information, "accessMode"));
+    error_info_cper->MemoryAddressAttributes = json_object_get_uint64(json_object_object_get(error_information, "memoryAttributes"));
+    error_info_cper->Reserved = 0;
+}
+
 //Converts a single ARM context information structure into CPER binary, outputting to the given stream.
 void ir_arm_context_info_to_cper(json_object* context_info, FILE* out)
 {
+    EFI_ARM_CONTEXT_INFORMATION_HEADER info_header;
 
+    //Version, array size, context type.
+    info_header.Version = json_object_get_int(json_object_object_get(context_info, "version"));
+    info_header.RegisterArraySize = json_object_get_int(json_object_object_get(context_info, "registerArraySize"));
+    info_header.RegisterContextType = readable_pair_to_integer(json_object_object_get(context_info, "registerContextType"));
+
+    //Flush to stream, write the register array itself.
+    fwrite(&info_header, sizeof(EFI_ARM_CONTEXT_INFORMATION_HEADER), 1, out);
+    fflush(out);
+
+    json_object* register_array = json_object_object_get(context_info, "registerArray");
+    switch (info_header.RegisterContextType)
+    {
+        case EFI_ARM_CONTEXT_TYPE_AARCH32_GPR:
+            ir_arm_aarch32_gpr_to_cper(register_array, out);
+            break;
+        case EFI_ARM_CONTEXT_TYPE_AARCH32_EL1:
+            ir_arm_aarch32_el1_to_cper(register_array, out);
+            break;
+        case EFI_ARM_CONTEXT_TYPE_AARCH32_EL2:
+            ir_arm_aarch32_el2_to_cper(register_array, out);
+            break;
+        case EFI_ARM_CONTEXT_TYPE_AARCH32_SECURE:
+            ir_arm_aarch32_secure_to_cper(register_array, out);
+            break;
+        case EFI_ARM_CONTEXT_TYPE_AARCH64_GPR:
+            ir_arm_aarch64_gpr_to_cper(register_array, out);
+            break;
+        case EFI_ARM_CONTEXT_TYPE_AARCH64_EL1:
+            ir_arm_aarch64_el1_to_cper(register_array, out);
+            break;
+        case EFI_ARM_CONTEXT_TYPE_AARCH64_EL2:
+            ir_arm_aarch64_el2_to_cper(register_array, out);
+            break;
+        case EFI_ARM_CONTEXT_TYPE_AARCH64_EL3:
+            ir_arm_aarch64_el3_to_cper(register_array, out);
+            break;
+        case EFI_ARM_CONTEXT_TYPE_MISC:
+            ir_arm_misc_registers_to_cper(register_array, out);
+            break;
+        default:
+            //Unknown register structure.
+            ir_arm_unknown_register_to_cper(register_array, &info_header, out);
+            break;
+    }
+}
+
+//Converts a single AARCH32 GPR CPER-JSON object to CPER binary, outputting to the given stream.
+void ir_arm_aarch32_gpr_to_cper(json_object* registers, FILE* out)
+{
+    //Get uniform register array.
+    EFI_ARM_V8_AARCH32_GPR reg_array;
+    ir_to_uniform_struct(registers, (UINT32*)&reg_array, 
+        sizeof(EFI_ARM_V8_AARCH32_GPR) / sizeof(UINT32), ARM_AARCH32_GPR_NAMES);
+
+    //Flush to stream.
+    fwrite(&reg_array, sizeof(reg_array), 1, out);
+    fflush(out);
+}
+
+//Converts a single AARCH32 EL1 register set CPER-JSON object to CPER binary, outputting to the given stream.
+void ir_arm_aarch32_el1_to_cper(json_object* registers, FILE* out)
+{
+    //Get uniform register array.
+    EFI_ARM_AARCH32_EL1_CONTEXT_REGISTERS reg_array;
+    ir_to_uniform_struct(registers, (UINT32*)&reg_array, 
+        sizeof(EFI_ARM_AARCH32_EL1_CONTEXT_REGISTERS) / sizeof(UINT32), ARM_AARCH32_EL1_REGISTER_NAMES);
+
+    //Flush to stream.
+    fwrite(&reg_array, sizeof(reg_array), 1, out);
+    fflush(out);
+}
+
+//Converts a single AARCH32 EL2 register set CPER-JSON object to CPER binary, outputting to the given stream.
+void ir_arm_aarch32_el2_to_cper(json_object* registers, FILE* out)
+{
+    //Get uniform register array.
+    EFI_ARM_AARCH32_EL2_CONTEXT_REGISTERS reg_array;
+    ir_to_uniform_struct(registers, (UINT32*)&reg_array, 
+        sizeof(EFI_ARM_AARCH32_EL2_CONTEXT_REGISTERS) / sizeof(UINT32), ARM_AARCH32_EL2_REGISTER_NAMES);
+
+    //Flush to stream.
+    fwrite(&reg_array, sizeof(reg_array), 1, out);
+    fflush(out);
+}
+
+//Converts a single AARCH32 secure register set CPER-JSON object to CPER binary, outputting to the given stream.
+void ir_arm_aarch32_secure_to_cper(json_object* registers, FILE* out)
+{
+    //Get uniform register array.
+    EFI_ARM_AARCH32_SECURE_CONTEXT_REGISTERS reg_array;
+    ir_to_uniform_struct(registers, (UINT32*)&reg_array, 
+        sizeof(EFI_ARM_AARCH32_SECURE_CONTEXT_REGISTERS) / sizeof(UINT32), ARM_AARCH32_SECURE_REGISTER_NAMES);
+
+    //Flush to stream.
+    fwrite(&reg_array, sizeof(reg_array), 1, out);
+    fflush(out);
+}
+
+//Converts a single AARCH64 GPR CPER-JSON object to CPER binary, outputting to the given stream.
+void ir_arm_aarch64_gpr_to_cper(json_object* registers, FILE* out)
+{
+    //Get uniform register array.
+    EFI_ARM_V8_AARCH64_GPR reg_array;
+    ir_to_uniform_struct64(registers, (UINT64*)&reg_array, 
+        sizeof(EFI_ARM_V8_AARCH64_GPR) / sizeof(UINT64), ARM_AARCH64_GPR_NAMES);
+
+    //Flush to stream.
+    fwrite(&reg_array, sizeof(reg_array), 1, out);
+    fflush(out);
+}
+
+//Converts a single AARCH64 EL1 register set CPER-JSON object to CPER binary, outputting to the given stream.
+void ir_arm_aarch64_el1_to_cper(json_object* registers, FILE* out)
+{
+    //Get uniform register array.
+    EFI_ARM_AARCH64_EL1_CONTEXT_REGISTERS reg_array;
+    ir_to_uniform_struct64(registers, (UINT64*)&reg_array, 
+        sizeof(EFI_ARM_AARCH64_EL1_CONTEXT_REGISTERS) / sizeof(UINT64), ARM_AARCH64_EL1_REGISTER_NAMES);
+
+    //Flush to stream.
+    fwrite(&reg_array, sizeof(reg_array), 1, out);
+    fflush(out);
+}
+
+//Converts a single AARCH64 EL2 register set CPER-JSON object to CPER binary, outputting to the given stream.
+void ir_arm_aarch64_el2_to_cper(json_object* registers, FILE* out)
+{
+    //Get uniform register array.
+    EFI_ARM_AARCH64_EL2_CONTEXT_REGISTERS reg_array;
+    ir_to_uniform_struct64(registers, (UINT64*)&reg_array, 
+        sizeof(EFI_ARM_AARCH64_EL2_CONTEXT_REGISTERS) / sizeof(UINT64), ARM_AARCH64_EL2_REGISTER_NAMES);
+
+    //Flush to stream.
+    fwrite(&reg_array, sizeof(reg_array), 1, out);
+    fflush(out);
+}
+
+//Converts a single AARCH64 EL3 register set CPER-JSON object to CPER binary, outputting to the given stream.
+void ir_arm_aarch64_el3_to_cper(json_object* registers, FILE* out)
+{
+    //Get uniform register array.
+    EFI_ARM_AARCH64_EL3_CONTEXT_REGISTERS reg_array;
+    ir_to_uniform_struct64(registers, (UINT64*)&reg_array, 
+        sizeof(EFI_ARM_AARCH64_EL3_CONTEXT_REGISTERS) / sizeof(UINT64), ARM_AARCH64_EL3_REGISTER_NAMES);
+
+    //Flush to stream.
+    fwrite(&reg_array, sizeof(reg_array), 1, out);
+    fflush(out);
+}
+
+//Converts a single ARM miscellaneous register set CPER-JSON object to CPER binary, outputting to the given stream.
+void ir_arm_misc_registers_to_cper(json_object* registers, FILE* out)
+{
+    EFI_ARM_MISC_CONTEXT_REGISTER reg_array;
+
+    //MRS encoding information.
+    json_object* mrs_encoding = json_object_object_get(registers, "mrsEncoding");
+    reg_array.MrsOp2 = json_object_get_uint64(json_object_object_get(mrs_encoding, "op2"));
+    reg_array.MrsCrm = json_object_get_uint64(json_object_object_get(mrs_encoding, "crm"));
+    reg_array.MrsCrn = json_object_get_uint64(json_object_object_get(mrs_encoding, "crn"));
+    reg_array.MrsOp1 = json_object_get_uint64(json_object_object_get(mrs_encoding, "op1"));
+    reg_array.MrsO0 = json_object_get_uint64(json_object_object_get(mrs_encoding, "o0"));
+
+    //Actual register value.
+    reg_array.Value = json_object_get_uint64(json_object_object_get(registers, "value"));
+
+    //Flush to stream.
+    fwrite(&reg_array, sizeof(reg_array), 1, out);
+    fflush(out);
+}
+
+//Converts a single ARM unknown register CPER-JSON object to CPER binary, outputting to the given stream.
+void ir_arm_unknown_register_to_cper(json_object* registers, EFI_ARM_CONTEXT_INFORMATION_HEADER* header, FILE* out)
+{
+    //Get base64 represented data.
+    json_object* encoded = json_object_object_get(registers, "data");
+    UINT8* decoded = b64_decode(json_object_get_string(encoded), json_object_get_string_len(encoded));
+
+    //Flush out to stream.
+    fwrite(&decoded, header->RegisterArraySize, 1, out);
+    fflush(out);
+    free(decoded);
 }

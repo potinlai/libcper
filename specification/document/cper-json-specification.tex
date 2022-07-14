@@ -754,7 +754,7 @@ multipleError.type & string & The human readable value, if available, of what ty
 \hline
 flags & object & An ARM Processor Error Info Flags structure as defined in Subsection \ref{subsection:armprocessorerrorinfoflagsstructure}.\\ 
 \hline
-errorInformation & object & An error information structure, as defined in one of Subsections \ref{subsection:armprocessorerrorinfoerrorinformationcachetlbstructure} or \ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}. Which structure this is depends on the \texttt{errorType.value} field.\\
+errorInformation & object & An error information structure, as defined in one of Subsections \ref{subsection:armprocessorerrorinfoerrorinformationcachetlbstructure} or \ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}, or . Which structure this is depends on the \texttt{errorType.value} field.\\
 \hline
 virtualFaultAddress & uint64 & Indicates a virtual fault address associated with the error, such as when an error occurs in virtually indexed cache.\\
 \hline
@@ -794,7 +794,7 @@ overflow & boolean & Whether error buffer overflow was detected. This is usually
 % ARM Processor Error Info Error Information (Cache/TLB) structure
 \subsection{ARM Processor Error Info Cache/TLB Information Structure}
 \label{subsection:armprocessorerrorinfoerrorinformationcachetlbstructure}
-This structure describes cache/TLB error information for a single ARM Processor Error Info structure (\ref{subsection:armprocessorerrorinfostructure}).
+This structure describes cache/TLB error information for a single ARM Processor Error Info structure (\ref{subsection:armprocessorerrorinfostructure}). This structure is used when the \texttt{type} field of that structure has the value 0 or 1.
 \jsontable{table:armprocessorerrorinfoerrorinformationcachetlbstructure}
 validationBits & object & An ARM Processor Info Cache/TLB Validation structure as defined in Subsection \ref{subsection:armprocessorerrorinfocachetlbvalidationstructure}.\\
 \hline
@@ -838,7 +838,7 @@ restartablePCValid & boolean & Whether the "restartablePC" field in the ARM Proc
 % ARM Processor Error Info Error Information (Bus) structure
 \subsection{ARM Processor Error Info Bus Information Structure}
 \label{subsection:armprocessorerrorinfoerrorinformationbusstructure}
-This structure describes bus error information for a single ARM Processor Error Info structure (\ref{subsection:armprocessorerrorinfostructure}).
+This structure describes bus error information for a single ARM Processor Error Info structure (\ref{subsection:armprocessorerrorinfostructure}). This structure is used when the \texttt{type} field of that structure has the value 2.
 \jsontable{table:armprocessorerrorinfoerrorinformationbusstructure}
 validationBits & object & An ARM Processor Info Bus Validation structure as defined in Subsection \ref{subsection:armprocessorerrorinfobusvalidationstructure}.\\
 \hline
@@ -902,11 +902,21 @@ memoryAttributesValid & boolean & Whether the "memoryAttributes" field in the AR
 accessModeValid & boolean & Whether the "accessMode" field in the ARM Processor Info Bus Information structure (\ref{subsection:armprocessorerrorinfoerrorinformationbusstructure}) is valid.\\
 \jsontableend{ARM Processor Error Info Bus validation structure field table.}
 
+% ARM Processor Error Info Error Information (Microarchitecture/Undefined) structure
+\subsection{ARM Processor Error Info Microarchitecture/Undefined Information Structure}
+\label{subsection:armprocessorerrorinfoerrorinformationmicroarchundefinedstructure}
+This structure describes microarchitecture/other undefined error information for a single ARM Processor Error Info structure (\ref{subsection:armprocessorerrorinfostructure}). This structure is used when the \texttt{type} field of that structure has a value other than 0-2 (inclusive).
+\jsontable{table:armprocessorerrorinfoerrorinformationmicroarchundefinedstructure}
+data & uint64 & The unformatted data represented in the error information structure.\\
+\jsontableend{ARM Processor Error Info Microarchitecture/Undefined Information structure field table.}
+
 % ARM Processor Context Info structure
 \subsection{ARM Processor Context Info Structure}
 \label{subsection:armprocessorcontextinfostructure}
 This structure describes a single ARM Processor Context Info structure, as part of a whole ARM Processor Error structure (\ref{section:armprocessorerrorsection}).
 \jsontable{table:armprocessorcontextinfostructure}
+version & int & The version of the structure. In the referenced UEFI specification, this is 0.\\
+\hline
 registerContextType.value & uint64 & The raw value of the type of processor context state being reported.\\
 registerContextType.name & string & The human readable name, if available, of the type of processor context state being reported.\\
 \hline

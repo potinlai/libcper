@@ -78,6 +78,11 @@ typedef struct {
 ///
 /// ARM Processor Error Information Structure
 ///
+#define ARM_ERROR_INFORMATION_TYPE_CACHE 0
+#define ARM_ERROR_INFORMATION_TYPE_TLB 1
+#define ARM_ERROR_INFORMATION_TYPE_BUS 2
+#define ARM_ERROR_INFORMATION_TYPE_MICROARCH 3
+
 typedef struct {
   UINT64 ValidationBits : 16;
   UINT64 TransactionType : 2;
@@ -135,7 +140,7 @@ typedef struct {
   EFI_ARM_ERROR_INFORMATION_STRUCTURE ErrorInformation;
   UINT64 VirtualFaultAddress;
   UINT64 PhysicalFaultAddress;
-} EFI_ARM_ERROR_INFORMATION_ENTRY;
+} __attribute__((packed, aligned(1))) EFI_ARM_ERROR_INFORMATION_ENTRY;
 
 ///
 /// ARM Processor Context Information Structure
