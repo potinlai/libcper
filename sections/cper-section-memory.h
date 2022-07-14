@@ -23,5 +23,8 @@
 
 json_object* cper_section_platform_memory_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor);
 json_object* cper_section_platform_memory2_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor);
+void ir_section_memory_to_cper(json_object* section, FILE* out);
+void ir_section_memory2_to_cper(json_object* section, FILE* out);
+
 
 #endif

@@ -36,6 +36,19 @@ json_object* cper_generic_error_status_to_ir(EFI_GENERIC_ERROR_STATUS* error_sta
     return error_status_ir;
 }
 
+//Converts the given CPER-JSON generic error status into a CPER structure.
+void ir_generic_error_status_to_cper(json_object* error_status, EFI_GENERIC_ERROR_STATUS* error_status_cper)
+{
+    error_status_cper->Type = readable_pair_to_integer(json_object_object_get(error_status, "errorType"));
+    error_status_cper->AddressSignal = json_object_get_boolean(json_object_object_get(error_status, "addressSignal"));
+    error_status_cper->ControlSignal = json_object_get_boolean(json_object_object_get(error_status, "controlSignal"));
+    error_status_cper->DataSignal = json_object_get_boolean(json_object_object_get(error_status, "dataSignal"));
+    error_status_cper->DetectedByResponder = json_object_get_boolean(json_object_object_get(error_status, "detectedByResponder"));
+    error_status_cper->DetectedByRequester = json_object_get_boolean(json_object_object_get(error_status, "detectedByRequester"));
+    error_status_cper->FirstError = json_object_get_boolean(json_object_object_get(error_status, "firstError"));
+    error_status_cper->OverflowNotLogged = json_object_get_boolean(json_object_object_get(error_status, "overflowDroppedLogs"));
+}
+
 //Converts a single uniform struct of UINT64s into intermediate JSON IR format, given names for each field in byte order.
 json_object* uniform_struct64_to_ir(UINT64* start, int len, const char* names[])
 {
@@ -278,4 +291,17 @@ int guid_equal(EFI_GUID* a, EFI_GUID* b)
 int bcd_to_int(UINT8 bcd)
 {
     return ((bcd & 0xF0) >> 4) * 10 + (bcd & 0x0F);
+}
+
+//Converts the given integer to a single byte BCD.
+UINT8 int_to_bcd(int value)
+{
+    UINT8 result = 0;
+    int shift = 0;
+    while (value > 0) {
+        result |= (value % 10) << (shift++ << 2);
+        value /= 10;
+    }
+
+    return result;
 }

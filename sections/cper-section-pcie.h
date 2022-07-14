@@ -34,5 +34,6 @@ typedef struct {
 } EFI_PCIE_ADV_ERROR_EXT_CAPABILITY;
 
 json_object* cper_section_pcie_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor);
+void ir_section_pcie_to_cper(json_object* section, FILE* out);
 
 #endif

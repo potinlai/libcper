@@ -5,6 +5,7 @@
 #define TIMESTAMP_LENGTH 24
 
 json_object* cper_generic_error_status_to_ir(EFI_GENERIC_ERROR_STATUS* error_status);
+void ir_generic_error_status_to_cper(json_object* error_status, EFI_GENERIC_ERROR_STATUS* error_status_cper);
 json_object* uniform_struct_to_ir(UINT32* start, int len, const char* names[]);
 json_object* uniform_struct64_to_ir(UINT64* start, int len, const char* names[]);
 void ir_to_uniform_struct(json_object* ir, UINT32* start, int len, const char* names[]);
@@ -23,6 +24,7 @@ void guid_to_string(char* out, EFI_GUID* guid);
 void string_to_guid(EFI_GUID* out, const char* guid);
 int guid_equal(EFI_GUID* a, EFI_GUID* b);
 int bcd_to_int(UINT8 bcd);
+UINT8 int_to_bcd(int value);
 
 //The available severity types for CPER.
 extern const char* CPER_SEVERITY_TYPES[4];
