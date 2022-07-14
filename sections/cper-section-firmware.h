@@ -9,5 +9,6 @@
     "SOC Firmware Error Record (Type1 Legacy)", "SOC Firmware Error Record (Type2)"}
 
 json_object* cper_section_firmware_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor);
+void ir_section_firmware_to_cper(json_object* section, FILE* out);
 
 #endif

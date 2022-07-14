@@ -47,3 +47,38 @@ json_object* cper_section_pci_bus_to_ir(void* section, EFI_ERROR_SECTION_DESCRIP
 
     return section_ir;
 }
+
+//Converts a single provided PCI/PCI-X bus CPER-JSON section into CPER binary, outputting to the
+//provided stream.
+void ir_section_pci_bus_to_cper(json_object* section, FILE* out)
+{
+    EFI_PCI_PCIX_BUS_ERROR_DATA* section_cper =
+        (EFI_PCI_PCIX_BUS_ERROR_DATA*)calloc(1, sizeof(EFI_PCI_PCIX_BUS_ERROR_DATA));
+
+    //Validation bits.
+    section_cper->ValidFields = ir_to_bitfield(json_object_object_get(section, "validationBits"), 
+        9, PCI_BUS_ERROR_VALID_BITFIELD_NAMES);
+
+    //Error status.
+    ir_generic_error_status_to_cper(json_object_object_get(section, "errorStatus"), &section_cper->ErrorStatus);
+
+    //Bus ID.
+    json_object* bus_id = json_object_object_get(section, "busID");
+    UINT16 bus_number = (UINT8)json_object_get_int(json_object_object_get(bus_id, "busNumber"));
+    UINT16 segment_number = (UINT8)json_object_get_int(json_object_object_get(bus_id, "segmentNumber"));
+    section_cper->BusId = bus_number + (segment_number << 8);
+
+    //Remaining fields.
+    section_cper->Type = (UINT16)readable_pair_to_integer(json_object_object_get(section, "errorType"));
+    section_cper->BusAddress = json_object_get_uint64(json_object_object_get(section, "busAddress"));
+    section_cper->BusData = json_object_get_uint64(json_object_object_get(section, "busData"));
+    section_cper->BusCommand = json_object_get_string(json_object_object_get(section, "busCommand")) == "PCI" ? 0 : 1;
+    section_cper->RequestorId = json_object_get_uint64(json_object_object_get(section, "requestorID"));
+    section_cper->ResponderId = json_object_get_uint64(json_object_object_get(section, "responderID"));
+    section_cper->TargetId = json_object_get_uint64(json_object_object_get(section, "targetID"));
+
+    //Write to stream, free resources.
+    fwrite(&section_cper, sizeof(section_cper), 1, out);
+    fflush(out);
+    free(section_cper);
+}

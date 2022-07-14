@@ -27,5 +27,7 @@
 #define DMAR_GENERIC_ERROR_ARCH_TYPES_VALUES (const char*[]){"VT-d", "IOMMU"}
 
 json_object* cper_section_dmar_generic_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor);
+void ir_section_dmar_generic_to_cper(json_object* section, FILE* out);
+
 
 #endif

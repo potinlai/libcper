@@ -23,5 +23,6 @@ typedef struct {
 } EFI_VTD_FAULT_RECORD;
 
 json_object* cper_section_dmar_vtd_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor);
+void ir_section_dmar_vtd_to_cper(json_object* section, FILE* out);
 
 #endif

@@ -60,3 +60,53 @@ json_object* cper_section_pci_dev_to_ir(void* section, EFI_ERROR_SECTION_DESCRIP
 
     return section_ir;
 }
+
+void ir_section_pci_dev_to_cper(json_object* section, FILE* out)
+{
+    EFI_PCI_PCIX_DEVICE_ERROR_DATA* section_cper =
+        (EFI_PCI_PCIX_DEVICE_ERROR_DATA*)calloc(1, sizeof(EFI_PCI_PCIX_DEVICE_ERROR_DATA));
+
+    //Validation bits.
+    section_cper->ValidFields = ir_to_bitfield(json_object_object_get(section, "validationBits"), 
+        5, PCI_DEV_ERROR_VALID_BITFIELD_NAMES);
+
+    //Error status.
+    ir_generic_error_status_to_cper(json_object_object_get(section, "errorStatus"), &section_cper->ErrorStatus);
+
+    //Device ID information.
+    json_object* id_info = json_object_object_get(section, "idInfo");
+    section_cper->IdInfo.VendorId = json_object_get_uint64(json_object_object_get(id_info, "vendorID"));
+    section_cper->IdInfo.DeviceId = json_object_get_uint64(json_object_object_get(id_info, "deviceID"));
+    section_cper->IdInfo.ClassCode = json_object_get_uint64(json_object_object_get(id_info, "classCode"));
+    section_cper->IdInfo.FunctionNumber = json_object_get_uint64(json_object_object_get(id_info, "functionNumber"));
+    section_cper->IdInfo.DeviceNumber = json_object_get_uint64(json_object_object_get(id_info, "deviceNumber"));
+    section_cper->IdInfo.BusNumber = json_object_get_uint64(json_object_object_get(id_info, "busNumber"));
+    section_cper->IdInfo.SegmentNumber = json_object_get_uint64(json_object_object_get(id_info, "segmentNumber"));
+
+    //Amount of following data pairs.
+    section_cper->MemoryNumber = (UINT32)json_object_get_uint64(json_object_object_get(section, "memoryNumber"));
+    section_cper->IoNumber = (UINT32)json_object_get_uint64(json_object_object_get(section, "ioNumber"));
+
+    //Write header out to stream, free it.
+    fwrite(&section_cper, sizeof(section_cper), 1, out);
+    fflush(out);
+    free(section_cper);
+
+    //Begin writing register pairs.
+    json_object* register_pairs = json_object_object_get(section, "registerPairs");
+    int num_pairs = json_object_array_length(register_pairs);
+    for (int i=0; i<num_pairs; i++)
+    {
+        //Get the pair array item out.
+        json_object* register_pair = json_object_array_get_idx(register_pairs, i);
+
+        //Create the pair array.
+        UINT64 pair[2];
+        pair[0] = json_object_get_uint64(json_object_object_get(register_pair, "firstHalf"));
+        pair[1] = json_object_get_uint64(json_object_object_get(register_pair, "secondHalf"));
+
+        //Push to stream.
+        fwrite(pair, sizeof(UINT64), 2, out);
+        fflush(out);
+    }
+}

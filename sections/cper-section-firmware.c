@@ -34,3 +34,22 @@ json_object* cper_section_firmware_to_ir(void* section, EFI_ERROR_SECTION_DESCRI
 
     return section_ir;
 }
+
+//Converts a single firmware CPER-JSON section into CPER binary, outputting to the given stream.
+void ir_section_firmware_to_cper(json_object* section, FILE* out)
+{
+    EFI_FIRMWARE_ERROR_DATA* section_cper =
+        (EFI_FIRMWARE_ERROR_DATA*)calloc(1, sizeof(EFI_FIRMWARE_ERROR_DATA));
+
+    //Record fields.
+    section_cper->ErrorType = readable_pair_to_integer(json_object_object_get(section, "errorRecordType"));
+    section_cper->Revision = json_object_get_int(json_object_object_get(section, "revision"));
+    section_cper->RecordId = json_object_get_uint64(json_object_object_get(section, "revision"));
+    string_to_guid(&section_cper->RecordIdGuid, 
+        json_object_get_string(json_object_object_get(section, "recordIDGUID")));
+
+    //Write to stream, free resources.
+    fwrite(&section_cper, sizeof(section_cper), 1, out);
+    fflush(out);
+    free(section_cper);
+}

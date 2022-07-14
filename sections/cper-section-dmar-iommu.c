@@ -5,6 +5,7 @@
  * Author: Lawrence.Tang@arm.com
  **/
 #include <stdio.h>
+#include <string.h>
 #include "json.h"
 #include "b64.h"
 #include "../edk/Cper.h"
@@ -44,4 +45,41 @@ json_object* cper_section_dmar_iommu_to_ir(void* section, EFI_ERROR_SECTION_DESC
     json_object_object_add(section_ir, "pageTableEntry_Level1", json_object_new_uint64(iommu_error->PteL1));
 
     return section_ir;
+}
+
+//Converts a single DMAR IOMMU CPER-JSON section into CPER binary, outputting to the given stream.
+void ir_section_dmar_iommu_to_cper(json_object* section, FILE* out)
+{
+    EFI_IOMMU_DMAR_ERROR_DATA* section_cper =
+        (EFI_IOMMU_DMAR_ERROR_DATA*)calloc(1, sizeof(EFI_IOMMU_DMAR_ERROR_DATA));
+
+    //Revision, registers.
+    section_cper->Revision = (UINT8)json_object_get_int(json_object_object_get(section, "revision"));
+    section_cper->Control = json_object_get_uint64(json_object_object_get(section, "controlRegister"));
+    section_cper->Status = json_object_get_uint64(json_object_object_get(section, "statusRegister"));
+
+    //IOMMU event log entry.
+    json_object* encoded = json_object_object_get(section, "eventLogEntry");
+    UINT8* decoded = b64_decode(json_object_get_string(encoded), json_object_get_string_len(encoded));
+    memcpy(section_cper->EventLogEntry, decoded, 16);
+    free(decoded);
+
+    //Device table entry.
+    encoded = json_object_object_get(section, "deviceTableEntry");
+    decoded = b64_decode(json_object_get_string(encoded), json_object_get_string_len(encoded));
+    memcpy(section_cper->DeviceTableEntry, decoded, 32);
+    free(decoded);
+
+    //Page table entries.
+    section_cper->PteL1 = json_object_get_uint64(json_object_object_get(section, "pageTableEntry_Level1"));
+    section_cper->PteL2 = json_object_get_uint64(json_object_object_get(section, "pageTableEntry_Level2"));
+    section_cper->PteL3 = json_object_get_uint64(json_object_object_get(section, "pageTableEntry_Level3"));
+    section_cper->PteL4 = json_object_get_uint64(json_object_object_get(section, "pageTableEntry_Level4"));
+    section_cper->PteL5 = json_object_get_uint64(json_object_object_get(section, "pageTableEntry_Level5"));
+    section_cper->PteL6 = json_object_get_uint64(json_object_object_get(section, "pageTableEntry_Level6"));
+
+    //Write to stream, free resources.
+    fwrite(&section_cper, sizeof(section_cper), 1, out);
+    fflush(out);
+    free(section_cper);
 }

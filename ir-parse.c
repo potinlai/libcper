@@ -77,18 +77,18 @@ void ir_to_cper(json_object* ir, FILE* out)
             ir_section_memory2_to_cper(section, out);
         else if (guid_equal(&descriptors[i]->SectionType, &gEfiPcieErrorSectionGuid))
             ir_section_pcie_to_cper(section, out);
-        // else if (guid_equal(&descriptors[i]->SectionType, &gEfiFirmwareErrorSectionGuid))
-        //     ir_section_firmware_to_cper(section, out);
-        // else if (guid_equal(&descriptors[i]->SectionType, &gEfiPciBusErrorSectionGuid))
-        //     ir_section_pci_bus_to_cper(section, out);
-        // else if (guid_equal(&descriptors[i]->SectionType, &gEfiPciDevErrorSectionGuid))
-        //     ir_section_pci_dev_to_cper(section, out);
-        // else if (guid_equal(&descriptors[i]->SectionType, &gEfiDMArGenericErrorSectionGuid))
-        //     ir_section_dmar_generic_to_cper(section, out);
-        // else if (guid_equal(&descriptors[i]->SectionType, &gEfiDirectedIoDMArErrorSectionGuid))
-        //     ir_section_dmar_vtd_to_cper(section, out);
-        // else if (guid_equal(&descriptors[i]->SectionType, &gEfiIommuDMArErrorSectionGuid))
-        //     ir_section_dmar_iommu_to_cper(section, out);
+        else if (guid_equal(&descriptors[i]->SectionType, &gEfiFirmwareErrorSectionGuid))
+            ir_section_firmware_to_cper(section, out);
+        else if (guid_equal(&descriptors[i]->SectionType, &gEfiPciBusErrorSectionGuid))
+            ir_section_pci_bus_to_cper(section, out);
+        else if (guid_equal(&descriptors[i]->SectionType, &gEfiPciDevErrorSectionGuid))
+            ir_section_pci_dev_to_cper(section, out);
+        else if (guid_equal(&descriptors[i]->SectionType, &gEfiDMArGenericErrorSectionGuid))
+            ir_section_dmar_generic_to_cper(section, out);
+        else if (guid_equal(&descriptors[i]->SectionType, &gEfiDirectedIoDMArErrorSectionGuid))
+            ir_section_dmar_vtd_to_cper(section, out);
+        else if (guid_equal(&descriptors[i]->SectionType, &gEfiIommuDMArErrorSectionGuid))
+            ir_section_dmar_iommu_to_cper(section, out);
         // else if (guid_equal(&descriptors[i]->SectionType, &gEfiCcixPerLogErrorSectionGuid))
         //     ir_section_ccix_per_to_cper(section, out);
         // else if (guid_equal(&descriptors[i]->SectionType, &gEfiCxlProtocolErrorSectionGuid))

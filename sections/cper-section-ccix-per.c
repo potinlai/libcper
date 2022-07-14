@@ -5,6 +5,7 @@
  * Author: Lawrence.Tang@arm.com
  **/
 #include <stdio.h>
+#include <string.h>
 #include "json.h"
 #include "b64.h"
 #include "../edk/Cper.h"
@@ -31,7 +32,7 @@ json_object* cper_section_ccix_per_to_ir(void* section, EFI_ERROR_SECTION_DESCRI
     //CCIX PER Log.
     //This is formatted as described in Section 7.3.2 of CCIX Base Specification (Rev 1.0).
     unsigned char* cur_pos = (unsigned char*)(ccix_error + 1);
-    int remaining_length = section - (void*)cur_pos + ccix_error->Length;
+    int remaining_length = ccix_error->Length - sizeof(ccix_error);
     if (remaining_length > 0)
     {
         char* encoded = b64_encode(cur_pos, remaining_length);
@@ -40,4 +41,36 @@ json_object* cper_section_ccix_per_to_ir(void* section, EFI_ERROR_SECTION_DESCRI
     }
 
     return section_ir;
+}
+
+//Converts a single CCIX PER CPER-JSON section into CPER binary, outputting to the given stream.
+void ir_section_ccix_per_to_cper(json_object* section, FILE* out)
+{
+    EFI_CCIX_PER_LOG_DATA* section_cper =
+        (EFI_CCIX_PER_LOG_DATA*)calloc(1, sizeof(EFI_CCIX_PER_LOG_DATA));
+
+    //Length.
+    section_cper->Length = json_object_get_uint64(json_object_object_get(section, "length"));
+
+    //Validation bits.
+    section_cper->ValidBits = ir_to_bitfield(json_object_object_get(section, "validationBits"), 
+        3, CCIX_PER_ERROR_VALID_BITFIELD_NAMES);
+
+    //CCIX source/port IDs.
+    section_cper->CcixSourceId = (UINT8)json_object_get_int(json_object_object_get(section, "ccixSourceID"));
+    section_cper->CcixPortId = (UINT8)json_object_get_int(json_object_object_get(section, "ccixPortID"));
+    
+    //Write header out to stream.
+    fwrite(&section_cper, sizeof(section_cper), 1, out);
+    fflush(out);
+
+    //Write CCIX PER log itself to stream.
+    json_object* encoded = json_object_object_get(section, "ccixPERLog");
+    UINT8* decoded = b64_decode(json_object_get_string(encoded), json_object_get_string_len(encoded));
+    fwrite(decoded, section_cper->Length - sizeof(section_cper), 1, out);
+    fflush(out);
+
+    //Free resources.
+    free(decoded);
+    free(section_cper);
 }

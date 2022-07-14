@@ -5,6 +5,7 @@
  * Author: Lawrence.Tang@arm.com
  **/
 #include <stdio.h>
+#include <string.h>
 #include "json.h"
 #include "b64.h"
 #include "../edk/Cper.h"
@@ -44,7 +45,7 @@ json_object* cper_section_dmar_vtd_to_ir(void* section, EFI_ERROR_SECTION_DESCRI
     json_object_object_add(fault_record_ir, "pasidValue", json_object_new_uint64(fault_record->PasidValue));
     json_object_object_add(fault_record_ir, "addressType", json_object_new_uint64(fault_record->AddressType));
 
-    //Fault record address type.
+    //Fault record type.
     json_object* fault_record_type = integer_to_readable_pair(fault_record->Type, 2,
         VTD_FAULT_RECORD_TYPES_KEYS,
         VTD_FAULT_RECORD_TYPES_VALUES,
@@ -71,4 +72,70 @@ json_object* cper_section_dmar_vtd_to_ir(void* section, EFI_ERROR_SECTION_DESCRI
     json_object_object_add(section_ir, "pageTableEntry_Level1", json_object_new_uint64(vtd_error->PteL1));
 
     return section_ir;
+}
+
+//Converts a single VT-d DMAR CPER-JSON segment into CPER binary, outputting to the given stream.
+void ir_section_dmar_vtd_to_cper(json_object* section, FILE* out)
+{
+    EFI_DIRECTED_IO_DMAR_ERROR_DATA* section_cper =
+        (EFI_DIRECTED_IO_DMAR_ERROR_DATA*)calloc(1, sizeof(EFI_DIRECTED_IO_DMAR_ERROR_DATA));
+
+    //OEM ID.
+    UINT64 oem_id = json_object_get_uint64(json_object_object_get(section, "oemID"));
+    section_cper->OemId[0] = oem_id >> 16;
+    section_cper->OemId[1] = (oem_id >> 8) & 0xFF;
+    section_cper->OemId[1] = oem_id & 0xFF;
+
+    //Registers & basic numeric fields.
+    section_cper->Version = (UINT8)json_object_get_int(json_object_object_get(section, "version"));
+    section_cper->Revision = (UINT8)json_object_get_int(json_object_object_get(section, "revision"));
+    section_cper->Capability = json_object_get_uint64(json_object_object_get(section, "capabilityRegister"));
+    section_cper->CapabilityEx = json_object_get_uint64(json_object_object_get(section, "extendedCapabilityRegister"));
+
+    //Fault record.
+    json_object* fault_record = json_object_object_get(section, "faultRecord");
+    EFI_VTD_FAULT_RECORD* fault_record_cper = (EFI_VTD_FAULT_RECORD*)section_cper->FaultRecord;
+    fault_record_cper->FaultInformation = 
+        json_object_get_uint64(json_object_object_get(fault_record, "faultInformation"));
+    fault_record_cper->SourceIdentifier = 
+        json_object_get_uint64(json_object_object_get(fault_record, "sourceIdentifier"));
+    fault_record_cper->PrivelegeModeRequested = 
+        json_object_get_boolean(json_object_object_get(fault_record, "privelegeModeRequested"));
+    fault_record_cper->ExecutePermissionRequested = 
+        json_object_get_boolean(json_object_object_get(fault_record, "executePermissionRequested"));
+    fault_record_cper->PasidPresent = 
+        json_object_get_boolean(json_object_object_get(fault_record, "pasidPresent"));
+    fault_record_cper->FaultReason = 
+        json_object_get_uint64(json_object_object_get(fault_record, "faultReason"));
+    fault_record_cper->PasidValue = 
+        json_object_get_uint64(json_object_object_get(fault_record, "pasidValue"));
+    fault_record_cper->AddressType = 
+        json_object_get_uint64(json_object_object_get(fault_record, "addressType"));
+    fault_record_cper->Type = 
+        readable_pair_to_integer(json_object_object_get(fault_record, "type"));
+        
+    //Root entry.
+    json_object* encoded = json_object_object_get(section, "rootEntry");
+    UINT8* decoded = b64_decode(json_object_get_string(encoded), json_object_get_string_len(encoded));
+    memcpy(section_cper->RootEntry, decoded, 16);
+    free(decoded);
+
+    //Context entry.
+    encoded = json_object_object_get(section, "contextEntry");
+    decoded = b64_decode(json_object_get_string(encoded), json_object_get_string_len(encoded));
+    memcpy(section_cper->ContextEntry, decoded, 16);
+    free(decoded);
+
+    //Page table entries.
+    section_cper->PteL1 = json_object_get_uint64(json_object_object_get(section, "pageTableEntry_Level1"));
+    section_cper->PteL2 = json_object_get_uint64(json_object_object_get(section, "pageTableEntry_Level2"));
+    section_cper->PteL3 = json_object_get_uint64(json_object_object_get(section, "pageTableEntry_Level3"));
+    section_cper->PteL4 = json_object_get_uint64(json_object_object_get(section, "pageTableEntry_Level4"));
+    section_cper->PteL5 = json_object_get_uint64(json_object_object_get(section, "pageTableEntry_Level5"));
+    section_cper->PteL6 = json_object_get_uint64(json_object_object_get(section, "pageTableEntry_Level6"));
+
+    //Write to stream, free resources.
+    fwrite(&section_cper, sizeof(section_cper), 1, out);
+    fflush(out);
+    free(section_cper);
 }
