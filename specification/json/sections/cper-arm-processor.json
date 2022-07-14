@@ -277,7 +277,7 @@
                             },
                             {
                                 "type": "object",
-                                "requried": ["data"],
+                                "required": ["data"],
                                 "additionalProperties": false,
                                 "properties": {
                                     "data": {
