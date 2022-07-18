@@ -9,10 +9,9 @@
 #include <string.h>
 #include "../edk/Cper.h"
 #include "gen-utils.h"
-#include "sections/gen-section-generic.h"
-#include "sections/gen-section-ia32x64.h"
+#include "sections/gen-sections.h"
 
-EFI_ERROR_SECTION_DESCRIPTOR* generate_section_descriptor(char* type, size_t* lengths, int index);
+EFI_ERROR_SECTION_DESCRIPTOR* generate_section_descriptor(char* type, size_t* lengths, int index, int num_sections);
 size_t generate_section(void** location, char* type);
 void print_help();
 
@@ -54,17 +53,20 @@ int main(int argc, char* argv[])
         (EFI_COMMON_ERROR_RECORD_HEADER*)calloc(1, sizeof(EFI_COMMON_ERROR_RECORD_HEADER));
     header->SignatureStart = 0x52455043; //CPER
     header->SectionCount = num_sections;
-    printf("%d sections\n", num_sections);
     header->SignatureEnd = 0xFFFFFFFF;
     header->Flags = 4; //HW_ERROR_FLAGS_SIMULATED
+    header->RecordID = (UINT64)rand();
+    header->ErrorSeverity = rand() % 4;
+    *((UINT64*)&header->TimeStamp) = (UINT64)rand();
+    header->ValidationBits = rand() % 0b1000;
 
     //Generate the section descriptors given the number of sections.
     EFI_ERROR_SECTION_DESCRIPTOR* section_descriptors[num_sections];
     for (int i=0; i<num_sections; i++)
-        section_descriptors[i] = generate_section_descriptor(argv[4 + i], section_lengths, i);
+        section_descriptors[i] = generate_section_descriptor(argv[4 + i], section_lengths, i, num_sections);
 
     //Calculate total length of structure, set in header.
-    size_t total_len = sizeof(header);
+    size_t total_len = sizeof(EFI_COMMON_ERROR_RECORD_HEADER);
     for (int i=0; i<num_sections; i++)
         total_len += section_lengths[i];
     total_len += num_sections * sizeof(EFI_ERROR_SECTION_DESCRIPTOR);
@@ -98,7 +100,7 @@ int main(int argc, char* argv[])
 }
 
 //Generates a single section descriptor for a section with the given properties.
-EFI_ERROR_SECTION_DESCRIPTOR* generate_section_descriptor(char* type, size_t* lengths, int index)
+EFI_ERROR_SECTION_DESCRIPTOR* generate_section_descriptor(char* type, size_t* lengths, int index, int num_sections)
 {
     EFI_ERROR_SECTION_DESCRIPTOR* descriptor = 
         (EFI_ERROR_SECTION_DESCRIPTOR*)generate_random_bytes(sizeof(EFI_ERROR_SECTION_DESCRIPTOR));
@@ -110,7 +112,8 @@ EFI_ERROR_SECTION_DESCRIPTOR* generate_section_descriptor(char* type, size_t* le
 
     //Set length, offset from base record.
     descriptor->SectionLength = (UINT32)lengths[index];
-    descriptor->SectionOffset = sizeof(EFI_COMMON_ERROR_RECORD_HEADER);
+    descriptor->SectionOffset = sizeof(EFI_COMMON_ERROR_RECORD_HEADER)
+        + (num_sections * sizeof(EFI_ERROR_SECTION_DESCRIPTOR));
     for (int i=0; i<index; i++)
         descriptor->SectionOffset += lengths[i];
 
@@ -191,8 +194,8 @@ size_t generate_section(void** location, char* type)
         length = generate_section_ia32x64(location);
     // else if (strcmp(type, "ipf") == 0)
     //     length = generate_section_ipf(location);
-    // else if (strcmp(type, "arm") == 0)
-    //     length = generate_section_arm(location);
+    else if (strcmp(type, "arm") == 0)
+        length = generate_section_arm(location);
     // else if (strcmp(type, "memory") == 0)
     //     length = generate_section_memory(location);
     // else if (strcmp(type, "memory2") == 0)

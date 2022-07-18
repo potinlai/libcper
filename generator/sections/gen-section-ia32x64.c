@@ -8,7 +8,8 @@
 #include <string.h>
 #include "../../edk/Cper.h"
 #include "../gen-utils.h"
-#include "gen-section-ia32x64.h"
+#include "gen-sections.h"
+#define IA32X64_ERROR_STRUCTURE_SIZE 64
 
 void* generate_ia32x64_error_structure();
 size_t generate_ia32x64_context_structure(void** location);

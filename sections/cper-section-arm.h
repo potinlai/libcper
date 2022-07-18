@@ -37,8 +37,8 @@
     "Device Memory Access"}
 #define ARM_PROCESSOR_INFO_REGISTER_CONTEXT_TYPES_KEYS (int []){0, 1, 2, 3, 4, 5, 6, 7, 8}
 #define ARM_PROCESSOR_INFO_REGISTER_CONTEXT_TYPES_VALUES (const char*[]){"AArch32 General Purpose Registers", \
-    "AArch32 EL1 Context Registers", "AArch32 EL2 Context Registers", "AArch32 Secure Context Registers" \
-    "AArch64 General Purpose Registers", "AArch64 EL1 Context Registers", "AArch64 EL2 Context Registers" \
+    "AArch32 EL1 Context Registers", "AArch32 EL2 Context Registers", "AArch32 Secure Context Registers", \
+    "AArch64 General Purpose Registers", "AArch64 EL1 Context Registers", "AArch64 EL2 Context Registers", \
     "AArch64 EL3 Context Registers", "Miscellaneous System Register Structure"}
 #define ARM_AARCH32_GPR_NAMES (const char*[]){"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", \
     "r10", "r11", "r12", "r13_sp", "r14_lr", "r15_pc"}
@@ -48,8 +48,8 @@
 #define ARM_AARCH32_EL2_REGISTER_NAMES (const char*[]){"elr_hyp", "hamair0", "hamair1", "hcr", "hcr2", "hdfar", \
     "hifar", "hpfar", "hsr", "htcr", "htpidr", "httbr", "spsr_hyp", "vtcr", "vttbr", "dacr32_el2"}
 #define ARM_AARCH32_SECURE_REGISTER_NAMES (const char*[]){"sctlr_s", "spsr_mon"}
-#define ARM_AARCH64_GPR_NAMES (const char*[]){"x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10" \
-    "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x18", "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26" \
+#define ARM_AARCH64_GPR_NAMES (const char*[]){"x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10", \
+    "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x18", "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", \
     "x27", "x28", "x29", "x30", "sp"}
 #define ARM_AARCH64_EL1_REGISTER_NAMES (const char*[]){"elr_el1", "esr_el1", "far_el1", "isr_el1", "mair_el1", \
     "midr_el1", "mpidr_el1", "sctlr_el1", "sp_el0", "sp_el1", "spsr_el1", "tcr_el1", "tpidr_el0", "tpidr_el1", \

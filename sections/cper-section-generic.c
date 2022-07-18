@@ -35,7 +35,7 @@ json_object* cper_section_generic_to_ir(void* section, EFI_ERROR_SECTION_DESCRIP
         sizeof(GENERIC_ISA_TYPES_KEYS) / sizeof(int),
         GENERIC_ISA_TYPES_KEYS,
         GENERIC_ISA_TYPES_VALUES,
-        "Unknown (Reserved");
+        "Unknown (Reserved)");
     json_object_object_add(section_ir, "processorISA", processor_isa);
 
     //Processor error type, with human readable name if possible.
@@ -43,7 +43,7 @@ json_object* cper_section_generic_to_ir(void* section, EFI_ERROR_SECTION_DESCRIP
         sizeof(GENERIC_ERROR_TYPES_KEYS) / sizeof(int),
         GENERIC_ERROR_TYPES_KEYS, 
         GENERIC_ERROR_TYPES_VALUES, 
-        "Unknown (Reserved");
+        "Unknown (Reserved)");
     json_object_object_add(section_ir, "errorType", processor_error_type);
 
     //The operation performed, with a human readable name if possible.
@@ -51,7 +51,7 @@ json_object* cper_section_generic_to_ir(void* section, EFI_ERROR_SECTION_DESCRIP
         sizeof(GENERIC_OPERATION_TYPES_KEYS) / sizeof(int),
         GENERIC_OPERATION_TYPES_KEYS, 
         GENERIC_OPERATION_TYPES_VALUES, 
-        "Unknown (Reserved");
+        "Unknown (Reserved)");
     json_object_object_add(section_ir, "operation", operation);
 
     //Flags, additional information about the error.
