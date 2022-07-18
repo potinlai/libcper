@@ -192,7 +192,7 @@ json_object* revision_to_ir(UINT16 revision)
 }
 
 //Returns the appropriate string for the given integer severity.
-const char* severity_to_string(UINT8 severity)
+const char* severity_to_string(UINT32 severity)
 {
     return severity < 4 ? CPER_SEVERITY_TYPES[severity] : "Unknown";
 }

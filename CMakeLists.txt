@@ -26,8 +26,10 @@ FetchContent_MakeAvailable(json-c b64-c)
 # Add library and test executable.
 file(GLOB SectionSources sections/*.c)
 file(GLOB EDKSources edk/*.c)
+file(GLOB GeneratorSectionSources generator/sections/*.c)
 add_library(cper-parse STATIC cper-parse.c ir-parse.c cper-utils.c json-schema.c json-schema.h ${SectionSources} ${EDKSources})
-add_executable(cper-convert testing/cper-convert.c)
+add_executable(cper-convert cli-app/cper-convert.c)
+add_executable(cper-generate generator/cper-generate.c generator/gen-utils.c ${GeneratorSectionSources} ${EDKSources})
 
 # Link library.
 target_link_libraries(cper-parse json-c b64c)

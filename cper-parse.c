@@ -41,13 +41,13 @@ json_object* cper_to_ir(FILE* cper_file)
     fseek(cper_file, 0, SEEK_SET);
     if (fread(&header, sizeof(EFI_COMMON_ERROR_RECORD_HEADER), 1, cper_file) != 1)
     {
-        printf("Invalid CPER file: Invalid length (log too short).");
+        printf("Invalid CPER file: Invalid length (log too short).\n");
         return NULL;
     }
 
     //Check if the header contains the magic bytes ("CPER").
     if (header.SignatureStart != EFI_ERROR_RECORD_SIGNATURE_START) {
-        printf("Invalid CPER file: Invalid header (incorrect signature).");
+        printf("Invalid CPER file: Invalid header (incorrect signature).\n");
         return NULL;
     }
 
@@ -63,7 +63,7 @@ json_object* cper_to_ir(FILE* cper_file)
         EFI_ERROR_SECTION_DESCRIPTOR section_descriptor;
         if (fread(&section_descriptor, sizeof(EFI_ERROR_SECTION_DESCRIPTOR), 1, cper_file) != 1)
         {
-            printf("Invalid number of section headers: Header states %d sections, could not read section %d.", header.SectionCount, i+1);
+            printf("Invalid number of section headers: Header states %d sections, could not read section %d.\n", header.SectionCount, i+1);
             return NULL;
         }
         json_object_array_add(section_descriptors_ir, cper_section_descriptor_to_ir(&section_descriptor));
@@ -230,7 +230,8 @@ json_object* cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR* section
          section_type_readable = "IPF";
     else if (guid_equal(&section_descriptor->SectionType, &gEfiArmProcessorErrorSectionGuid))
         section_type_readable = "ARM";
-    else if (guid_equal(&section_descriptor->SectionType, &gEfiPlatformMemoryErrorSectionGuid))
+    else if (guid_equal(&section_descriptor->SectionType, &gEfiPlatformMemoryErrorSectionGuid)
+            || guid_equal(&section_descriptor->SectionType, &gEfiPlatformMemoryError2SectionGuid))
         section_type_readable = "Platform Memory";
     else if (guid_equal(&section_descriptor->SectionType, &gEfiPcieErrorSectionGuid))
         section_type_readable = "PCIe";
@@ -294,7 +295,7 @@ json_object* cper_section_to_ir(FILE* handle, EFI_ERROR_SECTION_DESCRIPTOR* desc
     void* section = malloc(descriptor->SectionLength);
     if (fread(section, descriptor->SectionLength, 1, handle) != 1)
     {
-        printf("Section read failed: Could not read %d bytes from global offset %d.", 
+        printf("Section read failed: Could not read %d bytes from global offset %d.\n", 
             descriptor->SectionLength,
             descriptor->SectionOffset);
         free(section);
