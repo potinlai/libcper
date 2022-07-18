@@ -10,7 +10,7 @@ make
 A static library file for the parsing library will be written to `lib/`, and test executables will be written to `bin/`.
 
 ## Usage
-This project comes with several binaries and libraries to help you deal with CPER binary and CPER-JSON. The first of these is `cper-convert`, which is a command line tool that can be found in `bin/`. With this, you can convert to and from CPER and CPER-JSON through the command line. An example usage scenario is below:
+This project comes with several binaries to help you deal with CPER binary and CPER-JSON. The first of these is `cper-convert`, which is a command line tool that can be found in `bin/`. With this, you can convert to and from CPER and CPER-JSON through the command line. An example usage scenario is below:
 ```
 cper-convert to-cper samples/cper-json-test-arm.json --out cper.dump
 cper-convert to-json cper.generated.dump
