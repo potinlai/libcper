@@ -26,10 +26,14 @@ FetchContent_MakeAvailable(json-c b64-c)
 # Add library and test executable.
 file(GLOB SectionSources sections/*.c)
 file(GLOB EDKSources edk/*.c)
-add_library(CPERParseLibrary STATIC cper-parse.c ir-parse.c cper-utils.c json-schema.c json-schema.h ${SectionSources} ${EDKSources})
-add_executable(CPERParseTest testing/cper-test.c)
+add_library(cper-parse STATIC cper-parse.c ir-parse.c cper-utils.c json-schema.c json-schema.h ${SectionSources} ${EDKSources})
+add_executable(cper-convert testing/cper-convert.c)
 
 # Link library.
-target_link_libraries(CPERParseLibrary json-c b64c)
-target_link_libraries(CPERParseTest CPERParseLibrary)
-target_compile_options(CPERParseLibrary PRIVATE -Wno-address-of-packed-member)
+target_link_libraries(cper-parse json-c b64c)
+target_link_libraries(cper-convert cper-parse)
+target_compile_options(cper-parse PRIVATE -Wno-address-of-packed-member)
+
+# Copy required specification JSON for command line application.
+add_custom_command(TARGET cper-convert POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory bin/specification)
+add_custom_command(TARGET cper-convert POST_BUILD COMMAND cp -r specification/json/* bin/specification)
