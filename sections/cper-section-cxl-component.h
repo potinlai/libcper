@@ -30,5 +30,6 @@ typedef struct {
 } EFI_CXL_COMPONENT_EVENT_HEADER;
 
 json_object* cper_section_cxl_component_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor);
+void ir_section_cxl_component_to_cper(json_object* section, FILE* out);
 
 #endif

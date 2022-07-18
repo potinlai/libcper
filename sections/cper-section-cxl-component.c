@@ -40,7 +40,7 @@ json_object* cper_section_cxl_component_to_ir(void* section, EFI_ERROR_SECTION_D
 
     //The specification for this is defined within the CXL Specification Section 8.2.9.1.
     unsigned char* cur_pos = (unsigned char*)(cxl_error + 1);
-    int remaining_len = section - (void*)cur_pos + cxl_error->Length;
+    int remaining_len = cxl_error->Length - sizeof(cxl_error);
     if (remaining_len > 0)
     {
         json_object* event_log = json_object_new_object();
@@ -51,4 +51,51 @@ json_object* cper_section_cxl_component_to_ir(void* section, EFI_ERROR_SECTION_D
     }
 
     return section_ir;
+}
+
+//Converts a single given CXL Component CPER-JSON section into CPER binary, outputting to the
+//given stream.
+void ir_section_cxl_component_to_cper(json_object* section, FILE* out)
+{
+    EFI_CXL_COMPONENT_EVENT_HEADER* section_cper =
+        (EFI_CXL_COMPONENT_EVENT_HEADER*)calloc(1, sizeof(EFI_CXL_COMPONENT_EVENT_HEADER));
+
+    //Length of the structure.
+    section_cper->Length = json_object_get_uint64(json_object_object_get(section, "length"));
+
+    //Validation bits.
+    section_cper->ValidBits = ir_to_bitfield(json_object_object_get(section, "validationBits"), 
+        3, CXL_COMPONENT_ERROR_VALID_BITFIELD_NAMES);
+
+    //Device ID information.
+    json_object* device_id = json_object_object_get(section, "deviceID");
+    section_cper->DeviceId.VendorId = json_object_get_uint64(json_object_object_get(device_id, "vendorID"));
+    section_cper->DeviceId.DeviceId = json_object_get_uint64(json_object_object_get(device_id, "deviceID"));
+    section_cper->DeviceId.FunctionNumber = 
+        json_object_get_uint64(json_object_object_get(device_id, "functionNumber"));
+    section_cper->DeviceId.DeviceNumber = 
+        json_object_get_uint64(json_object_object_get(device_id, "deviceNumber"));
+    section_cper->DeviceId.BusNumber = 
+        json_object_get_uint64(json_object_object_get(device_id, "busNumber"));
+    section_cper->DeviceId.SegmentNumber = 
+        json_object_get_uint64(json_object_object_get(device_id, "segmentNumber"));
+    section_cper->DeviceId.SlotNumber = 
+        json_object_get_uint64(json_object_object_get(device_id, "slotNumber"));
+
+    //Device serial number.
+    section_cper->DeviceSerial = json_object_get_uint64(json_object_object_get(section, "deviceSerial"));
+
+    //Write header out to stream.
+    fwrite(section_cper, sizeof(section_cper), 1, out);
+    fflush(out);
+
+    //CXL component event log, decoded from base64.
+    json_object* encoded = json_object_object_get(section, "cxlComponentEventLog");
+    int log_length = section_cper->Length - sizeof(section_cper);
+    char* decoded = b64_decode(json_object_get_string(encoded), json_object_get_string_len(encoded));
+    fwrite(decoded, log_length, 1, out);
+    fflush(out);
+    free(decoded);
+
+    free(section_cper);
 }

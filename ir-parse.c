@@ -89,18 +89,18 @@ void ir_to_cper(json_object* ir, FILE* out)
             ir_section_dmar_vtd_to_cper(section, out);
         else if (guid_equal(&descriptors[i]->SectionType, &gEfiIommuDMArErrorSectionGuid))
             ir_section_dmar_iommu_to_cper(section, out);
-        // else if (guid_equal(&descriptors[i]->SectionType, &gEfiCcixPerLogErrorSectionGuid))
-        //     ir_section_ccix_per_to_cper(section, out);
-        // else if (guid_equal(&descriptors[i]->SectionType, &gEfiCxlProtocolErrorSectionGuid))
-        //     ir_section_cxl_protocol_to_cper(section, out);
-        // else if (guid_equal(&descriptors[i]->SectionType, &gEfiCxlGeneralMediaErrorSectionGuid)
-        //     || guid_equal(&descriptors[i]->SectionType, &gEfiCxlDramEventErrorSectionGuid)
-        //     || guid_equal(&descriptors[i]->SectionType, &gEfiCxlPhysicalSwitchErrorSectionGuid)
-        //     || guid_equal(&descriptors[i]->SectionType, &gEfiCxlVirtualSwitchErrorSectionGuid)
-        //     || guid_equal(&descriptors[i]->SectionType, &gEfiCxlMldPortErrorSectionGuid))
-        // {
-        //     ir_section_cxl_component_to_cper(section, out);
-        // }
+        else if (guid_equal(&descriptors[i]->SectionType, &gEfiCcixPerLogErrorSectionGuid))
+            ir_section_ccix_per_to_cper(section, out);
+        else if (guid_equal(&descriptors[i]->SectionType, &gEfiCxlProtocolErrorSectionGuid))
+            ir_section_cxl_protocol_to_cper(section, out);
+        else if (guid_equal(&descriptors[i]->SectionType, &gEfiCxlGeneralMediaErrorSectionGuid)
+            || guid_equal(&descriptors[i]->SectionType, &gEfiCxlDramEventErrorSectionGuid)
+            || guid_equal(&descriptors[i]->SectionType, &gEfiCxlPhysicalSwitchErrorSectionGuid)
+            || guid_equal(&descriptors[i]->SectionType, &gEfiCxlVirtualSwitchErrorSectionGuid)
+            || guid_equal(&descriptors[i]->SectionType, &gEfiCxlMldPortErrorSectionGuid))
+        {
+            ir_section_cxl_component_to_cper(section, out);
+        }
         else
         {
             //Unknown GUID, so read as a base64 unknown section.

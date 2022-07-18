@@ -5,6 +5,7 @@
  * Author: Lawrence.Tang@arm.com
  **/
 #include <stdio.h>
+#include <string.h>
 #include "json.h"
 #include "b64.h"
 #include "../edk/Cper.h"
@@ -99,4 +100,85 @@ json_object* cper_section_cxl_protocol_to_ir(void* section, EFI_ERROR_SECTION_DE
     free(encoded);
     
     return section_ir;
+}
+
+//Converts a single CXL protocol CPER-JSON section into CPER binary, outputting to the given stream.
+void ir_section_cxl_protocol_to_cper(json_object* section, FILE* out)
+{
+    EFI_CXL_PROTOCOL_ERROR_DATA* section_cper =
+        (EFI_CXL_PROTOCOL_ERROR_DATA*)calloc(1, sizeof(EFI_CXL_PROTOCOL_ERROR_DATA));
+
+    //Validation bits.
+    section_cper->ValidBits = ir_to_bitfield(json_object_object_get(section, "validationBits"), 
+        7, CXL_PROTOCOL_ERROR_VALID_BITFIELD_NAMES);
+
+    //Detecting agent type.
+    section_cper->CxlAgentType = readable_pair_to_integer(json_object_object_get(section, "agentType"));
+
+    //Based on the agent type, set the address.
+    json_object* address = json_object_object_get(section, "cxlAgentAddress");
+    if (section_cper->CxlAgentType == CXL_PROTOCOL_ERROR_DEVICE_AGENT)
+    {
+        //Address is split by function, device, bus & segment.
+        UINT64 function = json_object_get_uint64(json_object_object_get(address, "functionNumber"));
+        UINT64 device = json_object_get_uint64(json_object_object_get(address, "deviceNumber"));
+        UINT64 bus = json_object_get_uint64(json_object_object_get(address, "busNumber"));
+        UINT64 segment = json_object_get_uint64(json_object_object_get(address, "segmentNumber"));
+        section_cper->CxlAgentAddress.DeviceAddress.FunctionNumber = function;
+        section_cper->CxlAgentAddress.DeviceAddress.DeviceNumber = device;
+        section_cper->CxlAgentAddress.DeviceAddress.BusNumber = bus;
+        section_cper->CxlAgentAddress.DeviceAddress.SegmentNumber = segment;
+    }
+    else if (section_cper->CxlAgentType == CXL_PROTOCOL_ERROR_HOST_DOWNSTREAM_PORT_AGENT)
+    {
+        //Plain RCRB base address.
+        section_cper->CxlAgentAddress.PortRcrbBaseAddress = 
+            json_object_get_uint64(json_object_object_get(address, "value"));
+    }
+
+    //Device ID information.
+    json_object* device_id = json_object_object_get(section, "deviceID");
+    section_cper->DeviceId.VendorId = json_object_get_uint64(json_object_object_get(device_id, "vendorID"));
+    section_cper->DeviceId.DeviceId = json_object_get_uint64(json_object_object_get(device_id, "deviceID"));
+    section_cper->DeviceId.SubsystemVendorId = 
+        json_object_get_uint64(json_object_object_get(device_id, "subsystemVendorID"));
+    section_cper->DeviceId.SubsystemDeviceId = 
+        json_object_get_uint64(json_object_object_get(device_id, "subsystemDeviceID"));
+    section_cper->DeviceId.ClassCode = json_object_get_uint64(json_object_object_get(device_id, "classCode"));
+    section_cper->DeviceId.SlotNumber = json_object_get_uint64(json_object_object_get(device_id, "slotNumber"));
+
+    //If CXL 1.1 device, the serial number & PCI capability structure.
+    if (section_cper->CxlAgentType == CXL_PROTOCOL_ERROR_DEVICE_AGENT)
+    {
+        section_cper->DeviceSerial = json_object_get_uint64(json_object_object_get(section, "deviceSerial"));
+
+        json_object* encoded = json_object_object_get(section, "capabilityStructure");
+        char* decoded = b64_decode(json_object_get_string(encoded), json_object_get_string_len(encoded));
+        memcpy(section_cper->CapabilityStructure.PcieCap, decoded, 60);
+        free(decoded);
+    }
+
+    //DVSEC length & error log length.
+    section_cper->CxlDvsecLength = (UINT16)json_object_get_int(json_object_object_get(section, "dvsecLength"));
+    section_cper->CxlErrorLogLength = (UINT16)json_object_get_int(json_object_object_get(section, "errorLogLength"));
+
+    //Write header to stream.
+    fwrite(section_cper, sizeof(section_cper), 1, out);
+    fflush(out);
+
+    //DVSEC out to stream.
+    json_object* encoded = json_object_object_get(section, "cxlDVSEC");
+    char* decoded = b64_decode(json_object_get_string(encoded), json_object_get_string_len(encoded));
+    fwrite(decoded, section_cper->CxlDvsecLength, 1, out);
+    fflush(out);
+    free(decoded);
+
+    //Error log out to stream.
+    encoded = json_object_object_get(section, "cxlErrorLog");
+    decoded = b64_decode(json_object_get_string(encoded), json_object_get_string_len(encoded));
+    fwrite(decoded, section_cper->CxlErrorLogLength, 1, out);
+    fflush(out);
+    free(decoded);
+
+    free(section_cper);
 }
