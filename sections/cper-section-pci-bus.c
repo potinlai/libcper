@@ -38,9 +38,10 @@ json_object* cper_section_pci_bus_to_ir(void* section, EFI_ERROR_SECTION_DESCRIP
     json_object_object_add(section_ir, "busID", bus_id);
 
     //Miscellaneous numeric fields.
+    UINT8 command_type = (bus_error->BusCommand >> 56) & 0b1; //Byte 7, bit 0.
     json_object_object_add(section_ir, "busAddress", json_object_new_uint64(bus_error->BusAddress));
     json_object_object_add(section_ir, "busData", json_object_new_uint64(bus_error->BusData));
-    json_object_object_add(section_ir, "busCommandType", json_object_new_string(bus_error->BusCommand == 0 ? "PCI" : "PCI-X"));
+    json_object_object_add(section_ir, "busCommandType", json_object_new_string(command_type == 0 ? "PCI" : "PCI-X"));
     json_object_object_add(section_ir, "busRequestorID", json_object_new_uint64(bus_error->RequestorId));
     json_object_object_add(section_ir, "busCompleterID", json_object_new_uint64(bus_error->ResponderId));
     json_object_object_add(section_ir, "targetID", json_object_new_uint64(bus_error->TargetId));

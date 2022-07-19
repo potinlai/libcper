@@ -196,32 +196,32 @@ size_t generate_section(void** location, char* type)
     //     length = generate_section_ipf(location);
     else if (strcmp(type, "arm") == 0)
         length = generate_section_arm(location);
-    // else if (strcmp(type, "memory") == 0)
-    //     length = generate_section_memory(location);
-    // else if (strcmp(type, "memory2") == 0)
-    //     length = generate_section_memory2(location);
-    // else if (strcmp(type, "pcie") == 0)
-    //     length = generate_section_pcie(location);
-    // else if (strcmp(type, "firmware") == 0)
-    //     length = generate_section_firmware(location);
-    // else if (strcmp(type, "pcibus") == 0)
-    //     length = generate_section_pci_bus(location);
-    // else if (strcmp(type, "pcidev") == 0)
-    //     length = generate_section_pci_dev(location);
-    // else if (strcmp(type, "dmargeneric") == 0)
-    //     length = generate_section_dmar_generic(location);
-    // else if (strcmp(type, "dmarvtd") == 0)
-    //     length = generate_section_dmar_vtd(location);
-    // else if (strcmp(type, "dmariommu") == 0)
-    //     length = generate_section_dmar_iommu(location);
-    // else if (strcmp(type, "ccixper") == 0)
-    //     length = generate_section_ccix_per(location);
-    // else if (strcmp(type, "cxlprotocol") == 0)
-    //     length = generate_section_cxl_protocol(location);
-    // else if (strcmp(type, "cxlcomponent") == 0)
-    //     length = generate_section_cxl_component(location);
-    // else if (strcmp(type, "unknown") == 0)
-    //     length = generate_section_unknown(location);
+    else if (strcmp(type, "memory") == 0)
+        length = generate_section_memory(location);
+    else if (strcmp(type, "memory2") == 0)
+        length = generate_section_memory2(location);
+    else if (strcmp(type, "pcie") == 0)
+        length = generate_section_pcie(location);
+    else if (strcmp(type, "firmware") == 0)
+        length = generate_section_firmware(location);
+    else if (strcmp(type, "pcibus") == 0)
+        length = generate_section_pci_bus(location);
+    else if (strcmp(type, "pcidev") == 0)
+        length = generate_section_pci_dev(location);
+    else if (strcmp(type, "dmargeneric") == 0)
+        length = generate_section_dmar_generic(location);
+    else if (strcmp(type, "dmarvtd") == 0)
+        length = generate_section_dmar_vtd(location);
+    else if (strcmp(type, "dmariommu") == 0)
+        length = generate_section_dmar_iommu(location);
+    else if (strcmp(type, "ccixper") == 0)
+        length = generate_section_ccix_per(location);
+    else if (strcmp(type, "cxlprotocol") == 0)
+        length = generate_section_cxl_protocol(location);
+    else if (strcmp(type, "cxlcomponent") == 0)
+        length = generate_section_cxl_component(location);
+    else if (strcmp(type, "unknown") == 0)
+        length = generate_random_section(location, rand() % 256);
     else 
     {
         //Undefined section, show error.

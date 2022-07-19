@@ -290,6 +290,9 @@ json_object* cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR* section
 //Converts the section described by a single given section descriptor.
 json_object* cper_section_to_ir(FILE* handle, EFI_ERROR_SECTION_DESCRIPTOR* descriptor)
 {
+    //Save our current position in the stream.
+    long position = ftell(handle);
+
     //Read section as described by the section descriptor.
     fseek(handle, descriptor->SectionOffset, SEEK_SET);
     void* section = malloc(descriptor->SectionLength);
@@ -301,6 +304,9 @@ json_object* cper_section_to_ir(FILE* handle, EFI_ERROR_SECTION_DESCRIPTOR* desc
         free(section);
         return NULL;
     }
+
+    //Seek back to our original position.
+    fseek(handle, position, SEEK_SET);
 
     //Parse section to IR based on GUID.
     json_object* result = NULL;
