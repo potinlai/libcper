@@ -76,7 +76,7 @@ json_object* cper_section_cxl_protocol_to_ir(void* section, EFI_ERROR_SECTION_DE
         //(36-byte, padded to 60 bytes) or PCIe 2.0 Capability Structure (60-byte). There does not seem
         //to be a way to differentiate these, so this is left as a b64 dump.
         char* encoded = b64_encode(cxl_protocol_error->CapabilityStructure.PcieCap, 60);
-        json_object_object_add(section_ir, "capabilityStructure", json_object_new_uint64(cxl_protocol_error->DeviceSerial));
+        json_object_object_add(section_ir, "capabilityStructure", json_object_new_string(encoded));
         free(encoded);
     }
 

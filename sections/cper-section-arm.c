@@ -214,7 +214,7 @@ json_object* cper_arm_bus_error_to_ir(EFI_ARM_BUS_ERROR_STRUCTURE* bus_error)
     json_object* bus_error_ir = json_object_new_object();
 
     //Validation bits.
-    json_object* validation = bitfield_to_ir(bus_error->ValidationBits, 7, ARM_BUS_ERROR_VALID_BITFIELD_NAMES);
+    json_object* validation = bitfield_to_ir(bus_error->ValidationBits, 12, ARM_BUS_ERROR_VALID_BITFIELD_NAMES);
     json_object_object_add(bus_error_ir, "validationBits", validation);
 
     //Transaction type.

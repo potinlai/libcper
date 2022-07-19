@@ -27,6 +27,9 @@
             "type": "integer"
         },
         "faultStatusRegister": {
+            "type": "integer"
+        },
+        "faultRecord": {
             "type": "object",
             "required": ["faultInformation", "sourceIdentifier", "privelegeModeRequested", "executePermissionRequested", "pasidPresent", "faultReason", "pasidValue", "addressType", "type"],
             "properties": {
@@ -66,22 +69,22 @@
         "contextEntry": {
             "type": "string"
         },
-        "pageEntry_Level6": {
+        "pageTableEntry_Level6": {
             "type": "integer"
         },
-        "pageEntry_Level5": {
+        "pageTableEntry_Level5": {
             "type": "integer"
         },
-        "pageEntry_Level4": {
+        "pageTableEntry_Level4": {
             "type": "integer"
         },
-        "pageEntry_Level3": {
+        "pageTableEntry_Level3": {
             "type": "integer"
         },
-        "pageEntry_Level2": {
+        "pageTableEntry_Level2": {
             "type": "integer"
         },
-        "pageEntry_Level1": {
+        "pageTableEntry_Level1": {
             "type": "integer"
         }
     }

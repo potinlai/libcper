@@ -7,7 +7,7 @@
     "properties": {
         "validationBits": {
             "type": "object",
-            "required": ["errorStatusValid", "physicalAddressValid", "physicalAddressMaskValid", "nodeValid", "cardValid", "moduleValid", "bankValid", "deviceValid", "rowValid", "memoryPlatformTargetValid", "memoryErrorTypeValid", "rankNumberValid", "cardHandleValid", "moduleHandleValid", "extendedRowBitsValid", "bankGroupValid", "bankAddressValid", "chipIdentificationValid"],
+            "required": ["errorStatusValid", "physicalAddressValid", "physicalAddressMaskValid", "nodeValid", "cardValid", "moduleValid", "bankValid", "deviceValid", "rowValid", "columnValid", "bitPositionValid", "platformRequestorIDValid", "platformResponderIDValid", "memoryPlatformTargetValid", "memoryErrorTypeValid", "rankNumberValid", "cardHandleValid", "moduleHandleValid", "extendedRowBitsValid", "bankGroupValid", "bankAddressValid", "chipIdentificationValid"],
             "properties": {
                 "errorStatusValid": {
                     "type": "boolean"
@@ -34,6 +34,18 @@
                     "type": "boolean"
                 },
                 "rowValid": {
+                    "type": "boolean"
+                },
+                "columnValid": {
+                    "type": "boolean"
+                },
+                "bitPositionValid": {
+                    "type": "boolean"
+                },
+                "platformRequestorIDValid": {
+                    "type": "boolean"
+                },
+                "platformResponderIDValid": {
                     "type": "boolean"
                 },
                 "memoryPlatformTargetValid": {

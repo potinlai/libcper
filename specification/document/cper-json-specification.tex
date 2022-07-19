@@ -1743,7 +1743,7 @@ segmentNumber & int & The segment number associated with the device.\\
 \hline
 faultReason.value & uint64 & The raw value of the reason for the fault.\\
 faultReason.name & string & The human readable name, if available, of the reason for the fault.\\
-faultReason.description & string & A human readable description, if available, of the reason for the fault.\\
+faultReason.description & string (\textbf{optional}) & A human readable description, if available, of the reason for the fault.\\
 \hline
 accessType.value & uint64 & The raw value of the access type that caused the fault.\\
 accessType.name & string & The human readable name, if available, of the access type that caused the fault.\\
@@ -1888,13 +1888,13 @@ validationBits & object & A CXL Protocol Validation structure as defined in Subs
 agentType.value & uint64 & The raw value of the detecting CXL agent type.\\
 agentType.name & string & The human readable name, if available, of the CXL agent type.\\
 \hline
-agentAddress & object & One of the structures described in Subsection \ref{subsection:cxlprotocoldeviceagentaddressstructure} or Subsection \ref{subsection:cxlprotocolrcrbaddressstructure}. Included structure is dependent on the \texttt{agentType.value} field.\\
+cxlAgentAddress & object & One of the structures described in Subsection \ref{subsection:cxlprotocoldeviceagentaddressstructure} or Subsection \ref{subsection:cxlprotocolrcrbaddressstructure}. Included structure is dependent on the \texttt{agentType.value} field.\\
 \hline
 deviceID & object & A CXL Device ID structure, as defined in Subsection \ref{subsection:cxlprotocoldeviceidstructure}.\\
 \hline
 deviceSerial & uint64 (\textbf{optional}) & The CXL device serial number. Only included if the detecting device is a CXL device (field \texttt{agentType.value} has value 0).\\
 \hline
-capabilityStructure & string & A base64-encoded binary dump of the CXL device's PCIe capability structure. This could either be a PCIe 1.1 Capability Structure (36-byte, padded to 60 bytes), or a PCIe 2.0 Capability Structure (60-byte). Only included if the detecting device is a CXL device (field \texttt{agentType.value} has value 0).\\
+capabilityStructure & string (\textbf{optional}) & A base64-encoded binary dump of the CXL device's PCIe capability structure. This could either be a PCIe 1.1 Capability Structure (36-byte, padded to 60 bytes), or a PCIe 2.0 Capability Structure (60-byte). Only included if the detecting device is a CXL device (field \texttt{agentType.value} has value 0).\\
 \hline
 dvsecLength & int & Length (in bytes) of the CXL DVSEC structure.\\
 \hline
@@ -1978,6 +1978,8 @@ This section describes the JSON format for a single CXL Component Error Section 
     \item CXL MLD Port Error (\texttt{\{ 0x8dc44363, 0x0c96, 0x4710, \{ 0xb7, 0xbf, 0x04, 0xbb, 0x99, 0x53, 0x4c, 0x3f \}\}})\\
 \end{itemize}
 \jsontable{table:cxlcomponenterrorsection}
+length & uint64 & The length in bytes for the entire structure.\\
+\hline
 validationBits & object & A CXL Component Validation structure as described in Subsection \ref{subsection:cxlcomponentvalidationstructure}.\\
 \hline
 deviceID & object & A CXL Component Device ID structure as described in Subsection \ref{subsection:cxlcomponentdeviceidstructure}.\\

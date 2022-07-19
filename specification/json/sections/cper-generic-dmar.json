@@ -13,7 +13,7 @@
         },
         "faultReason": {
             "type": "object",
-            "required": ["value", "name", "description"],
+            "required": ["value", "name"],
             "properties": {
                 "value": {
                     "type": "integer"

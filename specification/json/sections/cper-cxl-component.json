@@ -2,9 +2,12 @@
     "$id": "cper-json-cxl-component-section",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "required": ["validationBits", "deviceID", "deviceSerial"],
+    "required": ["length", "validationBits", "deviceID", "deviceSerial"],
     "additionalProperties": false,
     "properties": {
+        "length": {
+            "type": "integer"
+        },
         "validationBits": {
             "type": "object",
             "required": ["deviceIDValid", "deviceSerialValid", "cxlComponentEventLogValid"],

@@ -2,7 +2,7 @@
     "$id": "cper-json-cxl-protocol-section",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "required": ["validationBits", "agentType", "agentAddress", "deviceID", "deviceSerial", "capabilityStructure", "dvsecLength", "errorLogLength", "cxlDVSEC", "cxlErrorLog"],
+    "required": ["validationBits", "agentType", "cxlAgentAddress", "deviceID", "dvsecLength", "errorLogLength", "cxlDVSEC", "cxlErrorLog"],
     "additionalProperties": false,
     "properties": {
         "validationBits": {
@@ -36,7 +36,7 @@
             "type": "object",
             "$ref": "./common/cper-json-nvp.json"
         },
-        "agentAddress": {
+        "cxlAgentAddress": {
             "type": "object",
             "oneOf": [
                 {
@@ -67,6 +67,30 @@
                     }
                 }
             ]
+        },
+        "deviceID": {
+            "type": "object",
+            "required": ["vendorID", "deviceID", "subsystemVendorID", "subsystemDeviceID", "classCode", "slotNumber"],
+            "properties": {
+                "vendorID": { 
+                    "type": "integer"
+                },
+                "deviceID": { 
+                    "type": "integer"
+                },
+                "subsystemVendorID": { 
+                    "type": "integer"
+                },
+                "subsystemDeviceID": { 
+                    "type": "integer"
+                },
+                "classCode": { 
+                    "type": "integer"
+                },
+                "slotNumber": { 
+                    "type": "integer"
+                }
+            }
         },
         "deviceSerial": { 
             "type": "integer"

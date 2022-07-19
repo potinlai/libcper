@@ -61,6 +61,9 @@
         "busAddress": {
             "type": "integer"
         },
+        "busData": {
+            "type": "integer"
+        },
         "busCommandType": {
             "type": "string"
         },
