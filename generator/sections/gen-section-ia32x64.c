@@ -75,25 +75,25 @@ void* generate_ia32x64_error_structure()
     {
         //Cache
         case 0:
-            memcpy(guid, &gEfiIa32x64ErrorTypeCacheCheckGuid, sizeof(guid));
+            memcpy(guid, &gEfiIa32x64ErrorTypeCacheCheckGuid, sizeof(EFI_GUID));
             memset(error_structure + 30, 0, 34);
             break;
 
         //TLB
         case 1:
-            memcpy(guid, &gEfiIa32x64ErrorTypeTlbCheckGuid, sizeof(guid));
+            memcpy(guid, &gEfiIa32x64ErrorTypeTlbCheckGuid, sizeof(EFI_GUID));
             memset(error_structure + 30, 0, 34);
             break;
 
         //Bus
         case 2:
-            memcpy(guid, &gEfiIa32x64ErrorTypeBusCheckGuid, sizeof(guid));
+            memcpy(guid, &gEfiIa32x64ErrorTypeBusCheckGuid, sizeof(EFI_GUID));
             memset(error_structure + 35, 0, 29);
             break;
 
         //MS
         case 3:
-            memcpy(guid, &gEfiIa32x64ErrorTypeMsCheckGuid, sizeof(guid));
+            memcpy(guid, &gEfiIa32x64ErrorTypeMsCheckGuid, sizeof(EFI_GUID));
             memset(error_structure + 24, 0, 38);
             break;
     }

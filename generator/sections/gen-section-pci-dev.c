@@ -27,6 +27,12 @@ size_t generate_section_pci_dev(void** location)
     *validation &= 0b11111; //Validation 5-63
     for (int i=0; i<5; i++)
         *(bytes + 27 + i) = 0; //Bytes 11-15 of ID info.
+        
+    //Set expected values.
+    UINT32* memory_number_field = (UINT32*)(bytes + 32);
+    UINT32* io_number_field = (UINT32*)(bytes + 36);
+    *memory_number_field = num_memory_pairs;
+    *io_number_field = num_io_pairs;
 
     //Fix error status.
     create_valid_error_section(bytes + 8);

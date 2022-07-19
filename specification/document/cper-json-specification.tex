@@ -285,7 +285,7 @@ processorTypeValid & boolean & Whether the "processorType" field of the Generic 
 \hline
 processorISAValid & boolean & Whether the "processorISA" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
 \hline
-errorTypeValid & boolean & Whether the "errorType" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
+processorErrorTypeValid & boolean & Whether the "errorType" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
 \hline
 operationValid & boolean & Whether the "operation" field of the Generic Processor Error section (\ref{section:genericprocessorerrorsection}) is valid.\\
 \hline
@@ -511,6 +511,8 @@ overflowValid & boolean & Whether the "overflow" field in a Processor Error Chec
 participationTypeValid & boolean (\textbf{optional}) & Whether the "participationType" field in the Processor Error Check Info (Bus Error) structure (\ref{subsection:ia32x64processorerrorcheckinfobusstructure}) is valid. \textbf{This field is only present on bus related check info structures.}\\
 \hline
 timedOutValid & boolean (\textbf{optional}) & Whether the "timeOut" field in the Processor Error Check Info (Bus Error) structure (\ref{subsection:ia32x64processorerrorcheckinfobusstructure}) is valid. \textbf{This field is only present on bus related check info structures.}\\
+\hline
+addressSpaceValid & boolean (\textbf{optional}) & Whether the "addressSpace" field in the Processor Error Check Info (Bus Error) structure (\ref{subsection:ia32x64processorerrorcheckinfobusstructure}) is valid. \textbf{This field is only present on bus related check info structures.}\\
 \jsontableend{IA32/x64 Processor Error Check Info (Cache/TLB/Bus) validation structure field table.}
 
 % IA32/x64 Processor Error Check Info (MS Check) Validation structure.

@@ -99,17 +99,26 @@ json_object* cper_ia32x64_processor_error_info_to_ir(EFI_IA32_X64_PROCESS_ERROR_
 
     //Add the check information on a per-structure basis.
     //Cache and TLB check information are identical, so can be equated.
-    json_object* checkInformation = NULL;
+    json_object* check_information = NULL;
     if (guid_equal(&error_info->ErrorType, &gEfiIa32x64ErrorTypeCacheCheckGuid)
         || guid_equal(&error_info->ErrorType, &gEfiIa32x64ErrorTypeTlbCheckGuid))
     {
-        checkInformation = cper_ia32x64_cache_tlb_check_to_ir((EFI_IA32_X64_CACHE_CHECK_INFO*)&error_info->CheckInfo);
+        check_information = cper_ia32x64_cache_tlb_check_to_ir((EFI_IA32_X64_CACHE_CHECK_INFO*)&error_info->CheckInfo);
     }
     else if (guid_equal(&error_info->ErrorType, &gEfiIa32x64ErrorTypeBusCheckGuid))
-        checkInformation = cper_ia32x64_bus_check_to_ir((EFI_IA32_X64_BUS_CHECK_INFO*)&error_info->CheckInfo);
+    {
+        check_information = cper_ia32x64_bus_check_to_ir((EFI_IA32_X64_BUS_CHECK_INFO*)&error_info->CheckInfo);
+    }
     else if (guid_equal(&error_info->ErrorType, &gEfiIa32x64ErrorTypeMsCheckGuid))
-        checkInformation = cper_ia32x64_ms_check_to_ir((EFI_IA32_X64_MS_CHECK_INFO*)&error_info->CheckInfo);
-    json_object_object_add(error_info_ir, "checkInfo", checkInformation);
+    {
+        check_information = cper_ia32x64_ms_check_to_ir((EFI_IA32_X64_MS_CHECK_INFO*)&error_info->CheckInfo);
+    }
+    else 
+    {
+        //Unknown check information.
+        printf("WARN: Invalid/unknown check information GUID found in IA32/x64 CPER section. Ignoring.\n");
+    }
+    json_object_object_add(error_info_ir, "checkInfo", check_information);
 
     //Target, requestor, and responder identifiers.
     json_object_object_add(error_info_ir, "targetAddressID", json_object_new_uint64(error_info->TargetId));
@@ -269,7 +278,7 @@ json_object* cper_ia32x64_processor_context_info_to_ir(EFI_IA32_X64_PROCESSOR_CO
         //No parseable data, just dump as base64 and shift the head to the next item.
         *cur_pos = (void*)(context_info + 1);
 
-        char* encoded = b64_encode((unsigned char*)cur_pos, context_info->ArraySize);
+        char* encoded = b64_encode((unsigned char*)*cur_pos, context_info->ArraySize);
         register_array = json_object_new_object();
         json_object_object_add(register_array, "data", json_object_new_string(encoded));
         free(encoded);

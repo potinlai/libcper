@@ -152,7 +152,7 @@
                                 "properties": {
                                     "validationBits": {
                                         "type": "object",
-                                        "required": ["transactionTypeValid", "operationValid", "levelValid", "processorContextCorruptValid", "uncorrectedValid", "preciseIPValid", "restartableIPValid", "overflowValid", "participationTypeValid", "timedOutValid"],
+                                        "required": ["transactionTypeValid", "operationValid", "levelValid", "processorContextCorruptValid", "uncorrectedValid", "preciseIPValid", "restartableIPValid", "overflowValid", "participationTypeValid", "timedOutValid", "addressSpaceValid"],
                                         "properties": {
                                             "transactionTypeValid": {
                                                 "type": "boolean"
@@ -182,6 +182,9 @@
                                                 "type": "boolean"
                                             },
                                             "timedOutValid": {
+                                                "type": "boolean"
+                                            },
+                                            "addressSpaceValid": {
                                                 "type": "boolean"
                                             }
                                         }

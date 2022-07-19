@@ -86,6 +86,8 @@ int validate_schema(json_object* schema, char* schema_directory, json_object* ob
     chdir(original_cwd);
     free(original_cwd);
 
+    if (result)
+        log_validator_debug("Successfully validated the provided object against schema.");
     return result;
 }
 

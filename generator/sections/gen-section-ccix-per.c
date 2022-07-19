@@ -28,6 +28,10 @@ size_t generate_section_ccix_per(void** location)
     UINT16* reserved = (UINT16*)(bytes + 14);
     *reserved = 0; //Reserved bytes 14-15.
 
+    //Set expected values.
+    UINT32* length = (UINT32*)bytes;
+    *length = size;
+
     //Set return values, exit.
     *location = bytes;
     return size;

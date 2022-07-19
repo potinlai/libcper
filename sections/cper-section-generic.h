@@ -11,7 +11,7 @@
 #define GENERIC_ERROR_TYPES_KEYS (int []){0, 1, 2, 4, 8}
 #define GENERIC_ERROR_TYPES_VALUES (const char*[]){"Unknown", "Cache Error", "TLB Error", "Bus Error", "Micro-Architectural Error"}
 #define GENERIC_OPERATION_TYPES_KEYS (int []){0, 1, 2, 3}
-#define GENERIC_OPERATION_TYPES_VALUES (const char*[]){"Unknown or generic", "Data Read", "Data Write", "Instruction Execution"}
+#define GENERIC_OPERATION_TYPES_VALUES (const char*[]){"Unknown or Generic", "Data Read", "Data Write", "Instruction Execution"}
 #define GENERIC_VALIDATION_BITFIELD_NAMES (const char*[]) \
     {"processorTypeValid", "processorISAValid", "processorErrorTypeValid", "operationValid", "flagsValid", \
     "levelValid", "cpuVersionValid", "cpuBrandInfoValid", "cpuIDValid", "targetAddressValid", "requestorIDValid", \

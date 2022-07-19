@@ -7,7 +7,7 @@
     "properties": {
         "validationBits": {
             "type": "object",
-            "required": ["processorTypeValid", "processorISAValid", "errorTypeValid", "operationValid", "flagsValid", "levelValid", "cpuVersionValid", "cpuBrandInfoValid", "cpuIDValid", "targetAddressValid", "requestorIDValid", "responderIDValid", "instructionIPValid"],
+            "required": ["processorTypeValid", "processorISAValid", "processorErrorTypeValid", "operationValid", "flagsValid", "levelValid", "cpuVersionValid", "cpuBrandInfoValid", "cpuIDValid", "targetAddressValid", "requestorIDValid", "responderIDValid", "instructionIPValid"],
             "properties": {
                 "processorTypeValid": {
                     "type": "boolean"
@@ -15,7 +15,7 @@
                 "processorISAValid": {
                     "type": "boolean"
                 },
-                "errorTypeValid": {
+                "processorErrorTypeValid": {
                     "type": "boolean"
                 },
                 "operationValid": {
@@ -68,9 +68,9 @@
         },
         "flags": {
             "type": "object",
-            "required": ["restartableIP", "preciseIP", "overflow", "corrected"],
+            "required": ["restartable", "preciseIP", "overflow", "corrected"],
             "properties": {
-                "restartableIP": {
+                "restartable": {
                     "type": "boolean"
                 },
                 "preciseIP": {

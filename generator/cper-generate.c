@@ -1,5 +1,5 @@
 /**
- * A user-space application for generating psuedo-random specification compliant CPER records. 
+ * Describes functions for generating psuedo-random specification compliant CPER records. 
  * 
  * Author: Lawrence.Tang@arm.com
  **/
@@ -10,41 +10,28 @@
 #include "../edk/Cper.h"
 #include "gen-utils.h"
 #include "sections/gen-sections.h"
+#include "cper-generate.h"
 
 EFI_ERROR_SECTION_DESCRIPTOR* generate_section_descriptor(char* type, size_t* lengths, int index, int num_sections);
 size_t generate_section(void** location, char* type);
-void print_help();
 
-int main(int argc, char* argv[])
+//Generates a CPER record with the given section types, outputting to the given stream.
+void generate_cper_record(char** types, UINT16 num_sections, FILE* out)
 {
-    //If help requested, print help.
-    if (argc == 2 && strcmp(argv[1], "--help") == 0)
-    {
-        print_help();
-        return 0;
-    }
-
-    //Ensure the minimum number of arguments.
-    if (argc < 5)
-    {
-        printf("Insufficient number of arguments. See 'cper-generate --help' for command information.\n");
-        return -1;
-    }
-
     //Initialise randomiser.
     init_random();
 
-    //Generate the sections. Type names start from argv[4].
-    UINT16 num_sections = argc - 4;
+    //Generate the sections.
     void* sections[num_sections];
     size_t section_lengths[num_sections];
     for (int i=0; i<num_sections; i++) 
     {
-        section_lengths[i] = generate_section(sections + i, argv[4 + i]);
+        section_lengths[i] = generate_section(sections + i, types[i]);
         if (section_lengths[i] == 0)
         {
             //Error encountered, exit.
-            return -1;
+            printf("Error encountered generating section %d of type '%s', length returned zero.\n", i+1, types[i]);
+            return;
         }
     }
 
@@ -63,7 +50,7 @@ int main(int argc, char* argv[])
     //Generate the section descriptors given the number of sections.
     EFI_ERROR_SECTION_DESCRIPTOR* section_descriptors[num_sections];
     for (int i=0; i<num_sections; i++)
-        section_descriptors[i] = generate_section_descriptor(argv[4 + i], section_lengths, i, num_sections);
+        section_descriptors[i] = generate_section_descriptor(types[i], section_lengths, i, num_sections);
 
     //Calculate total length of structure, set in header.
     size_t total_len = sizeof(EFI_COMMON_ERROR_RECORD_HEADER);
@@ -72,31 +59,22 @@ int main(int argc, char* argv[])
     total_len += num_sections * sizeof(EFI_ERROR_SECTION_DESCRIPTOR);
     header->RecordLength = (UINT32)total_len;
 
-    //Open a file handle to write output.
-    FILE* cper_file = fopen(argv[2], "w");
-    if (cper_file == NULL) 
-    {
-        printf("Could not get a handle for output file '%s', file handle returned null.\n", argv[2]);
-        return -1;
-    }
-
-    //Write to file in order, free all resources.
-    fwrite(header, sizeof(EFI_COMMON_ERROR_RECORD_HEADER), 1, cper_file);
-    fflush(cper_file);
+    //Write to stream in order, free all resources.
+    fwrite(header, sizeof(EFI_COMMON_ERROR_RECORD_HEADER), 1, out);
+    fflush(out);
     free(header);
     for (int i=0; i<num_sections; i++)
     {
-        fwrite(section_descriptors[i], sizeof(EFI_ERROR_SECTION_DESCRIPTOR), 1, cper_file);
-        fflush(cper_file);
+        fwrite(section_descriptors[i], sizeof(EFI_ERROR_SECTION_DESCRIPTOR), 1, out);
+        fflush(out);
         free(section_descriptors[i]);
     }
     for (int i=0; i<num_sections; i++) 
     {
-        fwrite(sections[i], section_lengths[i], 1, cper_file);
-        fflush(cper_file);
+        fwrite(sections[i], section_lengths[i], 1, out);
+        fflush(out);
         free(sections[i]);
     }
-    fclose(cper_file);
 }
 
 //Generates a single section descriptor for a section with the given properties.
@@ -109,6 +87,9 @@ EFI_ERROR_SECTION_DESCRIPTOR* generate_section_descriptor(char* type, size_t* le
     descriptor->SecValidMask &= 0b11;
     descriptor->Resv1 = 0;
     descriptor->SectionFlags &= 0xFF;
+
+    //Set severity.
+    descriptor->Severity = rand() % 4;
 
     //Set length, offset from base record.
     descriptor->SectionLength = (UINT32)lengths[index];
@@ -230,31 +211,4 @@ size_t generate_section(void** location, char* type)
     }
 
     return length;
-}
-
-//Prints command help for this CPER generator.
-void print_help()
-{
-    printf(":: --out cper.file --sections section1 [section2 section3 ...]\n");
-    printf("\tGenerates a psuedo-random CPER file with the provided section types and outputs to the given file name.\n");
-    printf("\tValid section type names are the following:\n");
-    printf("\t\t- generic\n");
-    printf("\t\t- ia32x64\n");
-    printf("\t\t- ipf\n");
-    printf("\t\t- arm\n");
-    printf("\t\t- memory\n");
-    printf("\t\t- memory2\n");
-    printf("\t\t- pcie\n");
-    printf("\t\t- firmware\n");
-    printf("\t\t- pcibus\n");
-    printf("\t\t- pcidev\n");
-    printf("\t\t- dmargeneric\n");
-    printf("\t\t- dmarvtd\n");
-    printf("\t\t- dmariommu\n");
-    printf("\t\t- ccixper\n");
-    printf("\t\t- cxlprotocol\n");
-    printf("\t\t- cxlcomponent\n");
-    printf("\t\t- unknown\n");
-    printf("\n:: --help\n");
-    printf("\tDisplays help information to the console.\n");
 }

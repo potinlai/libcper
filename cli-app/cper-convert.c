@@ -111,16 +111,11 @@ void json_to_cper(int argc, char* argv[])
 
     //Are we skipping validation?
     int do_validate = 1;
-    if (argc == 6)
+    if (argc >= 6 && argc < 8)
     {
         if (strcmp(argv[5], "--no-validate") == 0)
         {
             do_validate = 0;
-        }
-        else
-        {
-            printf("Invalid argument '%s' for command 'to-cper'. See 'cper-convert --help' for command information.\n", argv[5]);
-            return;
         }
     }
 
@@ -129,19 +124,12 @@ void json_to_cper(int argc, char* argv[])
     {
         char* specification_path = NULL;
 
-        //If there is another argument pair, it must be a validation specification file path.
-        if (argc == 7)
+        //Is there a specification file path?
+        if (argc >= 7 && strcmp(argv[argc - 2], "--specification") == 0)
         {
-            //Ensure valid argument naming.
-            if (strcmp(argv[5], "--specification") != 0)
-            {
-                printf("Invalid argument '%s' for command 'to-cper'. See 'cper-convert --help' for command information.\n", argv[5]);
-                return;
-            }
-
-            specification_path = argv[6];
+            specification_path = argv[argc - 1];
         }
-        else if (argc == 5)
+        else
         {
             //Make the specification path the assumed default (application directory + specification/cper-json.json).
             specification_path = malloc(PATH_MAX);
@@ -149,11 +137,16 @@ void json_to_cper(int argc, char* argv[])
             strcpy(specification_path, dir);
             strcat(specification_path, "/specification/cper-json.json");
         }
-        else
+
+        //Enable debug mode if indicated.
+        for (int i=5; i<argc; i++) 
         {
-            //Invalid number of arguments.
-            printf("Invalid number of arguments for command 'to-cper'. See 'cper-convert --help' for command information.\n");
-            return;
+            if (strcmp(argv[i], "--debug") == 0)
+            {
+                validate_schema_debug_enable();
+                printf("debug enabled.\n");
+                break;
+            }
         }
 
         //Attempt to verify with the the specification.
@@ -194,7 +187,7 @@ void print_help(void)
     printf(":: to-json cper.file [--out file.name]\n");
     printf("\tConverts the provided CPER log file into JSON, by default outputting to console. If '--out' is specified,\n");
     printf("\tThe outputted JSON will be written to the provided file name instead.\n");
-    printf("\n:: to-cper cper.json --out file.name [--no-validate] [--specification some/spec/path.json]\n");
+    printf("\n:: to-cper cper.json --out file.name [--no-validate] [--debug] [--specification some/spec/path.json]\n");
     printf("\tConverts the provided CPER-JSON JSON file into CPER binary. An output file must be specified with '--out'.\n");
     printf("\tBy default, the provided JSON will try to be validated against a specification. If no specification file path\n");
     printf("\tis provided with '--specification', then it will default to 'argv[0] + /specification/cper-json.json'.\n");

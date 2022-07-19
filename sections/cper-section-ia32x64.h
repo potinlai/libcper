@@ -8,8 +8,8 @@
     {"checkInfoValid", "targetAddressIDValid", "requestorIDValid", "responderIDValid", \
     "instructionPointerValid"}
 #define IA32X64_CHECK_INFO_VALID_BITFIELD_NAMES (const char*[]) \
-    {"transactionTypeValid", "operationValid", "levelValid", "processorContextCorruptValid", "uncorrectedValid" \
-    "preciseIPValid", "restartableIPValid", "overflowValid", "participationTypeValid", "timedOutValid" \
+    {"transactionTypeValid", "operationValid", "levelValid", "processorContextCorruptValid", "uncorrectedValid", \
+    "preciseIPValid", "restartableIPValid", "overflowValid", "participationTypeValid", "timedOutValid", \
     "addressSpaceValid"}
 #define IA32X64_CHECK_INFO_MS_CHECK_VALID_BITFIELD_NAMES (const char*[]) \
     {"errorTypeValid", "processorContextCorruptValid", "uncorrectedValid", "preciseIPValid", "restartableIPValid", \
