@@ -6,7 +6,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include "../../edk/Cper.h"
 #include "../gen-utils.h"
 #include "gen-sections.h"
@@ -132,20 +131,33 @@ size_t generate_ia32x64_context_structure(void** location)
 
     //Set register size.
     if (reg_type == 2)
+    {
         reg_size = 92; //IA32 registers.
-    if (reg_type == 3)
+    }
+    else if (reg_type == 3)
+    {
         reg_size = 244; //x64 registers.
+    }
     else
-        reg_size = (rand() % 5) * 32; //Not table defined.
+    {
+        reg_size = (rand() % 5 + 1) * 32; //Not table defined.
+    }
 
     //Create structure randomly.
     int total_size = 16 + reg_size;
     UINT16* context_structure = (UINT16*)generate_random_bytes(total_size);
 
+    //If it is x64 registers, set reserved area accordingly.
+    if (reg_type == 3)
+    {
+        UINT8* reg_bytes = (UINT8*)(context_structure + 8);
+        UINT32* reserved = (UINT32*)(reg_bytes + 140);
+        *reserved = 0;
+    }
+
     //Set header information.
     *(context_structure) = reg_type;
     *(context_structure + 1) = reg_size;
-    printf("set reg size to %d (for type %d).\n", reg_size, reg_type);
 
     //Set return values and exit.
     *location = context_structure;

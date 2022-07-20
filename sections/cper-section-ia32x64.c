@@ -567,12 +567,12 @@ void ir_ia32x64_ia32_registers_to_cper(json_object* registers, FILE* out)
     register_state.Edi = (UINT32)json_object_get_uint64(json_object_object_get(registers, "edi"));
     register_state.Ebp = (UINT32)json_object_get_uint64(json_object_object_get(registers, "ebp"));
     register_state.Esp = (UINT32)json_object_get_uint64(json_object_object_get(registers, "esp"));
-    register_state.Cs = (UINT32)json_object_get_uint64(json_object_object_get(registers, "cs"));
+    register_state.Cs = (UINT16)json_object_get_uint64(json_object_object_get(registers, "cs"));
     register_state.Ds = (UINT32)json_object_get_uint64(json_object_object_get(registers, "ds"));
-    register_state.Ss = (UINT32)json_object_get_uint64(json_object_object_get(registers, "ss"));
-    register_state.Es = (UINT32)json_object_get_uint64(json_object_object_get(registers, "es"));
-    register_state.Fs = (UINT32)json_object_get_uint64(json_object_object_get(registers, "fs"));
-    register_state.Gs = (UINT32)json_object_get_uint64(json_object_object_get(registers, "gs"));
+    register_state.Ss = (UINT16)json_object_get_uint64(json_object_object_get(registers, "ss"));
+    register_state.Es = (UINT16)json_object_get_uint64(json_object_object_get(registers, "es"));
+    register_state.Fs = (UINT16)json_object_get_uint64(json_object_object_get(registers, "fs"));
+    register_state.Gs = (UINT16)json_object_get_uint64(json_object_object_get(registers, "gs"));
     register_state.Eflags = (UINT32)json_object_get_uint64(json_object_object_get(registers, "eflags"));
     register_state.Eip = (UINT32)json_object_get_uint64(json_object_object_get(registers, "eip"));
     register_state.Cr0 = (UINT32)json_object_get_uint64(json_object_object_get(registers, "cr0"));
@@ -583,11 +583,11 @@ void ir_ia32x64_ia32_registers_to_cper(json_object* registers, FILE* out)
 
     //64-bit registers are split into two 32-bit parts.
     UINT64 gdtr = json_object_get_uint64(json_object_object_get(registers, "gdtr"));
-    register_state.Gdtr[0] = gdtr >> 32;
-    register_state.Gdtr[1] = gdtr & 0xFFFFFFFF;
+    register_state.Gdtr[0] = gdtr & 0xFFFFFFFF;
+    register_state.Gdtr[1] = gdtr >> 32;
     UINT64 idtr = json_object_get_uint64(json_object_object_get(registers, "idtr"));
-    register_state.Idtr[0] = idtr >> 32;
-    register_state.Idtr[1] = idtr & 0xFFFFFFFF;
+    register_state.Idtr[0] = idtr & 0xFFFFFFFF;
+    register_state.Idtr[1] = idtr >> 32;
 
     //16-bit registers.
     register_state.Ldtr = (UINT16)json_object_get_uint64(json_object_object_get(registers, "ldtr"));
@@ -618,12 +618,13 @@ void ir_ia32x64_x64_registers_to_cper(json_object* registers, FILE* out)
     register_state.R13 = json_object_get_uint64(json_object_object_get(registers, "r13"));
     register_state.R14 = json_object_get_uint64(json_object_object_get(registers, "r14"));
     register_state.R15 = json_object_get_uint64(json_object_object_get(registers, "r15"));
-    register_state.Cs = json_object_get_uint64(json_object_object_get(registers, "cs"));
-    register_state.Ds = json_object_get_uint64(json_object_object_get(registers, "ds"));
-    register_state.Ss = json_object_get_uint64(json_object_object_get(registers, "ss"));
-    register_state.Es = json_object_get_uint64(json_object_object_get(registers, "es"));
-    register_state.Fs = json_object_get_uint64(json_object_object_get(registers, "fs"));
-    register_state.Gs = json_object_get_uint64(json_object_object_get(registers, "gs"));
+    register_state.Cs = (UINT16)json_object_get_int(json_object_object_get(registers, "cs"));
+    register_state.Ds = (UINT16)json_object_get_int(json_object_object_get(registers, "ds"));
+    register_state.Ss = (UINT16)json_object_get_int(json_object_object_get(registers, "ss"));
+    register_state.Es = (UINT16)json_object_get_int(json_object_object_get(registers, "es"));
+    register_state.Fs = (UINT16)json_object_get_int(json_object_object_get(registers, "fs"));
+    register_state.Gs = (UINT16)json_object_get_int(json_object_object_get(registers, "gs"));
+    register_state.Resv1 = 0;
     register_state.Rflags = json_object_get_uint64(json_object_object_get(registers, "rflags"));
     register_state.Rip = json_object_get_uint64(json_object_object_get(registers, "eip"));
     register_state.Cr0 = json_object_get_uint64(json_object_object_get(registers, "cr0"));
@@ -636,10 +637,10 @@ void ir_ia32x64_x64_registers_to_cper(json_object* registers, FILE* out)
     register_state.Gdtr[1] = json_object_get_uint64(json_object_object_get(registers, "gdtr_1"));
     register_state.Idtr[0] = json_object_get_uint64(json_object_object_get(registers, "idtr_0"));
     register_state.Idtr[1] = json_object_get_uint64(json_object_object_get(registers, "idtr_1"));
-    register_state.Ldtr = (UINT16)json_object_get_uint64(json_object_object_get(registers, "ldtr"));
-    register_state.Tr = (UINT16)json_object_get_uint64(json_object_object_get(registers, "tr"));
+    register_state.Ldtr = (UINT16)json_object_get_int(json_object_object_get(registers, "ldtr"));
+    register_state.Tr = (UINT16)json_object_get_int(json_object_object_get(registers, "tr"));
 
     //Write out to stream.
-    fwrite(&register_state, sizeof(EFI_CONTEXT_IA32_REGISTER_STATE), 1, out);
+    fwrite(&register_state, sizeof(EFI_CONTEXT_X64_REGISTER_STATE), 1, out);
     fflush(out);
 }
