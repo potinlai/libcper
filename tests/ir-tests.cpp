@@ -50,11 +50,12 @@ void single_section_binary_test(const char* section_name)
     size_t cper_buf_size;
     FILE* stream = open_memstream(&cper_buf, &cper_buf_size);
     ir_to_cper(ir, stream);
+    size_t cper_len = ftell(stream);
     fclose(stream);
 
     //Validate the two are identical.
-    ASSERT_EQ(size, cper_buf_size);
-    ASSERT_EQ(memcmp(buf, cper_buf, size), 0) << "Binary output was not identical to input.";
+    ASSERT_GE(size, cper_len);
+    ASSERT_EQ(memcmp(buf, cper_buf, cper_len), 0) << "Binary output was not identical to input.";
     
     //Free everything up.
     fclose(record);

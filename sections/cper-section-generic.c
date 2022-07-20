@@ -86,7 +86,7 @@ void ir_section_generic_to_cper(json_object* section, FILE* out)
 
     //Validation bits.
     section_cper->ValidFields = ir_to_bitfield(json_object_object_get(section, "validationBits"), 
-        11, GENERIC_VALIDATION_BITFIELD_NAMES);
+        13, GENERIC_VALIDATION_BITFIELD_NAMES);
         
     //Various name/value pair fields.
     section_cper->Type = (UINT8)readable_pair_to_integer(json_object_object_get(section, "processorType"));

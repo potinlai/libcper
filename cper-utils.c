@@ -201,14 +201,14 @@ const char* severity_to_string(UINT32 severity)
 //Output must be at least TIMESTAMP_LENGTH bytes long.
 void timestamp_to_string(char* out, EFI_ERROR_TIME_STAMP* timestamp)
 {
-    sprintf(out, "%02d%02d-%02d-%02dT%02d:%02d:%02d.000", 
-            timestamp->Century,
-            timestamp->Year,
-            timestamp->Month,
-            timestamp->Day,
-            timestamp->Hours,
-            timestamp->Minutes,
-            timestamp->Seconds);
+    sprintf(out, "%02hhu%02hhu-%02hhu-%02hhuT%02hhu:%02hhu:%02hhu.000", 
+            bcd_to_int(timestamp->Century) % 100, //Cannot go to three digits.
+            bcd_to_int(timestamp->Year) % 100, //Cannot go to three digits.
+            bcd_to_int(timestamp->Month),
+            bcd_to_int(timestamp->Day),
+            bcd_to_int(timestamp->Hours),
+            bcd_to_int(timestamp->Minutes),
+            bcd_to_int(timestamp->Seconds));
 }
 
 //Converts a single timestamp string to an EFI timestamp.
@@ -218,7 +218,7 @@ void string_to_timestamp(EFI_ERROR_TIME_STAMP* out, const char* timestamp)
     if (timestamp == NULL)
         return;
 
-    sscanf(timestamp, "%02hhd%02hhd-%02hhd-%02hhdT%02hhd:%02hhd:%02hhd.000", 
+    sscanf(timestamp, "%2hhu%2hhu-%hhu-%hhuT%hhu:%hhu:%hhu.000", 
             &out->Century,
             &out->Year,
             &out->Month,
@@ -226,6 +226,15 @@ void string_to_timestamp(EFI_ERROR_TIME_STAMP* out, const char* timestamp)
             &out->Hours,
             &out->Minutes,
             &out->Seconds);
+
+    //Convert back to BCD.
+    out->Century = int_to_bcd(out->Century);
+    out->Year = int_to_bcd(out->Year);
+    out->Month = int_to_bcd(out->Month);
+    out->Day = int_to_bcd(out->Day);
+    out->Hours = int_to_bcd(out->Hours);
+    out->Minutes = int_to_bcd(out->Minutes);
+    out->Seconds = int_to_bcd(out->Seconds);
 }
 
 //Helper function to convert an EDK EFI GUID into a string for intermediate use.
@@ -285,23 +294,4 @@ int guid_equal(EFI_GUID* a, EFI_GUID* b)
     }
 
     return 1;
-}
-
-//Converts the given BCD byte to a standard integer.
-int bcd_to_int(UINT8 bcd)
-{
-    return ((bcd & 0xF0) >> 4) * 10 + (bcd & 0x0F);
-}
-
-//Converts the given integer to a single byte BCD.
-UINT8 int_to_bcd(int value)
-{
-    UINT8 result = 0;
-    int shift = 0;
-    while (value > 0) {
-        result |= (value % 10) << (shift++ << 2);
-        value /= 10;
-    }
-
-    return result;
 }

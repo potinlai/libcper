@@ -44,8 +44,17 @@ void generate_cper_record(char** types, UINT16 num_sections, FILE* out)
     header->Flags = 4; //HW_ERROR_FLAGS_SIMULATED
     header->RecordID = (UINT64)rand();
     header->ErrorSeverity = rand() % 4;
-    *((UINT64*)&header->TimeStamp) = (UINT64)rand();
-    header->ValidationBits = rand() % 0b1000;
+
+    //Generate a valid timestamp.
+    header->TimeStamp.Century = int_to_bcd(rand() % 100);
+    header->TimeStamp.Year = int_to_bcd(rand() % 100);
+    header->TimeStamp.Month = int_to_bcd(rand() % 12 + 1);
+    header->TimeStamp.Day = int_to_bcd(rand() % 31 + 1);
+    header->TimeStamp.Hours = int_to_bcd(rand() % 24 + 1);
+    header->TimeStamp.Seconds = int_to_bcd(rand() % 60);
+
+    //Turn all validation bits on.
+    header->ValidationBits = 0b11;
 
     //Generate the section descriptors given the number of sections.
     EFI_ERROR_SECTION_DESCRIPTOR* section_descriptors[num_sections];
@@ -84,9 +93,11 @@ EFI_ERROR_SECTION_DESCRIPTOR* generate_section_descriptor(char* type, size_t* le
         (EFI_ERROR_SECTION_DESCRIPTOR*)generate_random_bytes(sizeof(EFI_ERROR_SECTION_DESCRIPTOR));
 
     //Set reserved bits to zero.
-    descriptor->SecValidMask &= 0b11;
     descriptor->Resv1 = 0;
     descriptor->SectionFlags &= 0xFF;
+
+    //Validation bits all set to 'on'.
+    descriptor->SecValidMask = 0b11;
 
     //Set severity.
     descriptor->Severity = rand() % 4;
@@ -97,6 +108,17 @@ EFI_ERROR_SECTION_DESCRIPTOR* generate_section_descriptor(char* type, size_t* le
         + (num_sections * sizeof(EFI_ERROR_SECTION_DESCRIPTOR));
     for (int i=0; i<index; i++)
         descriptor->SectionOffset += lengths[i];
+    
+    //Ensure the FRU text is not null terminated early.
+    for (int i=0; i<20; i++)
+    {
+        if (descriptor->FruString[i] = 0x0)
+            descriptor->FruString[i] = rand() % 127 + 1;
+
+        //Null terminate last byte.
+        if (i == 19)
+            descriptor->FruString[i] = 0x0;
+    }
 
     //Set section type GUID based on type name.
     if (strcmp(type, "generic") == 0)

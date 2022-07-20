@@ -37,6 +37,10 @@ size_t generate_section_ia32x64(void** location)
         total_len += context_structure_lengths[i];
     UINT8* section = generate_random_bytes(total_len);
 
+    //Null extend the end of the CPUID in the header.
+    for (int i=0; i<16; i++)
+        *(section + 48 + i) = 0x0;
+
     //Set header information.
     UINT64* validation = (UINT64*)section;
     *validation &= 0b11;
@@ -68,33 +72,50 @@ void* generate_ia32x64_error_structure()
 {
     UINT8* error_structure = generate_random_bytes(IA32X64_ERROR_STRUCTURE_SIZE);
 
+    //Set error structure reserved space to zero.
+    UINT64* validation = (UINT64*)(error_structure + 16);
+    *validation &= 0x1F;
+
     //Create a random type of error structure.
     EFI_GUID* guid = (EFI_GUID*)error_structure;
+    UINT64* check_info = (UINT64*)(error_structure + 24);
     int error_structure_type = rand() % 4;
     switch (error_structure_type)
     {
         //Cache
         case 0:
             memcpy(guid, &gEfiIa32x64ErrorTypeCacheCheckGuid, sizeof(EFI_GUID));
-            memset(error_structure + 30, 0, 34);
+
+            //Set reserved space to zero.
+            *check_info &= ~0xFF00;
+            *check_info &= 0x3FFFFFFF;
             break;
 
         //TLB
         case 1:
             memcpy(guid, &gEfiIa32x64ErrorTypeTlbCheckGuid, sizeof(EFI_GUID));
-            memset(error_structure + 30, 0, 34);
+
+            //Set reserved space to zero.
+            *check_info &= ~0xFF00;
+            *check_info &= 0x3FFFFFFF;
             break;
 
         //Bus
         case 2:
             memcpy(guid, &gEfiIa32x64ErrorTypeBusCheckGuid, sizeof(EFI_GUID));
-            memset(error_structure + 35, 0, 29);
+
+            //Set reserved space to zero.
+            *check_info &= ~0xF800;
+            *check_info &= 0x7FFFFFFFF;
             break;
 
         //MS
         case 3:
             memcpy(guid, &gEfiIa32x64ErrorTypeMsCheckGuid, sizeof(EFI_GUID));
-            memset(error_structure + 24, 0, 38);
+
+            //Set reserved space to zero.
+            *check_info &= ~0xFF30;
+            *check_info &= 0xFFFFFF;
             break;
     }
 

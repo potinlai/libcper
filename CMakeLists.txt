@@ -38,12 +38,21 @@ FetchContent_MakeAvailable(json-c b64-c googletest)
 file(GLOB SectionSources sections/*.c)
 file(GLOB EDKSources edk/*.c)
 file(GLOB GeneratorSectionSources generator/sections/*.c)
-add_library(cper-parse STATIC cper-parse.c ir-parse.c cper-utils.c json-schema.c json-schema.h ${SectionSources} ${EDKSources})
+add_library(cper-parse STATIC 
+  cper-parse.c 
+  ir-parse.c 
+  cper-utils.c 
+  common-utils.c
+  json-schema.c 
+  ${SectionSources} 
+  ${EDKSources}
+)
 add_executable(cper-convert cli-app/cper-convert.c)
 add_executable(cper-generate 
   generator/cper-generate-cli.c
   generator/cper-generate.c 
   generator/gen-utils.c 
+  common-utils.c
   ${GeneratorSectionSources} 
   ${EDKSources}
 )
@@ -67,4 +76,4 @@ add_custom_command(TARGET cper-convert POST_BUILD COMMAND ${CMAKE_COMMAND} -E ma
 add_custom_command(TARGET cper-convert POST_BUILD COMMAND cp -r specification/json/* bin/specification)
 
 # Add tests to GoogleTest.
-gtest_discover_tests(cper-tests WORKING_DIRECTORY bin/)
+#gtest_discover_tests(cper-tests WORKING_DIRECTORY bin/)

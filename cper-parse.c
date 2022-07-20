@@ -109,15 +109,8 @@ json_object* cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER* header)
     if (header->ValidationBits & 0b10)
     {
         char timestamp_string[TIMESTAMP_LENGTH];
-        sprintf(timestamp_string, "%02d%02d-%02d-%02dT%02d:%02d:%02d.000", 
-            header->TimeStamp.Century,
-            header->TimeStamp.Year,
-            header->TimeStamp.Month,
-            header->TimeStamp.Day,
-            header->TimeStamp.Hours,
-            header->TimeStamp.Minutes,
-            header->TimeStamp.Seconds);
-
+        timestamp_to_string(timestamp_string, &header->TimeStamp);
+        
         json_object_object_add(header_ir, "timestamp", json_object_new_string(timestamp_string));
         json_object_object_add(header_ir, "timestampIsPrecise", json_object_new_boolean(header->TimeStamp.Flag));
     }

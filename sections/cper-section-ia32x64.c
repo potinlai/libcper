@@ -71,7 +71,7 @@ json_object* cper_section_ia32x64_to_ir(void* section, EFI_ERROR_SECTION_DESCRIP
     json_object_object_add(record_ir, "processorErrorInfo", error_info_array);
 
     //Processor context information, of the amount described above.
-    EFI_IA32_X64_PROCESSOR_CONTEXT_INFO* current_context_info = (EFI_IA32_X64_PROCESSOR_CONTEXT_INFO*)(current_error_info + 1);
+    EFI_IA32_X64_PROCESSOR_CONTEXT_INFO* current_context_info = (EFI_IA32_X64_PROCESSOR_CONTEXT_INFO*)current_error_info;
     json_object* context_info_array = json_object_new_array();
     for (int i=0; i<processor_context_info_num; i++) 
     {
@@ -523,8 +523,8 @@ void ir_ia32x64_context_info_to_cper(json_object* context_info, FILE* out)
 
     //Miscellaneous numeric fields.
     context_info_cper->ArraySize = (UINT16)json_object_get_uint64(json_object_object_get(context_info, "registerArraySize"));
-    context_info_cper->MsrAddress = (UINT16)json_object_get_uint64(json_object_object_get(context_info, "msrAddress"));
-    context_info_cper->MmRegisterAddress = (UINT16)json_object_get_uint64(json_object_object_get(context_info, "mmRegisterAddress"));
+    context_info_cper->MsrAddress = (UINT32)json_object_get_uint64(json_object_object_get(context_info, "msrAddress"));
+    context_info_cper->MmRegisterAddress = json_object_get_uint64(json_object_object_get(context_info, "mmRegisterAddress"));
 
     //Flush header to stream.
     fwrite(context_info_cper, sizeof(EFI_IA32_X64_PROCESSOR_CONTEXT_INFO), 1, out);
@@ -532,17 +532,21 @@ void ir_ia32x64_context_info_to_cper(json_object* context_info, FILE* out)
 
     //Handle the register array, depending on type provided.
     json_object* register_array = json_object_object_get(context_info, "registerArray");
-    switch (context_info_cper->RegisterType)
+    if (context_info_cper->RegisterType == EFI_REG_CONTEXT_TYPE_IA32)
     {
-        case EFI_REG_CONTEXT_TYPE_IA32:
-            ir_ia32x64_ia32_registers_to_cper(register_array, out);
-            break;
-        case EFI_REG_CONTEXT_TYPE_X64:
-            ir_ia32x64_ia32_registers_to_cper(register_array, out);
-            break;
-        default:
-            //Unknown/undefined.
-            break;
+        ir_ia32x64_ia32_registers_to_cper(register_array, out);
+    }
+    else if (context_info_cper->RegisterType == EFI_REG_CONTEXT_TYPE_X64)
+    {
+        ir_ia32x64_x64_registers_to_cper(register_array, out);
+    }
+    else 
+    {
+        //Unknown/structure is not defined.
+        json_object* encoded = json_object_object_get(register_array, "data");
+        char* decoded = b64_decode(json_object_get_string(encoded), json_object_get_string_len(encoded));
+        fwrite(decoded, context_info_cper->ArraySize, 1, out);
+        fflush(out);
     }
 
     //Free remaining resources.

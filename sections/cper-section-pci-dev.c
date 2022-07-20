@@ -93,7 +93,7 @@ void ir_section_pci_dev_to_cper(json_object* section, FILE* out)
     free(section_cper);
 
     //Begin writing register pairs.
-    json_object* register_pairs = json_object_object_get(section, "registerPairs");
+    json_object* register_pairs = json_object_object_get(section, "registerDataPairs");
     int num_pairs = json_object_array_length(register_pairs);
     for (int i=0; i<num_pairs; i++)
     {

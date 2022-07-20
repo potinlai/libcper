@@ -22,5 +22,17 @@ size_t generate_section_generic(void** location)
     *(start_byte + 12) &= 0b111;
     *((UINT16*)(start_byte + 14)) = 0x0;
     
+    //Ensure CPU brand string does not terminate early.
+    for (int i=0; i<128; i++)
+    {
+        UINT8* byte = start_byte + 24 + i;
+        if (*byte == 0x0)
+            *byte = rand() % 127 + 1;
+
+        //Null terminate last byte.
+        if (i == 127)
+            *byte = 0x0;
+    }
+
     return size;
 }
