@@ -61,7 +61,7 @@ json_object* cper_section_arm_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR*
 
     //Whether the processor is running, and the state of it if so.
     json_object_object_add(section_ir, "running", json_object_new_boolean(record->RunningState & 0b1));
-    if (record->RunningState >> 31)
+    if (!(record->RunningState >> 31))
     {
         //Bit 32 of running state is on, so PSCI state information is included.
         //This can't be made human readable, as it is unknown whether this will be the pre-PSCI 1.0 format
@@ -360,6 +360,7 @@ json_object* cper_arm_misc_register_array_to_ir(EFI_ARM_MISC_CONTEXT_REGISTER* m
 void ir_section_arm_to_cper(json_object* section, FILE* out)
 {
     EFI_ARM_ERROR_RECORD* section_cper = (EFI_ARM_ERROR_RECORD*)calloc(1, sizeof(EFI_ARM_ERROR_RECORD));
+    long starting_stream_pos = ftell(out);
 
     //Validation bits.
     section_cper->ValidFields = ir_to_bitfield(json_object_object_get(section, "validationBits"), 
@@ -399,9 +400,13 @@ void ir_section_arm_to_cper(json_object* section, FILE* out)
     json_object* vendor_specific_info = json_object_object_get(section, "vendorSpecificInfo");
     if (vendor_specific_info != NULL)
     {
-        int vendor_specific_len = json_object_get_string_len(vendor_specific_info);
-        UINT8* decoded = b64_decode(json_object_get_string(vendor_specific_info), vendor_specific_len);
-        fwrite(decoded, vendor_specific_len / 4 * 3, 1, out); //b64 length to byte length
+        json_object* vendor_info_string = json_object_object_get(vendor_specific_info, "data");
+        int vendor_specific_len = json_object_get_string_len(vendor_info_string);
+        UINT8* decoded = b64_decode(json_object_get_string(vendor_info_string), vendor_specific_len);
+
+        //Write out to file.
+        long cur_stream_pos = ftell(out);
+        fwrite(decoded, starting_stream_pos + section_cper->SectionLength - cur_stream_pos, 1, out);
         fflush(out);
         free(decoded);
     }

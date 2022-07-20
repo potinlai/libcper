@@ -33,5 +33,4 @@ Specification for the CPER binary format can be found in [UEFI Specification App
 
 ### Remaining Task List
 - Add readable versions of the IA32/x64 processor info type GUIDs, updating specification & both conversions.
-- Add remaining `cper-generate` sections for testing purposes.
 - Add a top-level "specification" object which indicates which version/revision of the specification the JSON is using.

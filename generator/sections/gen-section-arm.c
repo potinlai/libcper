@@ -52,6 +52,10 @@ size_t generate_section_arm(void** location)
     *(section + 12) = rand() % 4;
 
     //Reserved zero bytes.
+    UINT64* validation = (UINT64*)section;
+    *validation &= 0b111;
+    UINT32* running_state = (UINT32*)(section + 32);
+    *running_state &= 0b1;
     memset(section + 13, 0, 3);
 
     //Copy in the sections/context structures, free resources.
@@ -86,6 +90,10 @@ void* generate_arm_error_info()
     //Type of error.
     UINT8 error_type = rand() % 4;
     *(error_info + 4) = error_type;
+
+    //Reserved bits for error information.
+    UINT16* validation = (UINT16*)(error_info + 2);
+    *validation &= 0x1F;
 
     //Make sure reserved bits are zero according with the type.
     UINT64* error_subinfo = (UINT64*)(error_info + 8);

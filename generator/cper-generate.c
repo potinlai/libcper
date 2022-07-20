@@ -112,7 +112,7 @@ EFI_ERROR_SECTION_DESCRIPTOR* generate_section_descriptor(char* type, size_t* le
     //Ensure the FRU text is not null terminated early.
     for (int i=0; i<20; i++)
     {
-        if (descriptor->FruString[i] = 0x0)
+        if (descriptor->FruString[i] == 0x0)
             descriptor->FruString[i] = rand() % 127 + 1;
 
         //Null terminate last byte.

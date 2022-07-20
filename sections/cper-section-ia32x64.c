@@ -72,10 +72,12 @@ json_object* cper_section_ia32x64_to_ir(void* section, EFI_ERROR_SECTION_DESCRIP
 
     //Processor context information, of the amount described above.
     EFI_IA32_X64_PROCESSOR_CONTEXT_INFO* current_context_info = (EFI_IA32_X64_PROCESSOR_CONTEXT_INFO*)current_error_info;
+    void* cur_pos = (void*)current_context_info;
     json_object* context_info_array = json_object_new_array();
     for (int i=0; i<processor_context_info_num; i++) 
     {
-        json_object_array_add(context_info_array, cper_ia32x64_processor_context_info_to_ir(current_context_info, (void**)&current_context_info));
+        json_object_array_add(context_info_array, cper_ia32x64_processor_context_info_to_ir(current_context_info, &cur_pos));
+        current_context_info = (EFI_IA32_X64_PROCESSOR_CONTEXT_INFO*)cur_pos;
         //The context array is a non-fixed size, pointer is shifted within the above function.
     }
     json_object_object_add(record_ir, "processorContextInfo", context_info_array);

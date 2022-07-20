@@ -10,7 +10,8 @@
     "Invalid Device Request", "ATT Access Error", "ATT Reserved Bit Invalid", "Illegal Command", "Command Buffer Access Error"}
 #define DMAR_GENERIC_ERROR_FAULT_REASON_TYPES_DESCRIPTIONS (const char*[]){ \
     "Domain mapping table entry is not present.", \
-    "DMAr unit's attempt to access the domain mapping table resulted in an error." \
+    "Invalid domain mapping table entry.", \
+    "DMAr unit's attempt to access the domain mapping table resulted in an error.", \
     "Reserved bit set to non-zero value in the domain mapping table.", \
     "DMA request to access an address beyond the device address width.", \
     "Invalid read or write access.", \

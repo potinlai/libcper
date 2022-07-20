@@ -6,6 +6,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "../../edk/Cper.h"
 #include "../gen-utils.h"
 #include "gen-sections.h"
@@ -114,7 +115,7 @@ void* generate_ia32x64_error_structure()
             memcpy(guid, &gEfiIa32x64ErrorTypeMsCheckGuid, sizeof(EFI_GUID));
 
             //Set reserved space to zero.
-            *check_info &= ~0xFF30;
+            *check_info &= ~0xFFE0;
             *check_info &= 0xFFFFFF;
             break;
     }
@@ -135,7 +136,7 @@ size_t generate_ia32x64_context_structure(void** location)
     if (reg_type == 3)
         reg_size = 244; //x64 registers.
     else
-        reg_size = rand() % 64; //Not table defined.
+        reg_size = (rand() % 5) * 32; //Not table defined.
 
     //Create structure randomly.
     int total_size = 16 + reg_size;
@@ -144,6 +145,7 @@ size_t generate_ia32x64_context_structure(void** location)
     //Set header information.
     *(context_structure) = reg_type;
     *(context_structure + 1) = reg_size;
+    printf("set reg size to %d (for type %d).\n", reg_size, reg_type);
 
     //Set return values and exit.
     *location = context_structure;
