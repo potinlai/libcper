@@ -163,7 +163,7 @@ void ir_section_cxl_protocol_to_cper(json_object* section, FILE* out)
     section_cper->CxlErrorLogLength = (UINT16)json_object_get_int(json_object_object_get(section, "errorLogLength"));
 
     //Write header to stream.
-    fwrite(section_cper, sizeof(section_cper), 1, out);
+    fwrite(section_cper, sizeof(EFI_CXL_PROTOCOL_ERROR_DATA), 1, out);
     fflush(out);
 
     //DVSEC out to stream.

@@ -80,38 +80,9 @@ json_object* cper_section_pcie_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR
 
     //AER information.
     json_object* aer_capability_ir = json_object_new_object();
-    EFI_PCIE_ADV_ERROR_EXT_CAPABILITY* aer_capability = (EFI_PCIE_ADV_ERROR_EXT_CAPABILITY*)pcie_error->AerInfo.PcieAer;
-    json_object_object_add(aer_capability_ir, "capabilityID", 
-        json_object_new_uint64(aer_capability->Header.PcieExtendedCapabilityId));
-    json_object_object_add(aer_capability_ir, "capabilityVersion", 
-        json_object_new_uint64(aer_capability->Header.CapabilityVersion));
-    json_object_object_add(aer_capability_ir, "uncorrectableErrorStatusRegister", 
-        json_object_new_uint64(aer_capability->UncorrectableErrorStatusReg));
-    json_object_object_add(aer_capability_ir, "uncorrectableErrorMaskRegister", 
-        json_object_new_uint64(aer_capability->UncorrectableErrorMaskReg));
-    json_object_object_add(aer_capability_ir, "uncorrectableErrorSeverityRegister", 
-        json_object_new_uint64(aer_capability->UncorrectableErrorSeverityReg));
-    json_object_object_add(aer_capability_ir, "correctableErrorStatusRegister", 
-        json_object_new_uint64(aer_capability->CorrectableErrorStatusReg));
-    json_object_object_add(aer_capability_ir, "correctableErrorMaskRegister", 
-        json_object_new_uint64(aer_capability->CorrectableErrorMaskReg));
-    json_object_object_add(aer_capability_ir, "aeccReg", json_object_new_uint64(aer_capability->AeccReg));
-
-    //Header log register (b64).
-    encoded = b64_encode((unsigned char*)aer_capability->HeaderLogReg, 16);
-    json_object_object_add(aer_capability_ir, "headerLogRegister", json_object_new_string(encoded));
+    encoded = b64_encode((unsigned char*)pcie_error->AerInfo.PcieAer, 96);
+    json_object_object_add(aer_capability_ir, "data", json_object_new_string(encoded));
     free(encoded);
-
-    //Remaining AER fields.
-    json_object_object_add(aer_capability_ir, "rootErrorCommand", 
-        json_object_new_uint64(aer_capability->RootErrorCommand));
-    json_object_object_add(aer_capability_ir, "rootErrorStatus", 
-        json_object_new_uint64(aer_capability->RootErrorStatus));
-    json_object_object_add(aer_capability_ir, "errorSourceIDRegister", 
-        json_object_new_uint64(aer_capability->ErrorSourceIdReg));
-    json_object_object_add(aer_capability_ir, "correctableErrorSourceIDRegister", 
-        json_object_new_uint64(aer_capability->CorrectableSourceIdReg));
-
     json_object_object_add(section_ir, "aerInfo", aer_capability_ir);
     return section_ir;
 }
@@ -127,9 +98,9 @@ void ir_section_pcie_to_cper(json_object* section, FILE* out)
 
     //Version.
     json_object* version = json_object_object_get(section, "version");
-    int minor = json_object_get_int(json_object_object_get(version, "minor"));
-    int major = json_object_get_int(json_object_object_get(version, "major"));
-    section_cper->Version = int_to_bcd(minor) + ((UINT16)(int_to_bcd(major)) << 8);
+    UINT32 minor = int_to_bcd(json_object_get_int(json_object_object_get(version, "minor")));
+    UINT32 major = int_to_bcd(json_object_get_int(json_object_object_get(version, "major")));
+    section_cper->Version = minor + (major << 8);
 
     //Command/status registers.
     json_object* command_status = json_object_object_get(section, "commandStatus");
@@ -146,7 +117,7 @@ void ir_section_pcie_to_cper(json_object* section, FILE* out)
         (UINT16)json_object_get_uint64(json_object_object_get(device_id, "deviceID"));
     section_cper->DevBridge.ClassCode[0] = class_id >> 16;
     section_cper->DevBridge.ClassCode[1] = (class_id >> 8) & 0xFF;
-    section_cper->DevBridge.ClassCode[1] = class_id & 0xFF;
+    section_cper->DevBridge.ClassCode[2] = class_id & 0xFF;
     section_cper->DevBridge.Function = 
         (UINT8)json_object_get_uint64(json_object_object_get(device_id, "functionNumber"));
     section_cper->DevBridge.Device = 
@@ -175,48 +146,17 @@ void ir_section_pcie_to_cper(json_object* section, FILE* out)
 
     //AER capability structure.
     json_object* aer_info = json_object_object_get(section, "aerInfo");
-    EFI_PCIE_ADV_ERROR_EXT_CAPABILITY* aer_capability = 
-        (EFI_PCIE_ADV_ERROR_EXT_CAPABILITY*)section_cper->AerInfo.PcieAer;
-    aer_capability->Header.PcieExtendedCapabilityId =
-        json_object_get_uint64(json_object_object_get(aer_info, "capabilityID"));
-    aer_capability->Header.CapabilityVersion =
-        json_object_get_uint64(json_object_object_get(aer_info, "capabilityVersion"));
-    aer_capability->UncorrectableErrorStatusReg =
-        (UINT32)json_object_get_uint64(json_object_object_get(aer_info, "uncorrectableErrorStatusRegister"));
-    aer_capability->UncorrectableErrorMaskReg =
-        (UINT32)json_object_get_uint64(json_object_object_get(aer_info, "uncorrectableErrorMaskRegister"));
-    aer_capability->UncorrectableErrorSeverityReg =
-        (UINT32)json_object_get_uint64(json_object_object_get(aer_info, "uncorrectableErrorSeverityRegister"));
-    aer_capability->CorrectableErrorStatusReg =
-        (UINT32)json_object_get_uint64(json_object_object_get(aer_info, "correctableErrorStatusRegister"));
-    aer_capability->CorrectableErrorMaskReg =
-        (UINT32)json_object_get_uint64(json_object_object_get(aer_info, "correctableErrorMaskRegister"));
-    aer_capability->AeccReg =
-        (UINT32)json_object_get_uint64(json_object_object_get(aer_info, "aeccReg"));
-
-    //AER header log register.
-    encoded = json_object_object_get(aer_info, "headerLogRegister");
+    encoded = json_object_object_get(aer_info, "data");
     decoded = b64_decode(json_object_get_string(encoded), json_object_get_string_len(encoded));
-    memcpy(aer_capability->HeaderLogReg, decoded, 16);
+    memcpy(section_cper->AerInfo.PcieAer, decoded, 96);
     free(decoded);
-
-    //Remaining AER fields.
-    aer_capability->RootErrorCommand =
-        (UINT32)json_object_get_uint64(json_object_object_get(aer_info, "rootErrorCommand"));
-    aer_capability->RootErrorStatus =
-        (UINT32)json_object_get_uint64(json_object_object_get(aer_info, "rootErrorStatus"));
-    aer_capability->ErrorSourceIdReg =
-        (UINT16)json_object_get_uint64(json_object_object_get(aer_info, "errorSourceIDRegister"));
-    aer_capability->CorrectableSourceIdReg =
-        (UINT16)json_object_get_uint64(json_object_object_get(aer_info, "correctableErrorSourceIDRegister"));
-
 
     //Miscellaneous value fields.
     section_cper->PortType = (UINT32)readable_pair_to_integer(json_object_object_get(section, "portType"));
     section_cper->SerialNo = json_object_get_uint64(json_object_object_get(section, "deviceSerialNumber"));
 
     //Write out to stream, free resources.
-    fwrite(&section_cper, sizeof(section_cper), 1, out);
+    fwrite(section_cper, sizeof(EFI_PCIE_ERROR_DATA), 1, out);
     fflush(out);
     free(section_cper);
 }

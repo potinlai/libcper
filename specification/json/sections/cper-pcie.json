@@ -122,46 +122,10 @@
         },
         "aerInfo": {
             "type": "object",
-            "required": ["capabilityID", "capabilityVersion", "uncorrectableErrorStatusRegister", "uncorrectableErrorMaskRegister", "uncorrectableErrorSeverityRegister", "correctableErrorStatusRegister", "correctableErrorMaskRegister", "aeccReg", "headerLogRegister", "rootErrorCommand", "rootErrorStatus", "errorSourceIDRegister", "correctableErrorSourceIDRegister"],
+            "required": ["data"],
             "properties": {
-                "capabilityID": {
-                    "type": "integer"
-                },
-                "capabilityVersion": {
-                    "type": "integer"
-                },
-                "uncorrectableErrorStatusRegister": {
-                    "type": "integer"
-                },
-                "uncorrectableErrorMaskRegister": {
-                    "type": "integer"
-                },
-                "uncorrectableErrorSeverityRegister": {
-                    "type": "integer"
-                },
-                "correctableErrorStatusRegister": {
-                    "type": "integer"
-                },
-                "correctableErrorMaskRegister": {
-                    "type": "integer"
-                },
-                "aeccReg": {
-                    "type": "integer"
-                },
-                "headerLogRegister": {
+                "data": {
                     "type": "string"
-                },
-                "rootErrorCommand": {
-                    "type": "integer"
-                },
-                "rootErrorStatus": {
-                    "type": "integer"
-                },
-                "errorSourceIDRegister": {
-                    "type": "integer"
-                },
-                "correctableErrorSourceIDRegister": {
-                    "type": "integer"
                 }
             }
         }

@@ -1519,7 +1519,8 @@ bridgeControlStatus.controlRegister & uint64 & The bridge control register. \emp
 \hline
 capabilityStructure.data & string & A base-64 formatted binary dump of the PCIe capability structure for this device. The structure could either be a PCIe 1.1 Capability Structure (36-byte, padded to 60 bytes) or a PCIe 2.0 Capability Structure (60-byte).\\
 \hline
-aerInfo & object & A PCIe AER Extended Capability structure, as defined in Subsection \ref{subsection:pcieaerecstructure}.\\
+% aerInfo & object & A PCIe AER Extended Capability structure, as defined in Subsection \ref{subsection:pcieaerecstructure}.\\
+aerInfo.data & string & A base64-formatted representation of a PCIe AER Extended Capability structure.\\
 \jsontableend{PCIe Error structure field table.}
 
 % PCIe error validation structure.
@@ -1569,37 +1570,37 @@ secondaryBusNumber & uint64 & The root port/bridge secondary bus number of the P
 slotNumber & uint64 & The slot number of the PCIe device.\\
 \jsontableend{PCIe Device ID structure field table.}
 
-% PCIe Advanced Error Reporting Extended Capability structure.
-\subsection{PCIe AER Extended Capability Structure}
-\label{subsection:pcieaerecstructure}
-This structure describes a PCIe Advanced Error Reporting Extended Capability structure, for use in a PCI Error section (\ref{table:pcieerrorsection}).
-\jsontable{table:pcieaerecstructure}
-capabilityID & uint64 & The capability ID for this AER structure.\\
-\hline
-capabilityVersion & uint64 & The capability structure version for this AER structure.\\
-\hline
-uncorrectableErrorStatusRegister & uint64 & The uncorrectable error status register value.\\
-\hline
-uncorrectableErrorMaskRegister & uint64 & The uncorrectable error mask register value.\\
-\hline
-uncorrectableErrorSeverityRegister & uint64 & The uncorrectable error severity register value.\\
-\hline
-correctableErrorStatusRegister & uint64 & The correctable error status register value.\\
-\hline
-correctableErrorMaskRegister & uint64 & The correctable error mask register value.\\
-\hline
-aeccReg & uint64 & The AECC register value.\\
-\hline
-headerLogRegister & string & A base64-encoded binary dump of the header log register.\\
-\hline
-rootErrorCommand & uint64 & The root error command.\\
-\hline
-rootErrorStatus & uint64 & The root error status.\\
-\hline
-errorSourceIDRegister & uint64 & The error source ID register.\\
-\hline
-correctableErrorSourceIDRegister & uint64 & The correctable error source ID register.\\
-\jsontableend{PCIe AER Extended Capability structure field table.}
+% % PCIe Advanced Error Reporting Extended Capability structure.
+% \subsection{PCIe AER Extended Capability Structure}
+% \label{subsection:pcieaerecstructure}
+% This structure describes a PCIe Advanced Error Reporting Extended Capability structure, for use in a PCI Error section (\ref{table:pcieerrorsection}).
+% \jsontable{table:pcieaerecstructure}
+% capabilityID & uint64 & The capability ID for this AER structure.\\
+% \hline
+% capabilityVersion & uint64 & The capability structure version for this AER structure.\\
+% \hline
+% uncorrectableErrorStatusRegister & uint64 & The uncorrectable error status register value.\\
+% \hline
+% uncorrectableErrorMaskRegister & uint64 & The uncorrectable error mask register value.\\
+% \hline
+% uncorrectableErrorSeverityRegister & uint64 & The uncorrectable error severity register value.\\
+% \hline
+% correctableErrorStatusRegister & uint64 & The correctable error status register value.\\
+% \hline
+% correctableErrorMaskRegister & uint64 & The correctable error mask register value.\\
+% \hline
+% aeccReg & uint64 & The AECC register value.\\
+% \hline
+% headerLogRegister & string & A base64-encoded binary dump of the header log register.\\
+% \hline
+% rootErrorCommand & uint64 & The root error command.\\
+% \hline
+% rootErrorStatus & uint64 & The root error status.\\
+% \hline
+% errorSourceIDRegister & uint64 & The error source ID register.\\
+% \hline
+% correctableErrorSourceIDRegister & uint64 & The correctable error source ID register.\\
+% \jsontableend{PCIe AER Extended Capability structure field table.}
 
 % PCI/PCI-X Bus error section.
 \section{PCI/PCI-X Bus Error Section}

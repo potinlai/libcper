@@ -26,7 +26,14 @@ size_t generate_section_pcie(void** location)
     *version &= 0xFFFF; //Version bytes 2-3
     UINT32* reserved = (UINT32*)(bytes + 20);
     *reserved = 0; //Reserved bytes 20-24
+    *(bytes + 37) &= ~0b111; //Device ID byte 13 bits 0-3
     *(bytes + 39) = 0; //Device ID byte 15
+
+    //Set expected values.
+    int minor = rand() % 128;
+    int major = rand() % 128;
+    *version = int_to_bcd(minor);
+    *version |= int_to_bcd(major) << 8;
 
     //Fix values that could be above range.
     UINT32* port_type = (UINT32*)(bytes + 8);

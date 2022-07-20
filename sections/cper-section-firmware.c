@@ -49,7 +49,7 @@ void ir_section_firmware_to_cper(json_object* section, FILE* out)
         json_object_get_string(json_object_object_get(section, "recordIDGUID")));
 
     //Write to stream, free resources.
-    fwrite(&section_cper, sizeof(section_cper), 1, out);
+    fwrite(section_cper, sizeof(EFI_FIRMWARE_ERROR_DATA), 1, out);
     fflush(out);
     free(section_cper);
 }

@@ -79,7 +79,7 @@ void ir_section_pci_bus_to_cper(json_object* section, FILE* out)
     section_cper->TargetId = json_object_get_uint64(json_object_object_get(section, "targetID"));
 
     //Write to stream, free resources.
-    fwrite(&section_cper, sizeof(section_cper), 1, out);
+    fwrite(section_cper, sizeof(EFI_PCI_PCIX_BUS_ERROR_DATA), 1, out);
     fflush(out);
     free(section_cper);
 }

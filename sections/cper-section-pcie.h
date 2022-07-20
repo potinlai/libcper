@@ -12,27 +12,6 @@
     "Root Port", "Upstream Switch Port", "Downstream Switch Port", "PCI Express to PCI/PCI-X Bridge", \
     "PCI/PCI-X Bridge to PCI Express Bridge", "Root Complex Integrated Endpoint Device", "Root Complex Event Collector"}
 
-typedef struct {
-    UINT64 PcieExtendedCapabilityId : 16;
-    UINT64 CapabilityVersion : 4;
-    UINT64 NextCapabilityOffset : 12; 
-} EFI_PCIE_ADV_ERROR_EXT_CAPABILITY_HEADER;
-
-typedef struct {
-    EFI_PCIE_ADV_ERROR_EXT_CAPABILITY_HEADER Header;
-    UINT32 UncorrectableErrorStatusReg;
-    UINT32 UncorrectableErrorMaskReg;
-    UINT32 UncorrectableErrorSeverityReg;
-    UINT32 CorrectableErrorStatusReg;
-    UINT32 CorrectableErrorMaskReg;
-    UINT32 AeccReg;
-    UINT8 HeaderLogReg[16];
-    UINT32 RootErrorCommand;
-    UINT32 RootErrorStatus;
-    UINT16 CorrectableSourceIdReg;
-    UINT16 ErrorSourceIdReg;
-} EFI_PCIE_ADV_ERROR_EXT_CAPABILITY;
-
 json_object* cper_section_pcie_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor);
 void ir_section_pcie_to_cper(json_object* section, FILE* out);
 

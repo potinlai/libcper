@@ -79,7 +79,7 @@ void ir_section_dmar_iommu_to_cper(json_object* section, FILE* out)
     section_cper->PteL6 = json_object_get_uint64(json_object_object_get(section, "pageTableEntry_Level6"));
 
     //Write to stream, free resources.
-    fwrite(&section_cper, sizeof(section_cper), 1, out);
+    fwrite(section_cper, sizeof(EFI_IOMMU_DMAR_ERROR_DATA), 1, out);
     fflush(out);
     free(section_cper);
 }

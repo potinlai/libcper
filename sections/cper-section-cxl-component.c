@@ -86,7 +86,7 @@ void ir_section_cxl_component_to_cper(json_object* section, FILE* out)
     section_cper->DeviceSerial = json_object_get_uint64(json_object_object_get(section, "deviceSerial"));
 
     //Write header out to stream.
-    fwrite(section_cper, sizeof(section_cper), 1, out);
+    fwrite(section_cper, sizeof(EFI_CXL_COMPONENT_EVENT_HEADER), 1, out);
     fflush(out);
 
     //CXL component event log, decoded from base64.

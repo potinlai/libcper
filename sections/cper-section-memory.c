@@ -172,7 +172,7 @@ void ir_section_memory_to_cper(json_object* section, FILE* out)
     section_cper->Extended |= json_object_get_int(json_object_object_get(extended, "chipIdentification")) << 5;
 
     //Miscellaneous value fields.
-    section_cper->ErrorType = readable_pair_to_integer(json_object_object_get(section, "memoryErrorType"));
+    section_cper->ErrorType = (UINT8)readable_pair_to_integer(json_object_object_get(section, "memoryErrorType"));
     section_cper->PhysicalAddress = json_object_get_uint64(json_object_object_get(section, "physicalAddress"));
     section_cper->PhysicalAddressMask = json_object_get_uint64(json_object_object_get(section, "physicalAddressMask"));
     section_cper->Node = (UINT16)json_object_get_uint64(json_object_object_get(section, "node"));
@@ -190,7 +190,7 @@ void ir_section_memory_to_cper(json_object* section, FILE* out)
     section_cper->ModuleHandle = (UINT16)json_object_get_uint64(json_object_object_get(section, "moduleSmbiosHandle"));
 
     //Write to stream, free up resources.
-    fwrite(&section_cper, sizeof(section_cper), 1, out);
+    fwrite(section_cper, sizeof(EFI_PLATFORM_MEMORY_ERROR_DATA), 1, out);
     fflush(out);
     free(section_cper);
 }
@@ -244,7 +244,7 @@ void ir_section_memory2_to_cper(json_object* section, FILE* out)
     section_cper->ModuleHandle = (UINT32)json_object_get_uint64(json_object_object_get(section, "moduleSmbiosHandle"));
 
     //Write to stream, free up resources.
-    fwrite(&section_cper, sizeof(section_cper), 1, out);
+    fwrite(section_cper, sizeof(EFI_PLATFORM_MEMORY2_ERROR_DATA), 1, out);
     fflush(out);
     free(section_cper);
 }
