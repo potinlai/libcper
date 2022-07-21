@@ -54,7 +54,16 @@
                 "additionalProperties": false,
                 "properties": {
                     "type": {
-                        "type": "string"
+                        "type": "object",
+                        "required": ["guid", "name"],
+                        "properties": {
+                            "guid": {
+                                "type": "string"
+                            },
+                            "name": {
+                                "type": "string"
+                            }
+                        }
                     },
                     "validationBits": {
                         "type": "object",

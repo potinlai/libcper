@@ -371,7 +371,8 @@ edx & uint64 & Value of the EDX register resulting from a call to CPUID with EAX
 \label{subsection:ia32x64processorerrorinfostructure}
 This structure describes a single IA32/x64 Processor Error Info sub-section, which is part of the larger IA32/x64 record (\ref{section:ia32x64errorsection}).
 \jsontable{table:ia32x64processorerrorinfostructure}
-type & string & A GUID indicating the type of processor error defined in this structure. See \texttt{edk/Cper.h} in the library repository for the defined GUID values.\\
+type.guid & string & A GUID indicating the type of processor error defined in this structure. See \texttt{edk/Cper.h} in the library repository for the defined GUID values.\\
+type.name & string & The human readable name, if available, of the type of processor error defined in this structure.\\
 \hline
 validationBits & object & An IA32/x64 Processor Error Info Validation structure, as defined in Subsection \ref{subsection:ia32x64processorerrorinfovalidationstructure}.\\
 \hline

@@ -126,8 +126,26 @@ json_object *cper_ia32x64_processor_error_info_to_ir(
 	//Error structure type (as GUID).
 	char error_type[GUID_STRING_LENGTH];
 	guid_to_string(error_type, &error_info->ErrorType);
-	json_object_object_add(error_info_ir, "type",
+	json_object *type = json_object_new_object();
+	json_object_object_add(type, "guid",
 			       json_object_new_string(error_type));
+
+	//Get the error structure type as a readable string.
+	const char *readable_type = "Unknown";
+	if (guid_equal(&error_info->ErrorType,
+		       &gEfiIa32x64ErrorTypeCacheCheckGuid))
+		readable_type = "Cache Check Error";
+	else if (guid_equal(&error_info->ErrorType,
+			    &gEfiIa32x64ErrorTypeTlbCheckGuid))
+		readable_type = "TLB Check Error";
+	else if (guid_equal(&error_info->ErrorType,
+			    &gEfiIa32x64ErrorTypeBusCheckGuid))
+		readable_type = "Bus Check Error";
+	else if (guid_equal(&error_info->ErrorType,
+			    &gEfiIa32x64ErrorTypeMsCheckGuid))
+		readable_type = "MS Check Error";
+	json_object_object_add(type, "name", json_object_new_string(readable_type));
+	json_object_object_add(error_info_ir, "type", type);
 
 	//Validation bits.
 	json_object *validation =
@@ -609,9 +627,10 @@ void ir_ia32x64_error_info_to_cper(json_object *error_info, FILE *out)
 			1, sizeof(EFI_IA32_X64_PROCESS_ERROR_INFO));
 
 	//Error structure type.
-	string_to_guid(&error_info_cper->ErrorType,
-		       json_object_get_string(
-			       json_object_object_get(error_info, "type")));
+	json_object *type = json_object_object_get(error_info, "type");
+	string_to_guid(
+		&error_info_cper->ErrorType,
+		json_object_get_string(json_object_object_get(type, "guid")));
 
 	//Validation bits.
 	error_info_cper->ValidFields = ir_to_bitfield(
