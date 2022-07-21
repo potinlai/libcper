@@ -21,11 +21,13 @@ cper-generate --out cper.generated.dump --sections generic ia32x64
 ```
 Help for both of these tools can be accessed through using the `--help` flag in isolation.
 
-Finally, a static library containing symbols for converting CPER and CPER-JSON between an intermediate JSON format can be found generated in `lib/`. This contains the following useful library symbols:
+Finally, a static library containing symbols for converting CPER and CPER-JSON between an intermediate JSON format can be found generated at `lib/libcper-parse.a`. This contains the following useful library symbols:
 ```
 json_object* cper_to_ir(FILE* cper_file);
 void ir_to_cper(json_object* ir, FILE* out);
 ```
+
+This library also has Python bindings generated on build, which are placed at `lib/cperparse.py`. The static library `_cperparse_pylib.a` (as well as the C file `cper-parsePYTHON_wrap.c`) are generated specifically for the purpose of wrapping types for the Python library, and should not be used as a standard static C library.
 
 ## Specification
 The specification for this project can be found in `specification/`.
