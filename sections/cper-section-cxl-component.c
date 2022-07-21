@@ -90,8 +90,9 @@ void ir_section_cxl_component_to_cper(json_object* section, FILE* out)
     fflush(out);
 
     //CXL component event log, decoded from base64.
-    json_object* encoded = json_object_object_get(section, "cxlComponentEventLog");
-    int log_length = section_cper->Length - sizeof(section_cper);
+    json_object* event_log = json_object_object_get(section, "cxlComponentEventLog");
+    json_object* encoded = json_object_object_get(event_log, "data");
+    int log_length = section_cper->Length - sizeof(EFI_CXL_COMPONENT_EVENT_HEADER);
     char* decoded = b64_decode(json_object_get_string(encoded), json_object_get_string_len(encoded));
     fwrite(decoded, log_length, 1, out);
     fflush(out);

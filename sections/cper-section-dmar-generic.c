@@ -67,7 +67,7 @@ void ir_section_dmar_generic_to_cper(json_object* section, FILE* out)
     section_cper->FaultReason = (UINT8)readable_pair_to_integer(json_object_object_get(section, "faultReason"));
     section_cper->AccessType = (UINT8)readable_pair_to_integer(json_object_object_get(section, "accessType"));
     section_cper->AddressType = (UINT8)readable_pair_to_integer(json_object_object_get(section, "addressType"));
-    section_cper->ArchType = (UINT8)readable_pair_to_integer(json_object_object_get(section, "archType"));
+    section_cper->ArchType = (UINT8)readable_pair_to_integer(json_object_object_get(section, "architectureType"));
     section_cper->DeviceAddr = json_object_get_uint64(json_object_object_get(section, "deviceAddress"));
 
     //Write to stream, free resources.

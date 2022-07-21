@@ -44,6 +44,12 @@ size_t generate_section_dmar_vtd(void** location)
     //Set reserved areas to zero.
     for (int i=0; i<12; i++)
         *(bytes + 36 + i) = 0; //Reserved bytes 36-47.
+    UINT8* fault_record = bytes + 48;
+    UINT32* reserved = (UINT32*)(fault_record);
+    *reserved &= ~0xFFF; //First 12 bits of fault record.
+    reserved = (UINT32*)(fault_record + 10);
+    *reserved &= ~0x1FFF; //Bits 80-92 of fault record.
+    *(fault_record + 15) &= 0x7; //Very last bit of fault record.
 
     //Set return values, exit.
     *location = bytes;
@@ -60,7 +66,7 @@ size_t generate_section_dmar_iommu(void** location)
     
     //Set reserved areas to zero.
     for (int i=0; i<7; i++)
-        *(bytes + 1 + i) + 0; //Reserved bytes 1 to 7.
+        *(bytes + 1 + i) = 0; //Reserved bytes 1 to 7.
     UINT64* reserved = (UINT64*)(bytes + 24);
     *reserved = 0; //Reserved bytes 24-31.
     for (int i=0; i<16; i++)

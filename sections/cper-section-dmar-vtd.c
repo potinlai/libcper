@@ -19,7 +19,9 @@ json_object* cper_section_dmar_vtd_to_ir(void* section, EFI_ERROR_SECTION_DESCRI
     json_object* section_ir = json_object_new_object();
 
     //Version, revision and OEM ID, as defined in the VT-d architecture.
-    UINT64 oem_id = (vtd_error->OemId[0] << 16) + (vtd_error->OemId[1] << 8) + vtd_error->OemId[2];
+    UINT64 oem_id = 0;
+    for (int i=0; i<6; i++)
+        oem_id |= (UINT64)vtd_error->OemId[i] << (i * 8);
     json_object_object_add(section_ir, "version", json_object_new_int(vtd_error->Version));
     json_object_object_add(section_ir, "revision", json_object_new_int(vtd_error->Revision));
     json_object_object_add(section_ir, "oemID", json_object_new_uint64(oem_id));
@@ -82,15 +84,17 @@ void ir_section_dmar_vtd_to_cper(json_object* section, FILE* out)
 
     //OEM ID.
     UINT64 oem_id = json_object_get_uint64(json_object_object_get(section, "oemID"));
-    section_cper->OemId[0] = oem_id >> 16;
-    section_cper->OemId[1] = (oem_id >> 8) & 0xFF;
-    section_cper->OemId[1] = oem_id & 0xFF;
+    for (int i=0; i<6; i++)
+        section_cper->OemId[i] = (oem_id >> (i * 8)) & 0xFF;
 
     //Registers & basic numeric fields.
     section_cper->Version = (UINT8)json_object_get_int(json_object_object_get(section, "version"));
     section_cper->Revision = (UINT8)json_object_get_int(json_object_object_get(section, "revision"));
     section_cper->Capability = json_object_get_uint64(json_object_object_get(section, "capabilityRegister"));
     section_cper->CapabilityEx = json_object_get_uint64(json_object_object_get(section, "extendedCapabilityRegister"));
+    section_cper->GlobalCommand = json_object_get_uint64(json_object_object_get(section, "globalCommandRegister"));
+    section_cper->GlobalStatus = json_object_get_uint64(json_object_object_get(section, "globalStatusRegister"));
+    section_cper->FaultStatus = json_object_get_uint64(json_object_object_get(section, "faultStatusRegister"));
 
     //Fault record.
     json_object* fault_record = json_object_object_get(section, "faultRecord");

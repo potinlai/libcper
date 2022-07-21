@@ -5,6 +5,7 @@
  * Author: Lawrence.Tang@arm.com
  **/
 #include <stdio.h>
+#include <string.h>
 #include "json.h"
 #include "../edk/Cper.h"
 #include "../cper-utils.h"
@@ -70,12 +71,14 @@ void ir_section_pci_bus_to_cper(json_object* section, FILE* out)
     section_cper->BusId = bus_number + (segment_number << 8);
 
     //Remaining fields.
+    UINT64 pcix_command = (UINT64)0x1 << 56;
+    const char* bus_command = json_object_get_string(json_object_object_get(section, "busCommandType"));
     section_cper->Type = (UINT16)readable_pair_to_integer(json_object_object_get(section, "errorType"));
     section_cper->BusAddress = json_object_get_uint64(json_object_object_get(section, "busAddress"));
     section_cper->BusData = json_object_get_uint64(json_object_object_get(section, "busData"));
-    section_cper->BusCommand = json_object_get_string(json_object_object_get(section, "busCommand")) == "PCI" ? 0 : 1;
-    section_cper->RequestorId = json_object_get_uint64(json_object_object_get(section, "requestorID"));
-    section_cper->ResponderId = json_object_get_uint64(json_object_object_get(section, "responderID"));
+    section_cper->BusCommand = strcmp(bus_command, "PCI") == 0 ? 0 : pcix_command;
+    section_cper->RequestorId = json_object_get_uint64(json_object_object_get(section, "busRequestorID"));
+    section_cper->ResponderId = json_object_get_uint64(json_object_object_get(section, "busCompleterID"));
     section_cper->TargetId = json_object_get_uint64(json_object_object_get(section, "targetID"));
 
     //Write to stream, free resources.

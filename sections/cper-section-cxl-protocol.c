@@ -107,7 +107,7 @@ void ir_section_cxl_protocol_to_cper(json_object* section, FILE* out)
 {
     EFI_CXL_PROTOCOL_ERROR_DATA* section_cper =
         (EFI_CXL_PROTOCOL_ERROR_DATA*)calloc(1, sizeof(EFI_CXL_PROTOCOL_ERROR_DATA));
-
+        
     //Validation bits.
     section_cper->ValidBits = ir_to_bitfield(json_object_object_get(section, "validationBits"), 
         7, CXL_PROTOCOL_ERROR_VALID_BITFIELD_NAMES);

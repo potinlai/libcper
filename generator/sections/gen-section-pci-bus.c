@@ -14,7 +14,7 @@
 size_t generate_section_pci_bus(void** location)
 {
     //Create random bytes.
-    int size = 208;
+    int size = 72;
     UINT8* bytes = generate_random_bytes(size);
     
     //Set reserved areas to zero.

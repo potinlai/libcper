@@ -18,8 +18,8 @@ size_t generate_section_firmware(void** location)
     UINT8* bytes = generate_random_bytes(size);
     
     //Set reserved areas to zero.
-    for (int i=0; i<7; i++)
-        *(bytes + 2 + i) = 0; //Reserved bytes 2-9.
+    for (int i=0; i<6; i++)
+        *(bytes + 2 + i) = 0; //Reserved bytes 2-7.
 
     //Set expected values.
     *(bytes + 1) = 2; //Revision, referenced version of spec is 2.

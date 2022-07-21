@@ -45,6 +45,13 @@ size_t generate_section_cxl_protocol(void** location)
     reserved = (UINT32*)(bytes + 112);
     *reserved = 0; //Reserved bytes 112-115.
 
+    //If the device is a host downstream port, serial/capability structure is invalid.
+    if (cxl_agent_type != 0)
+    {
+        for (int i=0; i<68; i++)
+            *(bytes + 40 + i) = 0; //Device serial & capability structure.
+    }
+
     //Set expected values.
     UINT16* dvsec_length_field = (UINT16*)(bytes + 108);
     UINT16* error_log_len_field = (UINT16*)(bytes + 110);
