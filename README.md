@@ -32,7 +32,3 @@ This library also has Python bindings generated on build, which are placed at `l
 ## Specification
 The specification for this project can be found in `specification/`.
 Specification for the CPER binary format can be found in [UEFI Specification Appendix N](https://uefi.org/sites/default/files/resources/UEFI_Spec_2_9_2021_03_18.pdf) (2021/03/18).
-
-### Remaining Task List
-- Add readable versions of the IA32/x64 processor info type GUIDs, updating specification & both conversions.
-- Add a top-level "specification" object which indicates which version/revision of the specification the JSON is using.
