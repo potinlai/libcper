@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
+project(CPERParse)
 include(FetchContent)
 include(GoogleTest)
 include(FindSWIG)
 include(UseSWIG)
 find_package(PythonLibs 3 REQUIRED)
 find_package(PythonInterp ${PYTHONLIBS_VERSION_STRING} REQUIRED)
-project(CPERParse)
 
 # GoogleTest requires at least C++14.
 set(CMAKE_CXX_STANDARD 14)
@@ -70,7 +70,6 @@ add_executable(cper-tests
 )
 
 # Link library.
-target_link_directories(cper-tests PUBLIC ${GTEST_LIBRARY_DIRS} ${GMOCK_LDFLAGS})
 target_link_libraries(cper-tests cper-parse json-c GTest::gtest_main)
 target_link_libraries(cper-parse json-c b64c)
 target_link_libraries(cper-convert cper-parse)
