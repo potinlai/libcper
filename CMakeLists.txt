@@ -20,7 +20,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 FetchContent_Declare(
   json-c
   GIT_REPOSITORY https://github.com/json-c/json-c.git
-  GIT_TAG        d28ac67dde77566f53a97f22b4ea7cb36afe6582 # 4/6/2022
+  GIT_TAG        9021cdcdd01fc9dbcbe1f06391848c2ac915212f # 0.15
 )
 
 # Fetch b64-c from git repository.
