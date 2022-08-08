@@ -455,3 +455,29 @@ json_object *cper_section_to_ir(FILE *handle,
 	free(section);
 	return result;
 }
+
+//Converts a single CPER section, without a header but with a section descriptor, to JSON.
+json_object *cper_single_section_to_ir(FILE *cper_section_file)
+{
+	json_object *ir = json_object_new_object();
+
+	//Read the section descriptor out.
+	EFI_ERROR_SECTION_DESCRIPTOR section_descriptor;
+	if (fread(&section_descriptor, sizeof(EFI_ERROR_SECTION_DESCRIPTOR), 1,
+		  cper_section_file) != 1) {
+		printf("Failed to read section descriptor for CPER single section (fread() returned an unexpected value).\n");
+		return NULL;
+	}
+
+	//Convert the section descriptor to IR.
+	json_object *section_descriptor_ir =
+		cper_section_descriptor_to_ir(&section_descriptor);
+	json_object_object_add(ir, "sectionDescriptor", section_descriptor_ir);
+
+	//Parse the single section.
+	json_object *section_ir =
+		cper_section_to_ir(cper_section_file, &section_descriptor);
+	json_object_object_add(ir, "section", section_ir);
+
+	return ir;
+}

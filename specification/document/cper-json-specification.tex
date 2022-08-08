@@ -51,19 +51,31 @@ defined in this document. There is also a comprehensive JSON schema\footnote{As 
 
 % Specification section.
 \chapter{Main Structure Specification}
-\section{Parent Structure}
-\label{section:parentstructure}
+\section{Parent Structure (Type 1): Full Log}
+\label{section:parentstructuretype1}
 This structure contains descriptions of the CPER log header, as well as the section descriptors and
-section structures themselves within arrays. This is the structure returned by \texttt{cper\_to\_ir(FILE* cper\_file)} as JSON IR.
+section structures themselves within arrays, representing a full CPER log. This is the structure returned by \texttt{cper\_to\_ir(FILE* cper\_file)} as JSON IR.
 
-% Parent structure table.
-\jsontable{table:parentstructure}
+% Parent structure (type 1) table.
+\jsontable{table:parentstructuretype1}
 header & object & A CPER header structure as defined in Section \ref{section:headerstructure}. \\
 \hline
 sectionDescriptors & array & An array of section descriptor objects as defined in Section \ref{section:sectiondescriptorstructure}. \\
 \hline
 sections & array & An array of section objects as defined in Chapter \ref{chapter:sectionchapter}. These sections are at the same index as their corresponding section descriptor within the \texttt{sectionDescriptors} array.\\
-\jsontableend{Parent structure field table.}
+\jsontableend{Parent structure (type 1) field table.}
+
+\section{Parent Structure (Type 2): Single Section Log}
+\label{section:parentstructuretype2}
+This structure contains a single section descriptor and section, representing a single section CPER log.
+This is the structure returned by \texttt{cper\_single\_section\_to\_ir(FILE* cper\_file)} as JSON IR.
+
+% Parent structure (type 2) table.
+\jsontable{table:parentstructuretype2}
+sectionDescriptor & object & A section descriptor object as defined in Section \ref{section:sectiondescriptorstructure}. \\
+\hline
+sections & array & A section object as defined in Chapter \ref{chapter:sectionchapter}.\\
+\jsontableend{Parent structure (type 2) field table.}
 
 % Header structure.
 \section{Header Structure}

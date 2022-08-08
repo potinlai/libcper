@@ -89,6 +89,29 @@ void generate_cper_record(char **types, UINT16 num_sections, FILE *out)
 	}
 }
 
+//Generates a single section record for the given section, and outputs to file.
+void generate_single_section_record(char *type, FILE *out)
+{
+	//Generate a section.
+	void *section;
+	size_t section_len = generate_section(&section, type);
+
+	//Generate a descriptor, correct the offset.
+	EFI_ERROR_SECTION_DESCRIPTOR *section_descriptor =
+		generate_section_descriptor(type, &section_len, 0, 1);
+	section_descriptor->SectionOffset =
+		sizeof(EFI_ERROR_SECTION_DESCRIPTOR);
+
+	//Write all to file.
+	fwrite(section_descriptor, sizeof(EFI_ERROR_SECTION_DESCRIPTOR), 1,
+	       out);
+	fwrite(section, section_len, 1, out);
+	fflush(out);
+
+	//Free remaining resources.
+	free(section_descriptor);
+}
+
 //Generates a single section descriptor for a section with the given properties.
 EFI_ERROR_SECTION_DESCRIPTOR *generate_section_descriptor(char *type,
 							  size_t *lengths,

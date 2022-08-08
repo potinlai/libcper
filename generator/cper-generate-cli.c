@@ -22,18 +22,23 @@ int main(int argc, char *argv[])
 
 	//Parse the command line arguments.
 	char *out_file = NULL;
+	char *single_section = NULL;
 	char **sections = NULL;
 	UINT16 num_sections = 0;
 	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "--out") == 0 && i < argc - 1) {
 			out_file = argv[i + 1];
 			i++;
+		} else if (strcmp(argv[i], "--single-section") == 0 &&
+			   i < argc - 1) {
+			single_section = argv[i + 1];
+			i++;
 		} else if (strcmp(argv[i], "--sections") == 0 && i < argc - 1) {
 			//All arguments after this must be section names.
 			num_sections = argc - i - 1;
 			sections = malloc(sizeof(char *) * num_sections);
 			i++;
-			
+
 			for (int j = i; j < argc; j++)
 				sections[j - i] = argv[j];
 			break;
@@ -58,8 +63,16 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	//Generate the record. Type names start from argv[4].
-	generate_cper_record(sections, num_sections, cper_file);
+	//Which type are we generating?
+	if (single_section != NULL && sections == NULL) {
+		generate_single_section_record(single_section, cper_file);
+	} else if (sections != NULL && single_section == NULL) {
+		generate_cper_record(sections, num_sections, cper_file);
+	} else {
+		//Invalid arguments.
+		printf("Invalid argument. Either both '--sections' and '--single-section' were set, or neither. For command information, refer to 'cper-generate --help'.\n");
+		return -1;
+	}
 
 	//Close & free remaining resources.
 	fclose(cper_file);
@@ -70,8 +83,12 @@ int main(int argc, char *argv[])
 //Prints command help for this CPER generator.
 void print_help()
 {
-	printf(":: --out cper.file --sections section1 [section2 section3 ...]\n");
-	printf("\tGenerates a pseudo-random CPER file with the provided section types and outputs to the given file name.\n");
+	printf(":: --out cper.file [--sections section1 ...] [--single-section sectiontype]\n");
+	printf("\tGenerates a pseudo-random CPER file with the provided section types and outputs to the given file name.\n\n");
+	printf("\tWhen the '--sections' flag is set, all following arguments are section names, and a full CPER log is generated\n");
+	printf("\tcontaining the given sections.\n");
+	printf("\tWhen the '--single-section' flag is set, the next argument is the single section that should be generated, and\n");
+	printf("\ta single section (no header, only a section descriptor & section) CPER file is generated.\n\n");
 	printf("\tValid section type names are the following:\n");
 	printf("\t\t- generic\n");
 	printf("\t\t- ia32x64\n");

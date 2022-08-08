@@ -3,42 +3,8 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "description": "JSON Schema for the CPER-JSON format, as described in the CPER-JSON specification document.",
     "type": "object",
-    "required": ["header", "sectionDescriptors", "sections"],
-    "additionalProperties": false,
-    "properties": {
-        "header": {
-            "$ref": "./cper-json-header.json"
-        },
-        "sectionDescriptors": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "$ref": "./cper-json-section-descriptor.json"
-            }
-        },
-        "sections": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "oneOf": [
-                    { "$ref": "./sections/cper-generic-processor.json" },
-                    { "$ref": "./sections/cper-ia32x64-processor.json" },
-                    { "$ref": "./sections/cper-arm-processor.json" },
-                    { "$ref": "./sections/cper-memory.json" },
-                    { "$ref": "./sections/cper-memory2.json" },
-                    { "$ref": "./sections/cper-pcie.json" },
-                    { "$ref": "./sections/cper-pci-bus.json" },
-                    { "$ref": "./sections/cper-pci-component.json" },
-                    { "$ref": "./sections/cper-firmware.json" },
-                    { "$ref": "./sections/cper-generic-dmar.json" },
-                    { "$ref": "./sections/cper-vtd-dmar.json" },
-                    { "$ref": "./sections/cper-iommu-dmar.json" },
-                    { "$ref": "./sections/cper-ccix-per.json" },
-                    { "$ref": "./sections/cper-cxl-protocol.json" },
-                    { "$ref": "./sections/cper-cxl-component.json" },
-                    { "$ref": "./sections/cper-unknown.json" }
-                ]
-            }
-        }
-    }
+    "oneOf": [
+        { "$ref": "./cper-json-full-log.json" },
+        { "$ref": "./cper-json-section-log.json" }
+    ]
 }

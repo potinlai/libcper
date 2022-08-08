@@ -13,7 +13,7 @@
 #include "../cper-parse.h"
 #include "../json-schema.h"
 
-void cper_to_json(char *in_file, char *out_file);
+void cper_to_json(char *in_file, char *out_file, int is_single_section);
 void json_to_cper(char *in_file, char *out_file, char *specification_file,
 		  char *program_dir, int no_validate, int debug);
 void print_help(void);
@@ -63,12 +63,14 @@ int main(int argc, char *argv[])
 	}
 
 	//Run the requested command.
-	if (strcmp(argv[1], "to-json") == 0)
-		cper_to_json(input_file, output_file);
-	else if (strcmp(argv[1], "to-cper") == 0)
+	if (strcmp(argv[1], "to-json") == 0) {
+		cper_to_json(input_file, output_file, 0);
+	} else if (strcmp(argv[1], "to-json-section") == 0) {
+		cper_to_json(input_file, output_file, 1);
+	} else if (strcmp(argv[1], "to-cper") == 0) {
 		json_to_cper(input_file, output_file, specification_file,
 			     argv[0], no_validate, debug);
-	else {
+	} else {
 		printf("Unrecognised argument '%s'. See 'cper-convert --help' for command information.\n",
 		       argv[1]);
 		return -1;
@@ -77,8 +79,8 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-//Command for converting a provided CPER log file into JSON.
-void cper_to_json(char *in_file, char *out_file)
+//Command for converting a provided CPER log file or CPER single section file into JSON.
+void cper_to_json(char *in_file, char *out_file, int is_single_section)
 {
 	//Get a handle for the log file.
 	FILE *cper_file = fopen(in_file, "r");
@@ -89,8 +91,14 @@ void cper_to_json(char *in_file, char *out_file)
 	}
 
 	//Convert.
-	json_object *ir = cper_to_ir(cper_file);
+	json_object *ir;
+	if (is_single_section)
+		ir = cper_single_section_to_ir(cper_file);
+	else
+		ir = cper_to_ir(cper_file);
 	fclose(cper_file);
+
+	//Output to string.
 	const char *json_output =
 		json_object_to_json_string_ext(ir, JSON_C_TO_STRING_PRETTY);
 
@@ -171,7 +179,6 @@ void json_to_cper(char *in_file, char *out_file, char *specification_file,
 		free(error_message);
 	}
 
-	//Attempt a conversion.
 	//Open a read for the output file.
 	FILE *cper_file = fopen(out_file, "w");
 	if (cper_file == NULL) {
@@ -180,8 +187,12 @@ void json_to_cper(char *in_file, char *out_file, char *specification_file,
 		return;
 	}
 
-	//Run the converter.
-	ir_to_cper(ir, cper_file);
+	//Detect the type of CPER (full log, single section) from the IR given.
+	//Run the converter accordingly.
+	if (json_object_object_get(ir, "header") != NULL)
+		ir_to_cper(ir, cper_file);
+	else
+		ir_single_section_to_cper(ir, cper_file);
 	fclose(cper_file);
 }
 
@@ -191,12 +202,17 @@ void print_help(void)
 	printf(":: to-json cper.file [--out file.name]\n");
 	printf("\tConverts the provided CPER log file into JSON, by default writing to stdout. If '--out' is specified,\n");
 	printf("\tThe outputted JSON will be written to the provided file name instead.\n");
+	printf("\n:: to-json-section cper.section.file [--out file.name]\n");
+	printf("\tConverts the provided single CPER section descriptor & section file into JSON, by default writing to stdout.\n");
+	printf("\tOtherwise behaves the same as 'to-json'.\n");
 	printf("\n:: to-cper cper.json --out file.name [--no-validate] [--debug] [--specification some/spec/path.json]\n");
 	printf("\tConverts the provided CPER-JSON JSON file into CPER binary. An output file must be specified with '--out'.\n");
+	printf("\tWill automatically detect whether the JSON passed is a single section, or a whole file,\n");
+	printf("\tand output binary accordingly.\n\n");
 	printf("\tBy default, the provided JSON will try to be validated against a specification. If no specification file path\n");
 	printf("\tis provided with '--specification', then it will default to 'argv[0] + /specification/cper-json.json'.\n");
 	printf("\tIf the '--no-validate' argument is set, then the provided JSON will not be validated. Be warned, this may cause\n");
-	printf("\tpremature exit/unexpected behaviour in CPER output.\n");
+	printf("\tpremature exit/unexpected behaviour in CPER output.\n\n");
 	printf("\tIf '--debug' is set, then debug output for JSON specification parsing will be printed to stdout.\n");
 	printf("\n:: --help\n");
 	printf("\tDisplays help information to the console.\n");

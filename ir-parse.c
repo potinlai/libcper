@@ -32,6 +32,8 @@ void ir_header_to_cper(json_object *header_ir,
 		       EFI_COMMON_ERROR_RECORD_HEADER *header);
 void ir_section_descriptor_to_cper(json_object *section_descriptor_ir,
 				   EFI_ERROR_SECTION_DESCRIPTOR *descriptor);
+void ir_section_to_cper(json_object *section,
+			EFI_ERROR_SECTION_DESCRIPTOR *descriptor, FILE *out);
 
 //Converts the given JSON IR CPER representation into CPER binary format, piped to the provided file stream.
 //This function performs no validation of the IR against the CPER-JSON specification. To ensure a safe call,
@@ -69,73 +71,8 @@ void ir_to_cper(json_object *ir, FILE *out)
 		//Get the section itself from the IR.
 		json_object *section = json_object_array_get_idx(sections, i);
 
-		//Find the correct section type, and parse.
-		if (guid_equal(&descriptors[i]->SectionType,
-			       &gEfiProcessorGenericErrorSectionGuid))
-			ir_section_generic_to_cper(section, out);
-		else if (guid_equal(&descriptors[i]->SectionType,
-				    &gEfiIa32X64ProcessorErrorSectionGuid))
-			ir_section_ia32x64_to_cper(section, out);
-		// else if (guid_equal(&descriptors[i]->SectionType, &gEfiIpfProcessorErrorSectionGuid))
-		//     ir_section_ipf_to_cper(section, out);
-		else if (guid_equal(&descriptors[i]->SectionType,
-				    &gEfiArmProcessorErrorSectionGuid))
-			ir_section_arm_to_cper(section, out);
-		else if (guid_equal(&descriptors[i]->SectionType,
-				    &gEfiPlatformMemoryErrorSectionGuid))
-			ir_section_memory_to_cper(section, out);
-		else if (guid_equal(&descriptors[i]->SectionType,
-				    &gEfiPlatformMemoryError2SectionGuid))
-			ir_section_memory2_to_cper(section, out);
-		else if (guid_equal(&descriptors[i]->SectionType,
-				    &gEfiPcieErrorSectionGuid))
-			ir_section_pcie_to_cper(section, out);
-		else if (guid_equal(&descriptors[i]->SectionType,
-				    &gEfiFirmwareErrorSectionGuid))
-			ir_section_firmware_to_cper(section, out);
-		else if (guid_equal(&descriptors[i]->SectionType,
-				    &gEfiPciBusErrorSectionGuid))
-			ir_section_pci_bus_to_cper(section, out);
-		else if (guid_equal(&descriptors[i]->SectionType,
-				    &gEfiPciDevErrorSectionGuid))
-			ir_section_pci_dev_to_cper(section, out);
-		else if (guid_equal(&descriptors[i]->SectionType,
-				    &gEfiDMArGenericErrorSectionGuid))
-			ir_section_dmar_generic_to_cper(section, out);
-		else if (guid_equal(&descriptors[i]->SectionType,
-				    &gEfiDirectedIoDMArErrorSectionGuid))
-			ir_section_dmar_vtd_to_cper(section, out);
-		else if (guid_equal(&descriptors[i]->SectionType,
-				    &gEfiIommuDMArErrorSectionGuid))
-			ir_section_dmar_iommu_to_cper(section, out);
-		else if (guid_equal(&descriptors[i]->SectionType,
-				    &gEfiCcixPerLogErrorSectionGuid))
-			ir_section_ccix_per_to_cper(section, out);
-		else if (guid_equal(&descriptors[i]->SectionType,
-				    &gEfiCxlProtocolErrorSectionGuid))
-			ir_section_cxl_protocol_to_cper(section, out);
-		else if (guid_equal(&descriptors[i]->SectionType,
-				    &gEfiCxlGeneralMediaErrorSectionGuid) ||
-			 guid_equal(&descriptors[i]->SectionType,
-				    &gEfiCxlDramEventErrorSectionGuid) ||
-			 guid_equal(&descriptors[i]->SectionType,
-				    &gEfiCxlPhysicalSwitchErrorSectionGuid) ||
-			 guid_equal(&descriptors[i]->SectionType,
-				    &gEfiCxlVirtualSwitchErrorSectionGuid) ||
-			 guid_equal(&descriptors[i]->SectionType,
-				    &gEfiCxlMldPortErrorSectionGuid)) {
-			ir_section_cxl_component_to_cper(section, out);
-		} else {
-			//Unknown GUID, so read as a base64 unknown section.
-			json_object *encoded =
-				json_object_object_get(section, "data");
-			UINT8 *decoded =
-				b64_decode(json_object_get_string(encoded),
-					   json_object_get_string_len(encoded));
-			fwrite(decoded, descriptors[i]->SectionLength, 1, out);
-			fflush(out);
-			free(decoded);
-		}
+		//Convert.
+		ir_section_to_cper(section, descriptors[i], out);
 	}
 
 	//Free all remaining resources.
@@ -223,6 +160,78 @@ void ir_header_to_cper(json_object *header_ir,
 		json_object_object_get(flags, "value"));
 }
 
+//Converts a single given IR section into CPER, outputting to the given stream.
+void ir_section_to_cper(json_object *section,
+			EFI_ERROR_SECTION_DESCRIPTOR *descriptor, FILE *out)
+{
+	//Find the correct section type, and parse.
+	if (guid_equal(&descriptor->SectionType,
+		       &gEfiProcessorGenericErrorSectionGuid))
+		ir_section_generic_to_cper(section, out);
+	else if (guid_equal(&descriptor->SectionType,
+			    &gEfiIa32X64ProcessorErrorSectionGuid))
+		ir_section_ia32x64_to_cper(section, out);
+	// else if (guid_equal(&descriptor->SectionType, &gEfiIpfProcessorErrorSectionGuid))
+	//     ir_section_ipf_to_cper(section, out);
+	else if (guid_equal(&descriptor->SectionType,
+			    &gEfiArmProcessorErrorSectionGuid))
+		ir_section_arm_to_cper(section, out);
+	else if (guid_equal(&descriptor->SectionType,
+			    &gEfiPlatformMemoryErrorSectionGuid))
+		ir_section_memory_to_cper(section, out);
+	else if (guid_equal(&descriptor->SectionType,
+			    &gEfiPlatformMemoryError2SectionGuid))
+		ir_section_memory2_to_cper(section, out);
+	else if (guid_equal(&descriptor->SectionType,
+			    &gEfiPcieErrorSectionGuid))
+		ir_section_pcie_to_cper(section, out);
+	else if (guid_equal(&descriptor->SectionType,
+			    &gEfiFirmwareErrorSectionGuid))
+		ir_section_firmware_to_cper(section, out);
+	else if (guid_equal(&descriptor->SectionType,
+			    &gEfiPciBusErrorSectionGuid))
+		ir_section_pci_bus_to_cper(section, out);
+	else if (guid_equal(&descriptor->SectionType,
+			    &gEfiPciDevErrorSectionGuid))
+		ir_section_pci_dev_to_cper(section, out);
+	else if (guid_equal(&descriptor->SectionType,
+			    &gEfiDMArGenericErrorSectionGuid))
+		ir_section_dmar_generic_to_cper(section, out);
+	else if (guid_equal(&descriptor->SectionType,
+			    &gEfiDirectedIoDMArErrorSectionGuid))
+		ir_section_dmar_vtd_to_cper(section, out);
+	else if (guid_equal(&descriptor->SectionType,
+			    &gEfiIommuDMArErrorSectionGuid))
+		ir_section_dmar_iommu_to_cper(section, out);
+	else if (guid_equal(&descriptor->SectionType,
+			    &gEfiCcixPerLogErrorSectionGuid))
+		ir_section_ccix_per_to_cper(section, out);
+	else if (guid_equal(&descriptor->SectionType,
+			    &gEfiCxlProtocolErrorSectionGuid))
+		ir_section_cxl_protocol_to_cper(section, out);
+	else if (guid_equal(&descriptor->SectionType,
+			    &gEfiCxlGeneralMediaErrorSectionGuid) ||
+		 guid_equal(&descriptor->SectionType,
+			    &gEfiCxlDramEventErrorSectionGuid) ||
+		 guid_equal(&descriptor->SectionType,
+			    &gEfiCxlPhysicalSwitchErrorSectionGuid) ||
+		 guid_equal(&descriptor->SectionType,
+			    &gEfiCxlVirtualSwitchErrorSectionGuid) ||
+		 guid_equal(&descriptor->SectionType,
+			    &gEfiCxlMldPortErrorSectionGuid)) {
+		ir_section_cxl_component_to_cper(section, out);
+	} else {
+		//Unknown GUID, so read as a base64 unknown section.
+		json_object *encoded = json_object_object_get(section, "data");
+		UINT8 *decoded =
+			b64_decode(json_object_get_string(encoded),
+				   json_object_get_string_len(encoded));
+		fwrite(decoded, descriptor->SectionLength, 1, out);
+		fflush(out);
+		free(decoded);
+	}
+}
+
 //Converts a single CPER-JSON IR section descriptor into a CPER structure.
 void ir_section_descriptor_to_cper(json_object *section_descriptor_ir,
 				   EFI_ERROR_SECTION_DESCRIPTOR *descriptor)
@@ -276,4 +285,26 @@ void ir_section_descriptor_to_cper(json_object *section_descriptor_ir,
 	if (fru_text != NULL)
 		strncpy(descriptor->FruString, json_object_get_string(fru_text),
 			20);
+}
+
+//Converts IR for a given single section format CPER record into CPER binary.
+void ir_single_section_to_cper(json_object *ir, FILE *out)
+{
+	//Create & write a section descriptor to file.
+	EFI_ERROR_SECTION_DESCRIPTOR *section_descriptor =
+		(EFI_ERROR_SECTION_DESCRIPTOR *)calloc(
+			1, sizeof(EFI_ERROR_SECTION_DESCRIPTOR));
+	ir_section_descriptor_to_cper(
+		json_object_object_get(ir, "sectionDescriptor"),
+		section_descriptor);
+	fwrite(section_descriptor, sizeof(EFI_ERROR_SECTION_DESCRIPTOR), 1,
+	       out);
+	fflush(out);
+
+	//Write section to file.
+	ir_section_to_cper(json_object_object_get(ir, "section"),
+			   section_descriptor, out);
+
+	//Free remaining resources.
+	free(section_descriptor);
 }
