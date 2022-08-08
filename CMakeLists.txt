@@ -70,6 +70,7 @@ add_executable(cper-tests
 )
 
 # Link library.
+target_link_directories(cper-tests PUBLIC ${GTEST_LIBRARY_DIRS} ${GMOCK_LDFLAGS})
 target_link_libraries(cper-tests cper-parse json-c GTest::gtest_main)
 target_link_libraries(cper-parse json-c b64c)
 target_link_libraries(cper-convert cper-parse)
