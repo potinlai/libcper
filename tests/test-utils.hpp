@@ -5,6 +5,6 @@ extern "C" {
 #include "../edk/BaseTypes.h"
 }
 
-FILE* generate_record_memstream(const char** types, UINT16 num_types, char** buf, size_t* buf_size);
+FILE* generate_record_memstream(const char** types, UINT16 num_types, char** buf, size_t* buf_size, int single_section);
 
 #endif

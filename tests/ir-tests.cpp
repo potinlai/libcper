@@ -18,15 +18,20 @@ extern "C" {
 */
 
 //Tests a single randomly generated CPER section of the given type to ensure CPER-JSON IR validity.
-void single_section_ir_test(const char *section_name)
+void cper_log_section_ir_test(const char *section_name, int single_section)
 {
-	//Generate CPER record for the given type.
+	//Generate full CPER record for the given type.
 	char *buf;
 	size_t size;
-	FILE *record = generate_record_memstream(&section_name, 1, &buf, &size);
+	FILE *record = generate_record_memstream(&section_name, 1, &buf, &size,
+						 single_section);
 
 	//Convert to IR, free resources.
-	json_object *ir = cper_to_ir(record);
+	json_object *ir;
+	if (single_section)
+		ir = cper_single_section_to_ir(record);
+	else
+		ir = cper_to_ir(record);
 	fclose(record);
 	free(buf);
 
@@ -34,30 +39,43 @@ void single_section_ir_test(const char *section_name)
 	char error_message[JSON_ERROR_MSG_MAX_LEN] = { 0 };
 	int valid = validate_schema_from_file("./specification/cper-json.json",
 					      ir, error_message);
-	ASSERT_TRUE(valid) << error_message;
+	ASSERT_TRUE(valid)
+		<< "IR validation test failed (single section mode = "
+		<< single_section << ") with message: " << error_message;
 }
 
 //Checks for binary round-trip equality for a given randomly generated CPER record.
-void single_section_binary_test(const char *section_name)
+void cper_log_section_binary_test(const char *section_name, int single_section)
 {
 	//Generate CPER record for the given type.
 	char *buf;
 	size_t size;
-	FILE *record = generate_record_memstream(&section_name, 1, &buf, &size);
+	FILE *record = generate_record_memstream(&section_name, 1, &buf, &size,
+						 single_section);
 
-	//Convert to IR, then back to binary, getting a stream out.
-	json_object *ir = cper_to_ir(record);
+	//Convert to IR.
+	json_object *ir;
+	if (single_section)
+		ir = cper_single_section_to_ir(record);
+	else
+		ir = cper_to_ir(record);
+
+	//Now convert back to binary, and get a stream out.
 	char *cper_buf;
 	size_t cper_buf_size;
 	FILE *stream = open_memstream(&cper_buf, &cper_buf_size);
-	ir_to_cper(ir, stream);
+	if (single_section)
+		ir_single_section_to_cper(ir, stream);
+	else
+		ir_to_cper(ir, stream);
 	size_t cper_len = ftell(stream);
 	fclose(stream);
 
 	//Validate the two are identical.
 	ASSERT_GE(size, cper_len);
 	ASSERT_EQ(memcmp(buf, cper_buf, cper_len), 0)
-		<< "Binary output was not identical to input.";
+		<< "Binary output was not identical to input (single section mode = "
+		<< single_section << ").";
 
 	//Free everything up.
 	fclose(record);
@@ -65,171 +83,186 @@ void single_section_binary_test(const char *section_name)
 	free(cper_buf);
 }
 
+//Tests randomly generated CPER sections for IR validity of a given type, in both single section mode and full CPER log mode.
+void cper_log_section_dual_ir_test(const char *section_name)
+{
+	cper_log_section_ir_test(section_name, 0);
+	cper_log_section_ir_test(section_name, 1);
+}
+
+//Tests randomly generated CPER sections for binary compatibility of a given type, in both single section mode and full CPER log mode.
+void cper_log_section_dual_binary_test(const char *section_name)
+{
+	cper_log_section_binary_test(section_name, 0);
+	cper_log_section_binary_test(section_name, 1);
+}
+
 /*
 * Single section tests.
 */
+
 //Generic processor tests.
 TEST(GenericProcessorTests, IRValid)
 {
-	single_section_ir_test("generic");
+	cper_log_section_dual_ir_test("generic");
 }
 TEST(GenericProcessorTests, BinaryEqual)
 {
-	single_section_binary_test("generic");
+	cper_log_section_dual_binary_test("generic");
 }
 
 //IA32/x64 tests.
 TEST(IA32x64Tests, IRValid)
 {
-	single_section_ir_test("ia32x64");
+	cper_log_section_dual_ir_test("ia32x64");
 }
 TEST(IA32x64Tests, BinaryEqual)
 {
-	single_section_binary_test("ia32x64");
+	cper_log_section_dual_binary_test("ia32x64");
 }
 
 // TEST(IPFTests, IRValid) {
-//     single_section_ir_test("ipf");
+//     cper_log_section_dual_ir_test("ipf");
 // }
 
 //ARM tests.
 TEST(ArmTests, IRValid)
 {
-	single_section_ir_test("arm");
+	cper_log_section_dual_ir_test("arm");
 }
 TEST(ArmTests, BinaryEqual)
 {
-	single_section_binary_test("arm");
+	cper_log_section_dual_binary_test("arm");
 }
 
 //Memory tests.
 TEST(MemoryTests, IRValid)
 {
-	single_section_ir_test("memory");
+	cper_log_section_dual_ir_test("memory");
 }
 TEST(MemoryTests, BinaryEqual)
 {
-	single_section_binary_test("memory");
+	cper_log_section_dual_binary_test("memory");
 }
 
 //Memory 2 tests.
 TEST(Memory2Tests, IRValid)
 {
-	single_section_ir_test("memory2");
+	cper_log_section_dual_ir_test("memory2");
 }
 TEST(Memory2Tests, BinaryEqual)
 {
-	single_section_binary_test("memory2");
+	cper_log_section_dual_binary_test("memory2");
 }
 
 //PCIe tests.
 TEST(PCIeTests, IRValid)
 {
-	single_section_ir_test("pcie");
+	cper_log_section_dual_ir_test("pcie");
 }
 TEST(PCIeTests, BinaryEqual)
 {
-	single_section_binary_test("pcie");
+	cper_log_section_dual_binary_test("pcie");
 }
 
 //Firmware tests.
 TEST(FirmwareTests, IRValid)
 {
-	single_section_ir_test("firmware");
+	cper_log_section_dual_ir_test("firmware");
 }
 TEST(FirmwareTests, BinaryEqual)
 {
-	single_section_binary_test("firmware");
+	cper_log_section_dual_binary_test("firmware");
 }
 
 //PCI Bus tests.
 TEST(PCIBusTests, IRValid)
 {
-	single_section_ir_test("pcibus");
+	cper_log_section_dual_ir_test("pcibus");
 }
 TEST(PCIBusTests, BinaryEqual)
 {
-	single_section_binary_test("pcibus");
+	cper_log_section_dual_binary_test("pcibus");
 }
 
 //PCI Device tests.
 TEST(PCIDevTests, IRValid)
 {
-	single_section_ir_test("pcidev");
+	cper_log_section_dual_ir_test("pcidev");
 }
 TEST(PCIDevTests, BinaryEqual)
 {
-	single_section_binary_test("pcidev");
+	cper_log_section_dual_binary_test("pcidev");
 }
 
 //Generic DMAr tests.
 TEST(DMArGenericTests, IRValid)
 {
-	single_section_ir_test("dmargeneric");
+	cper_log_section_dual_ir_test("dmargeneric");
 }
 TEST(DMArGenericTests, BinaryEqual)
 {
-	single_section_binary_test("dmargeneric");
+	cper_log_section_dual_binary_test("dmargeneric");
 }
 
 //VT-d DMAr tests.
 TEST(DMArVtdTests, IRValid)
 {
-	single_section_ir_test("dmarvtd");
+	cper_log_section_dual_ir_test("dmarvtd");
 }
 TEST(DMArVtdTests, BinaryEqual)
 {
-	single_section_binary_test("dmarvtd");
+	cper_log_section_dual_binary_test("dmarvtd");
 }
 
 //IOMMU DMAr tests.
 TEST(DMArIOMMUTests, IRValid)
 {
-	single_section_ir_test("dmariommu");
+	cper_log_section_dual_ir_test("dmariommu");
 }
 TEST(DMArIOMMUTests, BinaryEqual)
 {
-	single_section_binary_test("dmariommu");
+	cper_log_section_dual_binary_test("dmariommu");
 }
 
 //CCIX PER tests.
 TEST(CCIXPERTests, IRValid)
 {
-	single_section_ir_test("ccixper");
+	cper_log_section_dual_ir_test("ccixper");
 }
 TEST(CCIXPERTests, BinaryEqual)
 {
-	single_section_binary_test("ccixper");
+	cper_log_section_dual_binary_test("ccixper");
 }
 
 //CXL Protocol tests.
 TEST(CXLProtocolTests, IRValid)
 {
-	single_section_ir_test("cxlprotocol");
+	cper_log_section_dual_ir_test("cxlprotocol");
 }
 TEST(CXLProtocolTests, BinaryEqual)
 {
-	single_section_binary_test("cxlprotocol");
+	cper_log_section_dual_binary_test("cxlprotocol");
 }
 
 //CXL Component tests.
 TEST(CXLComponentTests, IRValid)
 {
-	single_section_ir_test("cxlcomponent");
+	cper_log_section_dual_ir_test("cxlcomponent");
 }
 TEST(CXLComponentTests, BinaryEqual)
 {
-	single_section_binary_test("cxlcomponent");
+	cper_log_section_dual_binary_test("cxlcomponent");
 }
 
 //Unknown section tests.
 TEST(UnknownSectionTests, IRValid)
 {
-	single_section_ir_test("unknown");
+	cper_log_section_dual_ir_test("unknown");
 }
 TEST(UnknownSectionTests, BinaryEqual)
 {
-	single_section_binary_test("unknown");
+	cper_log_section_dual_binary_test("unknown");
 }
 
 //Entrypoint for the testing program.
