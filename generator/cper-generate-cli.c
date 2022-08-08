@@ -5,6 +5,7 @@
  **/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "../edk/Cper.h"
 #include "cper-generate.h"
@@ -19,24 +20,51 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	//Ensure the minimum number of arguments.
-	if (argc < 5) {
-		printf("Insufficient number of arguments. See 'cper-generate --help' for command information.\n");
+	//Parse the command line arguments.
+	char *out_file = NULL;
+	char **sections = NULL;
+	UINT16 num_sections = 0;
+	for (int i = 1; i < argc; i++) {
+		if (strcmp(argv[i], "--out") == 0 && i < argc - 1) {
+			out_file = argv[i + 1];
+			i++;
+		} else if (strcmp(argv[i], "--sections") == 0 && i < argc - 1) {
+			//All arguments after this must be section names.
+			num_sections = argc - i - 1;
+			sections = malloc(sizeof(char *) * num_sections);
+			i++;
+			
+			for (int j = i; j < argc; j++)
+				sections[j - i] = argv[j];
+			break;
+		} else {
+			printf("Unrecognised argument '%s'. For command information, refer to 'cper-generate --help'.\n",
+			       argv[i]);
+			return -1;
+		}
+	}
+
+	//If no output file passed as argument, exit.
+	if (out_file == NULL) {
+		printf("No output file provided. For command information, refer to 'cper-generate --help'.\n");
 		return -1;
 	}
 
 	//Open a file handle to write output.
-	FILE *cper_file = fopen(argv[2], "w");
+	FILE *cper_file = fopen(out_file, "w");
 	if (cper_file == NULL) {
 		printf("Could not get a handle for output file '%s', file handle returned null.\n",
-		       argv[2]);
+		       out_file);
 		return -1;
 	}
 
 	//Generate the record. Type names start from argv[4].
-	UINT16 num_sections = argc - 4;
-	generate_cper_record(argv + 4, num_sections, cper_file);
+	generate_cper_record(sections, num_sections, cper_file);
+
+	//Close & free remaining resources.
 	fclose(cper_file);
+	if (sections != NULL)
+		free(sections);
 }
 
 //Prints command help for this CPER generator.

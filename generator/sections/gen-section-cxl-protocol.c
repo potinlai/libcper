@@ -36,7 +36,7 @@ size_t generate_section_cxl_protocol(void** location)
     if (cxl_agent_type == 0)
     {
         for (int i=0; i<3; i++)
-            *(bytes + 20 + i) = 0; //CXL agent address bytes 5-7.
+            *(bytes + 21 + i) = 0; //CXL agent address bytes 5-7.
     }
     
     *(bytes + 34) &= ~0b111; //Device ID byte 10 bits 0-2.

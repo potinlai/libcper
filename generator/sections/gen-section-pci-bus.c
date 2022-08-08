@@ -23,7 +23,7 @@ size_t generate_section_pci_bus(void** location)
     UINT32* reserved = (UINT32*)(bytes + 20);
     *reserved = 0;
     UINT64* bus_command = (UINT64*)(bytes + 40);
-    *bus_command &= (0b1 << 56); //Bus command bytes bar bit 56.
+    *bus_command &= ((UINT64)0b1 << 56); //Bus command bytes bar bit 56.
 
     //Fix values that could be above range.
     UINT16* error_type = (UINT16*)(bytes + 16);

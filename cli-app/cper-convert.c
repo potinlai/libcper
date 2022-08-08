@@ -13,29 +13,61 @@
 #include "../cper-parse.h"
 #include "../json-schema.h"
 
-void cper_to_json(int argc, char *argv[]);
-void json_to_cper(int argc, char *argv[]);
+void cper_to_json(char *in_file, char *out_file);
+void json_to_cper(char *in_file, char *out_file, char *specification_file,
+		  char *program_dir, int no_validate, int debug);
 void print_help(void);
 
 int main(int argc, char *argv[])
 {
-	//Ensure at least one argument is present.
-	if (argc < 2) {
+	//Print help if requested.
+	if (argc == 2 && strcmp(argv[1], "--help") == 0) {
+		print_help();
+		return 0;
+	}
+
+	//Ensure at least two arguments are present.
+	if (argc < 3) {
 		printf("Invalid number of arguments. See 'cper-convert --help' for command information.\n");
 		return -1;
 	}
 
 	//Parse the command line arguments.
-	char* input_file = NULL;
-	char* output_file = NULL;
+	char *input_file = argv[2];
+	char *output_file = NULL;
+	char *specification_file = NULL;
+	int no_validate = 0;
+	int debug = 0;
+	for (int i = 3; i < argc; i++) {
+		if (strcmp(argv[i], "--out") == 0 && i < argc - 1) {
+			//Output file.
+			output_file = argv[i + 1];
+			i++;
+		} else if (strcmp(argv[i], "--specification") == 0 &&
+			   i < argc - 1) {
+			//Specification file.
+			specification_file = argv[i + 1];
+			i++;
+		} else if (strcmp(argv[i], "--no-validate") == 0) {
+			//No validation to be used.
+			//Invalidates specification file.
+			specification_file = NULL;
+			no_validate = 1;
+		} else if (strcmp(argv[i], "--debug") == 0) {
+			//Debug output on.
+			debug = 1;
+		} else {
+			printf("Unrecognised argument '%s'. See 'cper-convert --help' for command information.\n",
+			       argv[i]);
+		}
+	}
 
 	//Run the requested command.
 	if (strcmp(argv[1], "to-json") == 0)
-		cper_to_json(argc, argv);
+		cper_to_json(input_file, output_file);
 	else if (strcmp(argv[1], "to-cper") == 0)
-		json_to_cper(argc, argv);
-	else if (strcmp(argv[1], "--help") == 0)
-		print_help();
+		json_to_cper(input_file, output_file, specification_file,
+			     argv[0], no_validate, debug);
 	else {
 		printf("Unrecognised argument '%s'. See 'cper-convert --help' for command information.\n",
 		       argv[1]);
@@ -46,18 +78,13 @@ int main(int argc, char *argv[])
 }
 
 //Command for converting a provided CPER log file into JSON.
-void cper_to_json(int argc, char *argv[])
+void cper_to_json(char *in_file, char *out_file)
 {
-	if (argc < 3) {
-		printf("Insufficient number of arguments for 'to-json'. See 'cper-convert --help' for command information.\n");
-		return;
-	}
-
 	//Get a handle for the log file.
-	FILE *cper_file = fopen(argv[2], "r");
+	FILE *cper_file = fopen(in_file, "r");
 	if (cper_file == NULL) {
 		printf("Could not open provided CPER file '%s', file handle returned null.\n",
-		       argv[2]);
+		       in_file);
 		return;
 	}
 
@@ -69,23 +96,16 @@ void cper_to_json(int argc, char *argv[])
 
 	//Check whether there is a "--out" argument, if there is, then output to file instead.
 	//Otherwise, just send to console.
-	if (argc != 5) {
+	if (out_file == NULL) {
 		printf("%s\n", json_output);
 		return;
 	}
 
-	//File out argument exists. Argument valid?
-	if (strcmp(argv[3], "--out") != 0) {
-		printf("Invalid argument '%s' for command 'to-json'. See 'cper-convert --help' for command information.\n",
-		       argv[3]);
-		return;
-	}
-
 	//Try to open a file handle to the desired output file.
-	FILE *json_file = fopen(argv[4], "w");
+	FILE *json_file = fopen(out_file, "w");
 	if (json_file == NULL) {
 		printf("Could not get a handle for output file '%s', file handle returned null.\n",
-		       argv[4]);
+		       out_file);
 		return;
 	}
 
@@ -95,63 +115,51 @@ void cper_to_json(int argc, char *argv[])
 }
 
 //Command for converting a provided CPER-JSON JSON file to CPER binary.
-void json_to_cper(int argc, char *argv[])
+void json_to_cper(char *in_file, char *out_file, char *specification_file,
+		  char *program_dir, int no_validate, int debug)
 {
-	if (argc < 5) {
-		printf("Insufficient number of arguments for 'to-cper'. See 'cper-convert --help' for command information.\n");
+	//Verify output file exists.
+	if (out_file == NULL) {
+		printf("No output file provided for 'to-cper'. See 'cper-convert --help' for command information.\n");
 		return;
 	}
 
 	//Read JSON IR from file.
-	json_object *ir = json_object_from_file(argv[2]);
+	json_object *ir = json_object_from_file(in_file);
 	if (ir == NULL) {
 		printf("Could not read JSON from file '%s', import returned null.\n",
-		       argv[2]);
+		       in_file);
 		return;
 	}
 
-	//Are we skipping validation?
-	int do_validate = 1;
-	if (argc >= 6 && argc < 8) {
-		if (strcmp(argv[5], "--no-validate") == 0) {
-			do_validate = 0;
-		}
-	}
-
 	//Validate the JSON against specification, unless otherwise specified.
-	if (do_validate) {
-		char *specification_path = NULL;
+	if (!no_validate) {
+		int using_default_spec_path = 0;
 
 		//Is there a specification file path?
-		if (argc >= 7 &&
-		    strcmp(argv[argc - 2], "--specification") == 0) {
-			specification_path = argv[argc - 1];
-		} else {
+		if (specification_file == NULL) {
+			using_default_spec_path = 1;
+
 			//Make the specification path the assumed default (application directory + specification/cper-json.json).
-			specification_path = malloc(PATH_MAX);
-			char *dir = dirname(argv[0]);
-			strcpy(specification_path, dir);
-			strcat(specification_path,
+			specification_file = malloc(PATH_MAX);
+			char *dir = dirname(program_dir);
+			strcpy(specification_file, dir);
+			strcat(specification_file,
 			       "/specification/cper-json.json");
 		}
 
 		//Enable debug mode if indicated.
-		for (int i = 5; i < argc; i++) {
-			if (strcmp(argv[i], "--debug") == 0) {
-				validate_schema_debug_enable();
-				printf("debug enabled.\n");
-				break;
-			}
-		}
+		if (debug)
+			validate_schema_debug_enable();
 
 		//Attempt to verify with the the specification.
 		char *error_message = malloc(JSON_ERROR_MSG_MAX_LEN);
-		int success = validate_schema_from_file(specification_path, ir,
+		int success = validate_schema_from_file(specification_file, ir,
 							error_message);
 
 		//Free specification path (if necessary).
-		if (argc == 5)
-			free(specification_path);
+		if (using_default_spec_path)
+			free(specification_file);
 
 		//If failed, early exit before conversion.
 		if (!success) {
@@ -165,10 +173,10 @@ void json_to_cper(int argc, char *argv[])
 
 	//Attempt a conversion.
 	//Open a read for the output file.
-	FILE *cper_file = fopen(argv[4], "w");
+	FILE *cper_file = fopen(out_file, "w");
 	if (cper_file == NULL) {
 		printf("Could not open output file '%s', file handle returned null.\n",
-		       argv[4]);
+		       out_file);
 		return;
 	}
 
@@ -181,7 +189,7 @@ void json_to_cper(int argc, char *argv[])
 void print_help(void)
 {
 	printf(":: to-json cper.file [--out file.name]\n");
-	printf("\tConverts the provided CPER log file into JSON, by default outputting to console. If '--out' is specified,\n");
+	printf("\tConverts the provided CPER log file into JSON, by default writing to stdout. If '--out' is specified,\n");
 	printf("\tThe outputted JSON will be written to the provided file name instead.\n");
 	printf("\n:: to-cper cper.json --out file.name [--no-validate] [--debug] [--specification some/spec/path.json]\n");
 	printf("\tConverts the provided CPER-JSON JSON file into CPER binary. An output file must be specified with '--out'.\n");
@@ -189,6 +197,7 @@ void print_help(void)
 	printf("\tis provided with '--specification', then it will default to 'argv[0] + /specification/cper-json.json'.\n");
 	printf("\tIf the '--no-validate' argument is set, then the provided JSON will not be validated. Be warned, this may cause\n");
 	printf("\tpremature exit/unexpected behaviour in CPER output.\n");
+	printf("\tIf '--debug' is set, then debug output for JSON specification parsing will be printed to stdout.\n");
 	printf("\n:: --help\n");
 	printf("\tDisplays help information to the console.\n");
 }
