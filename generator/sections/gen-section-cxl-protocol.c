@@ -1,5 +1,5 @@
 /**
- * Functions for generating psuedo-random CXL protocol error sections.
+ * Functions for generating pseudo-random CXL protocol error sections.
  * 
  * Author: Lawrence.Tang@arm.com
  **/
@@ -9,7 +9,7 @@
 #include "../gen-utils.h"
 #include "gen-sections.h"
 
-//Generates a single psuedo-random CXL protocol error section, saving the resulting address to the given
+//Generates a single pseudo-random CXL protocol error section, saving the resulting address to the given
 //location. Returns the size of the newly created section.
 size_t generate_section_cxl_protocol(void** location)
 {

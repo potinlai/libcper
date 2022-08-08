@@ -15,7 +15,7 @@ This project comes with several binaries to help you deal with CPER binary and C
 cper-convert to-cper samples/cper-json-test-arm.json --out cper.dump
 cper-convert to-json cper.generated.dump
 ```
-Another tool bundled with this repository is `cper-generate`, which is another command line tool found in `bin/`. This allows you to generate psuedo-random valid CPER records with sections of specified types for testing purposes. An example use of the program is below:
+Another tool bundled with this repository is `cper-generate`, found in `bin/`. This allows you to generate pseudo-random valid CPER records with sections of specified types for testing purposes. An example use of the program is below:
 ```
 cper-generate --out cper.generated.dump --sections generic ia32x64
 ```

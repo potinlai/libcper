@@ -1,5 +1,5 @@
 /**
- * Functions for generating psuedo-random CPER IA32/x64 sections.
+ * Functions for generating pseudo-random CPER IA32/x64 sections.
  * 
  * Author: Lawrence.Tang@arm.com
  **/
@@ -14,7 +14,7 @@
 void* generate_ia32x64_error_structure();
 size_t generate_ia32x64_context_structure(void** location);
 
-//Generates a single psuedo-random IA32/x64 section, saving the resulting address to the given
+//Generates a single pseudo-random IA32/x64 section, saving the resulting address to the given
 //location. Returns the size of the newly created section.
 size_t generate_section_ia32x64(void** location)
 {

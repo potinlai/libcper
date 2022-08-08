@@ -1,5 +1,5 @@
 /**
- * Functions for generating psuedo-random CPER PCIe error sections.
+ * Functions for generating pseudo-random CPER PCIe error sections.
  * 
  * Author: Lawrence.Tang@arm.com
  **/
@@ -11,7 +11,7 @@
 
 #define PCIE_PORT_TYPES (int []){0, 1, 4, 5, 6, 7, 8, 9, 10}
 
-//Generates a single psuedo-random PCIe error section, saving the resulting address to the given
+//Generates a single pseudo-random PCIe error section, saving the resulting address to the given
 //location. Returns the size of the newly created section.
 size_t generate_section_pcie(void** location)
 {

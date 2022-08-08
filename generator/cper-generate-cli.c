@@ -1,5 +1,5 @@
 /**
- * A user-space application for generating psuedo-random specification compliant CPER records. 
+ * A user-space application for generating pseudo-random specification compliant CPER records. 
  * 
  * Author: Lawrence.Tang@arm.com
  **/
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 void print_help()
 {
 	printf(":: --out cper.file --sections section1 [section2 section3 ...]\n");
-	printf("\tGenerates a psuedo-random CPER file with the provided section types and outputs to the given file name.\n");
+	printf("\tGenerates a pseudo-random CPER file with the provided section types and outputs to the given file name.\n");
 	printf("\tValid section type names are the following:\n");
 	printf("\t\t- generic\n");
 	printf("\t\t- ia32x64\n");

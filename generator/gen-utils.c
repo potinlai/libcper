@@ -1,5 +1,5 @@
 /**
- * Utility functions to assist in generating psuedo-random CPER sections. 
+ * Utility functions to assist in generating pseudo-random CPER sections. 
  * 
  * Author: Lawrence.Tang@arm.com
  **/

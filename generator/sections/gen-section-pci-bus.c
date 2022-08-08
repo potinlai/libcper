@@ -1,5 +1,5 @@
 /**
- * Functions for generating psuedo-random CPER PCI/PCI-X bus error sections.
+ * Functions for generating pseudo-random CPER PCI/PCI-X bus error sections.
  * 
  * Author: Lawrence.Tang@arm.com
  **/
@@ -9,7 +9,7 @@
 #include "../gen-utils.h"
 #include "gen-sections.h"
 
-//Generates a single psuedo-random PCI/PCI-X bus error section, saving the resulting address to the given
+//Generates a single pseudo-random PCI/PCI-X bus error section, saving the resulting address to the given
 //location. Returns the size of the newly created section.
 size_t generate_section_pci_bus(void** location)
 {
@@ -23,7 +23,7 @@ size_t generate_section_pci_bus(void** location)
     UINT32* reserved = (UINT32*)(bytes + 20);
     *reserved = 0;
     UINT64* bus_command = (UINT64*)(bytes + 40);
-    *bus_command &= 0x100000000000000; //Bus command bytes bar bit 56.
+    *bus_command &= (0b1 << 56); //Bus command bytes bar bit 56.
 
     //Fix values that could be above range.
     UINT16* error_type = (UINT16*)(bytes + 16);

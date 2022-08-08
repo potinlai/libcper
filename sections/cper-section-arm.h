@@ -73,7 +73,7 @@ typedef struct {
   UINT64  MIDR_EL1;
   UINT32 RunningState;
   UINT32 PsciState;
-} EFI_ARM_ERROR_RECORD;
+} __attribute__((packed, aligned(1))) EFI_ARM_ERROR_RECORD;
 
 ///
 /// ARM Processor Error Information Structure
@@ -149,7 +149,7 @@ typedef struct {
   UINT16 Version;
   UINT16 RegisterContextType;
   UINT32 RegisterArraySize;
-} EFI_ARM_CONTEXT_INFORMATION_HEADER;
+} __attribute__((packed, aligned(1))) EFI_ARM_CONTEXT_INFORMATION_HEADER;
 
 ///
 /// ARM Processor Context Register Types

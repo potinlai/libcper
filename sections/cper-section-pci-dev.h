@@ -27,7 +27,7 @@ typedef struct {
   EFI_PCI_PCIX_DEVICE_ID_INFO IdInfo;
   UINT32                      MemoryNumber;
   UINT32                      IoNumber;
-} EFI_PCI_PCIX_DEVICE_ERROR_DATA;
+} __attribute__((packed, aligned(1))) EFI_PCI_PCIX_DEVICE_ERROR_DATA;
 
 json_object* cper_section_pci_dev_to_ir(void* section, EFI_ERROR_SECTION_DESCRIPTOR* descriptor);
 void ir_section_pci_dev_to_cper(json_object* section, FILE* out);

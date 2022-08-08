@@ -1,5 +1,5 @@
 /**
- * Functions for generating psuedo-random CPER ARM processor sections.
+ * Functions for generating pseudo-random CPER ARM processor sections.
  * 
  * Author: Lawrence.Tang@arm.com
  **/
@@ -14,7 +14,7 @@
 void* generate_arm_error_info();
 size_t generate_arm_context_info(void** location);
 
-//Generates a single psuedo-random ARM processor section, saving the resulting address to the given
+//Generates a single pseudo-random ARM processor section, saving the resulting address to the given
 //location. Returns the size of the newly created section.
 size_t generate_section_arm(void** location)
 {

@@ -1,7 +1,17 @@
+/** @file
+  GUIDs and definitions used for Common Platform Error Record.
+
+  Copyright (c) 2011 - 2017, Intel Corporation. All rights reserved.<BR>
+  (C) Copyright 2016 Hewlett Packard Enterprise Development LP<BR>
+  SPDX-License-Identifier: BSD-2-Clause-Patent
+
+  @par Revision Reference:
+  GUIDs defined in UEFI 2.7 Specification.
+
+**/
+
 /**
  * Extern definitions for EFI GUIDs relating to notification types and error section types.
- * 
- * Author: Lawrence.Tang@arm.com
  **/
 #include "Cper.h"
 

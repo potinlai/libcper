@@ -1,5 +1,5 @@
 /**
- * Functions for generating psuedo-random CPER DMAr error sections.
+ * Functions for generating pseudo-random CPER DMAr error sections.
  * 
  * Author: Lawrence.Tang@arm.com
  **/
@@ -9,7 +9,7 @@
 #include "../gen-utils.h"
 #include "gen-sections.h"
 
-//Generates a single psuedo-random generic DMAr error section, saving the resulting address to the given
+//Generates a single pseudo-random generic DMAr error section, saving the resulting address to the given
 //location. Returns the size of the newly created section.
 size_t generate_section_dmar_generic(void** location)
 {
@@ -33,7 +33,7 @@ size_t generate_section_dmar_generic(void** location)
     return size;
 }
 
-//Generates a single psuedo-random VT-d DMAr error section, saving the resulting address to the given
+//Generates a single pseudo-random VT-d DMAr error section, saving the resulting address to the given
 //location. Returns the size of the newly created section.
 size_t generate_section_dmar_vtd(void** location)
 {
@@ -56,7 +56,7 @@ size_t generate_section_dmar_vtd(void** location)
     return size;
 }
 
-//Generates a single psuedo-random IOMMU DMAr error section, saving the resulting address to the given
+//Generates a single pseudo-random IOMMU DMAr error section, saving the resulting address to the given
 //location. Returns the size of the newly created section.
 size_t generate_section_dmar_iommu(void** location)
 {

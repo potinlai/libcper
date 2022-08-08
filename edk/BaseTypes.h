@@ -1,3 +1,13 @@
+/** @file
+  Processor or Compiler specific defines for all supported processors.
+
+  This file is stand alone self consistent set of definitions.
+
+  Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-2-Clause-Patent
+
+**/
+
 #ifndef CPER_BASETYPES_H
 #define CPER_BASETYPES_H
 
