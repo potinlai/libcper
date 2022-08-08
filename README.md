@@ -7,6 +7,7 @@ Before building this library and its associated tools, you must have CMake (>=3.
 - `GoogleTest`
 - `FindSWIG`
 - `UseSWIG`
+
 You should also have Python3 and associated libraries installed for the purposes of building the Python bindings.
 
 ## Building
