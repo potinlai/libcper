@@ -25,6 +25,10 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
+	//Parse the command line arguments.
+	char* input_file = NULL;
+	char* output_file = NULL;
+
 	//Run the requested command.
 	if (strcmp(argv[1], "to-json") == 0)
 		cper_to_json(argc, argv);
