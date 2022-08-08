@@ -1,6 +1,14 @@
 # CPER JSON Representation & Conversion Library
 This repository specifies a structure for representing UEFI CPER records (as described in UEFI Specification Appendix N) in a human-readable JSON format, in addition to a library which can readily convert back and forth between the standard CPER binary format and the specified structured JSON.
 
+## Prerequisites
+Before building this library and its associated tools, you must have CMake (>=3.10) and SWIG installed, with the following CMake modules available:
+- `FetchContent`
+- `GoogleTest`
+- `FindSWIG`
+- `UseSWIG`
+You should also have Python3 and associated libraries installed for the purposes of building the Python bindings.
+
 ## Building
 This project uses CMake (>=3.10). To build, simply run:
 ```
@@ -30,5 +38,5 @@ void ir_to_cper(json_object* ir, FILE* out);
 This library also has Python bindings generated on build, which are placed at `lib/cperparse.py`. The static library `_cperparse_pylib.a` (as well as the C file `cper-parsePYTHON_wrap.c`) are generated specifically for the purpose of wrapping types for the Python library, and should not be used as a standard static C library.
 
 ## Specification
-The specification for this project can be found in `specification/`.
+The specification for this project's CPER-JSON format can be found in `specification/`, defined in both JSON Schema format and also as a LaTeX document.
 Specification for the CPER binary format can be found in [UEFI Specification Appendix N](https://uefi.org/sites/default/files/resources/UEFI_Spec_2_9_2021_03_18.pdf) (2021/03/18).

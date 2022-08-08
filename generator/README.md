@@ -10,5 +10,5 @@ This command would generate a CPER log with a processor generic section, VT-d DM
 
 ## Caveats
 The generator is not completely random within the bounds of the specification, to make testing easier.
-- Validation bits are always set to "true" for optional fields, to ensure that translating from CPER binary -> JSON -> CPER binary yields the same binary output as started with, rather than changing due to optional fields being left out.
+- Validation bits are always set to "true" for **optional** fields, to ensure that translating from CPER binary -> JSON -> CPER binary yields the same binary output as started with, rather than changing due to optional fields being left out.
 - Parts of sections which are defined in other external specifications (i.e, not included in UEFI Appendix N) generally do not have their structures to specification, and are simply random bytes.
