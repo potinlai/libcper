@@ -2,10 +2,12 @@ cmake_minimum_required(VERSION 3.10)
 project(CPERParse)
 include(FetchContent)
 include(GoogleTest)
-include(FindSWIG)
-include(UseSWIG)
-find_package(PythonLibs 3 REQUIRED)
-find_package(PythonInterp ${PYTHONLIBS_VERSION_STRING} REQUIRED)
+if (NOT CMAKE_CROSSCOMPILING)
+  include(FindSWIG)
+  include(UseSWIG)
+  find_package(PythonLibs 3 REQUIRED)
+  find_package(PythonInterp ${PYTHONLIBS_VERSION_STRING} REQUIRED)
+endif()
 
 # GoogleTest requires at least C++14.
 set(CMAKE_CXX_STANDARD 14)
@@ -83,15 +85,17 @@ add_custom_command(TARGET cper-convert POST_BUILD COMMAND cp -r specification/js
 gtest_discover_tests(cper-tests WORKING_DIRECTORY bin/)
 
 # Generate Python bindings with SWIG.
-include_directories(cperparse_pylib ${PYTHON_INCLUDE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
-swig_add_library(cperparse_pylib 
-  TYPE STATIC
-  LANGUAGE python
-  SOURCES cper-parse.i
-  OUTPUT_DIR lib/
-)
-swig_link_libraries(cperparse_pylib 
-  cper-parse
-  json-c
-  ${PYTHON_LIBRARIES}
-)
+if (NOT CMAKE_CROSSCOMPILING)
+  include_directories(cperparse_pylib ${PYTHON_INCLUDE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
+  swig_add_library(cperparse_pylib 
+    TYPE STATIC
+    LANGUAGE python
+    SOURCES cper-parse.i
+    OUTPUT_DIR lib/
+  )
+  swig_link_libraries(cperparse_pylib 
+    cper-parse
+    json-c
+    ${PYTHON_LIBRARIES}
+  )
+endif()

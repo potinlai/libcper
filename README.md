@@ -11,12 +11,21 @@ Before building this library and its associated tools, you must have CMake (>=3.
 You should also have Python3 and associated libraries installed for the purposes of building the Python bindings.
 
 ## Building
-This project uses CMake (>=3.10). To build, simply run:
+This project uses CMake (>=3.10). To build for native architecture, simply run:
 ```
 cmake .
 make
 ```
 A static library file for the parsing library will be written to `lib/`, and test executables will be written to `bin/`.
+
+### Cross Compilation
+To cross compile for ARM/AArch64 architecture from x86, instead use the below commands (ensure `cmake clean .` beforehand).
+You will need either the `arm-linux-gnueabi` or `aarch64-linux-gnu` toolchain installed.
+```bash
+cmake -DCMAKE_TOOLCHAIN_FILE="toolchains/arm-toolchain.cmake" -S. -Bbin # arm-linux-gnueabi
+cmake -DCMAKE_TOOLCHAIN_FILE="toolchains/aarch64-toolchain.cmake" -S. -Bbin # aarch64-linux-gnu
+make
+```
 
 ## Usage
 This project comes with several binaries to help you deal with CPER binary and CPER-JSON. The first of these is `cper-convert`, which is a command line tool that can be found in `bin/`. With this, you can convert to and from CPER and CPER-JSON through the command line. An example usage scenario is below:
