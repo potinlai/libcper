@@ -1,7 +1,7 @@
 #ifndef CPER_SECTION_CXL_PROTOCOL_H
 #define CPER_SECTION_CXL_PROTOCOL_H
 
-#include "json.h"
+#include <json.h>
 #include "../edk/Cper.h"
 
 #define CXL_PROTOCOL_ERROR_VALID_BITFIELD_NAMES (const char*[]) {"cxlAgentTypeValid", "cxlAgentAddressValid", \

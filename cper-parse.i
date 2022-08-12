@@ -1,7 +1,7 @@
 %module cperparse
 %{
     #include "cper-parse.h"
-    #include "json.h"
+    #include <json.h>
     #include <stdio.h>
 %}
 

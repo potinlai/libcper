@@ -1,7 +1,7 @@
 #ifndef CPER_SECTION_CXL_COMPONENT_H
 #define CPER_SECTION_CXL_COMPONENT_H
 
-#include "json.h"
+#include <json.h>
 #include "../edk/Cper.h"
 
 #define CXL_COMPONENT_ERROR_VALID_BITFIELD_NAMES (const char*[]) {"deviceIDValid", "deviceSerialValid", \

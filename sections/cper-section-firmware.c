@@ -5,7 +5,7 @@
  * Author: Lawrence.Tang@arm.com
  **/
 #include <stdio.h>
-#include "json.h"
+#include <json.h>
 #include "../edk/Cper.h"
 #include "../cper-utils.h"
 #include "cper-section-firmware.h"

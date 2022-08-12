@@ -1,7 +1,7 @@
 #ifndef CPER_SECTION_IPF_H
 #define CPER_SECTION_IPF_H
 
-#include "json.h"
+#include <json.h>
 #include "../edk/Cper.h"
 
 #define IPF_MOD_ERROR_VALID_BITFIELD_NAMES (const char*[]) {"checkInfoValid", "requestorIdentifierValid", \

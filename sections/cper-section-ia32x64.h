@@ -1,7 +1,7 @@
 #ifndef CPER_SECTION_IA32X64_H
 #define CPER_SECTION_IA32X64_H
 
-#include "json.h"
+#include <json.h>
 #include "../edk/Cper.h"
 
 #define IA32X64_PROCESSOR_ERROR_VALID_BITFIELD_NAMES (const char*[]) \

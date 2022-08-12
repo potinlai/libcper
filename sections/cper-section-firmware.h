@@ -1,7 +1,7 @@
 #ifndef CPER_SECTION_FIRMWARE_H
 #define CPER_SECTION_FIRMWARE_H
 
-#include "json.h"
+#include <json.h>
 #include "../edk/Cper.h"
 
 #define FIRMWARE_ERROR_RECORD_TYPES_KEYS (int []){0, 1, 2}

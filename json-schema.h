@@ -1,7 +1,7 @@
 #ifndef JSON_SCHEMA_H
 #define JSON_SCHEMA_H
 
-#include "json.h"
+#include <json.h>
 
 #define JSON_SCHEMA_VERSION "https://json-schema.org/draft/2020-12/schema"
 #define JSON_ERROR_MSG_MAX_LEN 512

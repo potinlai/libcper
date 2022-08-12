@@ -1,7 +1,7 @@
 #ifndef CPER_SECTION_CCIX_PER_H
 #define CPER_SECTION_CCIX_PER_H
 
-#include "json.h"
+#include <json.h>
 #include "../edk/Cper.h"
 
 #define CCIX_PER_ERROR_VALID_BITFIELD_NAMES (const char*[]) {"ccixSourceIDValid", "ccixPortIDValid", "ccixPERLogValid"}

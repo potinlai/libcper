@@ -1,7 +1,7 @@
 #ifndef CPER_SECTION_PCIE_H
 #define CPER_SECTION_PCIE_H
 
-#include "json.h"
+#include <json.h>
 #include "../edk/Cper.h"
 
 #define PCIE_ERROR_VALID_BITFIELD_NAMES (const char*[]) {"portTypeValid", "versionValid", "commandStatusValid", \

@@ -1,6 +1,6 @@
 #ifndef CPER_PARSE_H
 #define CPER_PARSE_H
-#include "json.h"
+#include <json.h>
 
 #define CPER_HEADER_VALID_BITFIELD_NAMES (const char*[]) {"platformIDValid", "timestampValid", "partitionIDValid"}
 #define CPER_SECTION_DESCRIPTOR_VALID_BITFIELD_NAMES (const char*[]) {"fruIDValid", "fruStringValid"}

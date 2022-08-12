@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "json.h"
+#include <json.h>
 #include "b64.h"
 #include "edk/Cper.h"
 #include "cper-parse.h"

@@ -9,7 +9,7 @@
 #include <string.h>
 #include <libgen.h>
 #include <limits.h>
-#include "json.h"
+#include <json.h>
 #include "../cper-parse.h"
 #include "../json-schema.h"
 

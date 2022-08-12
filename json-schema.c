@@ -11,7 +11,7 @@
 #include <libgen.h>
 #include <limits.h>
 #include <stdarg.h>
-#include "json.h"
+#include <json.h>
 #include "json-schema.h"
 #include "edk/BaseTypes.h"
 

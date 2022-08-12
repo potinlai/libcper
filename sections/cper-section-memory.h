@@ -1,7 +1,7 @@
 #ifndef CPER_SECTION_MEMORY_H
 #define CPER_SECTION_MEMORY_H
 
-#include "json.h"
+#include <json.h>
 #include "../edk/Cper.h"
 
 #define MEMORY_ERROR_VALID_BITFIELD_NAMES (const char*[]) \

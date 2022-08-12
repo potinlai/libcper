@@ -1,7 +1,7 @@
 #ifndef CPER_SECTION_DMAR_GENERIC_H
 #define CPER_SECTION_DMAR_GENERIC_H
 
-#include "json.h"
+#include <json.h>
 #include "../edk/Cper.h"
 
 #define DMAR_GENERIC_ERROR_FAULT_REASON_TYPES_KEYS (int []){0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB}

@@ -1,7 +1,7 @@
 #ifndef CPER_SECTION_GENERIC_H
 #define CPER_SECTION_GENERIC_H
 
-#include "json.h"
+#include <json.h>
 #include "../edk/Cper.h"
 
 #define GENERIC_PROC_TYPES_KEYS (int []){0, 1, 2}

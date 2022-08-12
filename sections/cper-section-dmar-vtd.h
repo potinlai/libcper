@@ -1,7 +1,7 @@
 #ifndef CPER_SECTION_DMAR_VTD_H
 #define CPER_SECTION_DMAR_VTD_H
 
-#include "json.h"
+#include <json.h>
 #include "../edk/Cper.h"
 
 #define VTD_FAULT_RECORD_TYPES_KEYS (int []){0, 1}

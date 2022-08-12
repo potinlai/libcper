@@ -1,7 +1,7 @@
 #ifndef CPER_SECTION_PCI_BUS_H
 #define CPER_SECTION_PCI_BUS_H
 
-#include "json.h"
+#include <json.h>
 #include "../edk/Cper.h"
 
 #define PCI_BUS_ERROR_VALID_BITFIELD_NAMES (const char*[]) {"errorStatusValid", "errorTypeValid", \
