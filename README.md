@@ -50,3 +50,6 @@ This library also has Python bindings generated on build, which are placed at `l
 ## Specification
 The specification for this project's CPER-JSON format can be found in `specification/`, defined in both JSON Schema format and also as a LaTeX document.
 Specification for the CPER binary format can be found in [UEFI Specification Appendix N](https://uefi.org/sites/default/files/resources/UEFI_Spec_2_9_2021_03_18.pdf) (2021/03/18).
+
+## Usage Examples
+This library is utilised in a proof of concept displaying CPER communication between a SatMC and OpenBMC board, including a conversion into CPER JSON for logging that utilises this library. You can find information on how to reproduce the prototype at the [scripts repository](https://gitlab.arm.com/server_management/cper-poc-scripts), and example usage of the library itself at the [pldm](https://gitlab.arm.com/server_management/pldm) repository.
