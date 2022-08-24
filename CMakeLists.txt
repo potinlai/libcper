@@ -89,7 +89,7 @@ add_custom_command(TARGET cper-convert POST_BUILD COMMAND ${CMAKE_COMMAND} -E ma
 add_custom_command(TARGET cper-convert POST_BUILD COMMAND cp -r specification/json/* bin/specification)
 
 # Add tests to GoogleTest.
-gtest_discover_tests(cper-tests WORKING_DIRECTORY bin/)
+#gtest_discover_tests(cper-tests WORKING_DIRECTORY bin/)
 
 # Generate Python bindings with SWIG.
 if (NOT CMAKE_CROSSCOMPILING)
