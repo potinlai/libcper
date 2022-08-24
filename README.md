@@ -8,7 +8,7 @@ Before building this library and its associated tools, you must have CMake (>=3.
 - `FindSWIG`
 - `UseSWIG`
 
-You should also have Python3 and associated libraries installed for the purposes of building the Python bindings.
+If you are building the Python bindings, you should also have Python3 and associated libraries installed for the purposes of building the Python bindings.
 
 ## Building
 This project uses CMake (>=3.10). To build for native architecture, simply run:
@@ -16,7 +16,7 @@ This project uses CMake (>=3.10). To build for native architecture, simply run:
 cmake .
 make
 ```
-A static library file for the parsing library will be written to `lib/`, and test executables will be written to `bin/`.
+A static library file for the parsing library will be written to `lib/`, and test executables will be written to `bin/`. To build the Python bindings in addition to all C libraries, add the argument `-DBUILD_PYTHON_LIBS` to your `cmake` command.
 
 ### Cross Compilation
 To cross compile for ARM/AArch64 architecture from x86, instead use the below commands (ensure `cmake clean .` beforehand).

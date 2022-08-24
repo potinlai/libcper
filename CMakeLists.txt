@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(CPERParse)
 include(FetchContent)
 include(GoogleTest)
-if (NOT CMAKE_CROSSCOMPILING)
+if (BUILD_PYTHON_LIBS)
   include(FindSWIG)
   include(UseSWIG)
   find_package(PythonLibs 3 REQUIRED)
@@ -92,7 +92,7 @@ add_custom_command(TARGET cper-convert POST_BUILD COMMAND cp -r specification/js
 #gtest_discover_tests(cper-tests WORKING_DIRECTORY bin/)
 
 # Generate Python bindings with SWIG.
-if (NOT CMAKE_CROSSCOMPILING)
+if (BUILD_PYTHON_LIBS)
   include_directories(cperparse_pylib ${PYTHON_INCLUDE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
   swig_add_library(cperparse_pylib 
     TYPE STATIC
