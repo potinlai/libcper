@@ -252,10 +252,11 @@ cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR *section_descriptor)
 
 	//Readable section type, if possible.
 	const char *section_type_readable = "Unknown";
-	for (int i=0; i<section_definitions_len; i++)
-	{
-		if (guid_equal(section_definitions[i].Guid, &section_descriptor->SectionType)) {
-			section_type_readable = section_definitions[i].ReadableName;
+	for (int i = 0; i < section_definitions_len; i++) {
+		if (guid_equal(section_definitions[i].Guid,
+			       &section_descriptor->SectionType)) {
+			section_type_readable =
+				section_definitions[i].ReadableName;
 			break;
 		}
 	}
@@ -316,10 +317,12 @@ json_object *cper_section_to_ir(FILE *handle,
 	//Parse section to IR based on GUID.
 	json_object *result = NULL;
 	int section_converted = 0;
-	for (int i=0; i<section_definitions_len; i++)
-	{
-		if (guid_equal(section_definitions[i].Guid, &descriptor->SectionType) && section_definitions[i].ToIR != NULL) {
-			result = section_definitions[i].ToIR(section, descriptor);
+	for (int i = 0; i < section_definitions_len; i++) {
+		if (guid_equal(section_definitions[i].Guid,
+			       &descriptor->SectionType) &&
+		    section_definitions[i].ToIR != NULL) {
+			result = section_definitions[i].ToIR(section,
+							     descriptor);
 			section_converted = 1;
 			break;
 		}

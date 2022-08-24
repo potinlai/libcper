@@ -152,9 +152,10 @@ void ir_section_to_cper(json_object *section,
 {
 	//Find the correct section type, and parse.
 	int section_converted = 0;
-	for (int i=0; i<section_definitions_len; i++)
-	{
-		if (guid_equal(section_definitions[i].Guid, &descriptor->SectionType) && section_definitions[i].ToCPER != NULL) {
+	for (int i = 0; i < section_definitions_len; i++) {
+		if (guid_equal(section_definitions[i].Guid,
+			       &descriptor->SectionType) &&
+		    section_definitions[i].ToCPER != NULL) {
 			section_definitions[i].ToCPER(section, out);
 			section_converted = 1;
 			break;
