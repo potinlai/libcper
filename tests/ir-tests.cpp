@@ -11,6 +11,7 @@ extern "C" {
 #include "../cper-parse.h"
 #include "../json-schema.h"
 #include "../generator/cper-generate.h"
+#include "../sections/cper-section.h"
 }
 
 /*
@@ -95,6 +96,22 @@ void cper_log_section_dual_binary_test(const char *section_name)
 {
 	cper_log_section_binary_test(section_name, 0);
 	cper_log_section_binary_test(section_name, 1);
+}
+
+/*
+* Non-single section assertions.
+*/
+TEST(CompileTimeAssertions, TwoWayConversion)
+{
+	for (int i=0; i<section_definitions_len; i++)
+	{
+		//If a conversion one way exists, a conversion the other way must exist.
+		std::string err = "If a CPER conversion exists one way, there must be an equivalent method in reverse.";
+		if (section_definitions[i].ToCPER != NULL)
+			ASSERT_NE(section_definitions[i].ToIR, NULL) << err;
+		if (section_definitions[i].ToIR != NULL)
+			ASSERT_NE(section_definitions[i].ToCPER, NULL) << err;
+	}
 }
 
 /*

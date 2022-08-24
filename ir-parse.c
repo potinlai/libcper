@@ -11,21 +11,7 @@
 #include "edk/Cper.h"
 #include "cper-parse.h"
 #include "cper-utils.h"
-#include "sections/cper-section-generic.h"
-#include "sections/cper-section-ia32x64.h"
-#include "sections/cper-section-arm.h"
-#include "sections/cper-section-memory.h"
-#include "sections/cper-section-pcie.h"
-#include "sections/cper-section-pci-bus.h"
-#include "sections/cper-section-pci-dev.h"
-#include "sections/cper-section-firmware.h"
-#include "sections/cper-section-dmar-generic.h"
-#include "sections/cper-section-dmar-vtd.h"
-#include "sections/cper-section-dmar-iommu.h"
-#include "sections/cper-section-ccix-per.h"
-#include "sections/cper-section-cxl-protocol.h"
-#include "sections/cper-section-ipf.h"
-#include "sections/cper-section-cxl-component.h"
+#include "sections/cper-section.h"
 
 //Private pre-declarations.
 void ir_header_to_cper(json_object *header_ir,
@@ -165,63 +151,18 @@ void ir_section_to_cper(json_object *section,
 			EFI_ERROR_SECTION_DESCRIPTOR *descriptor, FILE *out)
 {
 	//Find the correct section type, and parse.
-	if (guid_equal(&descriptor->SectionType,
-		       &gEfiProcessorGenericErrorSectionGuid))
-		ir_section_generic_to_cper(section, out);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiIa32X64ProcessorErrorSectionGuid))
-		ir_section_ia32x64_to_cper(section, out);
-	// else if (guid_equal(&descriptor->SectionType, &gEfiIpfProcessorErrorSectionGuid))
-	//     ir_section_ipf_to_cper(section, out);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiArmProcessorErrorSectionGuid))
-		ir_section_arm_to_cper(section, out);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiPlatformMemoryErrorSectionGuid))
-		ir_section_memory_to_cper(section, out);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiPlatformMemoryError2SectionGuid))
-		ir_section_memory2_to_cper(section, out);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiPcieErrorSectionGuid))
-		ir_section_pcie_to_cper(section, out);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiFirmwareErrorSectionGuid))
-		ir_section_firmware_to_cper(section, out);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiPciBusErrorSectionGuid))
-		ir_section_pci_bus_to_cper(section, out);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiPciDevErrorSectionGuid))
-		ir_section_pci_dev_to_cper(section, out);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiDMArGenericErrorSectionGuid))
-		ir_section_dmar_generic_to_cper(section, out);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiDirectedIoDMArErrorSectionGuid))
-		ir_section_dmar_vtd_to_cper(section, out);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiIommuDMArErrorSectionGuid))
-		ir_section_dmar_iommu_to_cper(section, out);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiCcixPerLogErrorSectionGuid))
-		ir_section_ccix_per_to_cper(section, out);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiCxlProtocolErrorSectionGuid))
-		ir_section_cxl_protocol_to_cper(section, out);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiCxlGeneralMediaErrorSectionGuid) ||
-		 guid_equal(&descriptor->SectionType,
-			    &gEfiCxlDramEventErrorSectionGuid) ||
-		 guid_equal(&descriptor->SectionType,
-			    &gEfiCxlPhysicalSwitchErrorSectionGuid) ||
-		 guid_equal(&descriptor->SectionType,
-			    &gEfiCxlVirtualSwitchErrorSectionGuid) ||
-		 guid_equal(&descriptor->SectionType,
-			    &gEfiCxlMldPortErrorSectionGuid)) {
-		ir_section_cxl_component_to_cper(section, out);
-	} else {
-		//Unknown GUID, so read as a base64 unknown section.
+	int section_converted = 0;
+	for (int i=0; i<section_definitions_len; i++)
+	{
+		if (guid_equal(section_definitions[i].Guid, &descriptor->SectionType) && section_definitions[i].ToCPER != NULL) {
+			section_definitions[i].ToCPER(section, out);
+			section_converted = 1;
+			break;
+		}
+	}
+
+	//If unknown GUID, so read as a base64 unknown section.
+	if (!section_converted) {
 		json_object *encoded = json_object_object_get(section, "data");
 		UINT8 *decoded =
 			b64_decode(json_object_get_string(encoded),

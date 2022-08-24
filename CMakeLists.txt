@@ -67,6 +67,7 @@ add_executable(cper-tests
   tests/test-utils.cpp
   generator/cper-generate.c
   generator/gen-utils.c 
+  sections/cper-section.c
   ${GeneratorSectionSources} 
   ${EDKSources}
 )
@@ -76,6 +77,7 @@ target_link_libraries(cper-tests cper-parse json-c GTest::gtest_main)
 target_link_libraries(cper-parse json-c b64c)
 target_link_libraries(cper-convert cper-parse)
 target_compile_options(cper-parse PRIVATE -Wno-address-of-packed-member)
+target_compile_options(cper-tests PRIVATE -fpermissive)
 
 # Copy required specification JSON for command line application.
 add_custom_command(TARGET cper-convert POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory bin/specification)

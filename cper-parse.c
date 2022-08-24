@@ -11,21 +11,7 @@
 #include "edk/Cper.h"
 #include "cper-parse.h"
 #include "cper-utils.h"
-#include "sections/cper-section-generic.h"
-#include "sections/cper-section-ia32x64.h"
-#include "sections/cper-section-arm.h"
-#include "sections/cper-section-memory.h"
-#include "sections/cper-section-pcie.h"
-#include "sections/cper-section-pci-bus.h"
-#include "sections/cper-section-pci-dev.h"
-#include "sections/cper-section-firmware.h"
-#include "sections/cper-section-dmar-generic.h"
-#include "sections/cper-section-dmar-vtd.h"
-#include "sections/cper-section-dmar-iommu.h"
-#include "sections/cper-section-ccix-per.h"
-#include "sections/cper-section-cxl-protocol.h"
-#include "sections/cper-section-ipf.h"
-#include "sections/cper-section-cxl-component.h"
+#include "sections/cper-section.h"
 
 //Private pre-definitions.
 json_object *cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER *header);
@@ -265,67 +251,14 @@ cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR *section_descriptor)
 			       json_object_new_string(section_type_string));
 
 	//Readable section type, if possible.
-	char *section_type_readable = "Unknown";
-	if (guid_equal(&section_descriptor->SectionType,
-		       &gEfiProcessorGenericErrorSectionGuid))
-		section_type_readable = "Processor Generic";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiIa32X64ProcessorErrorSectionGuid))
-		section_type_readable = "IA32/X64";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiIpfProcessorErrorSectionGuid))
-		section_type_readable = "IPF";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiArmProcessorErrorSectionGuid))
-		section_type_readable = "ARM";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiPlatformMemoryErrorSectionGuid) ||
-		 guid_equal(&section_descriptor->SectionType,
-			    &gEfiPlatformMemoryError2SectionGuid))
-		section_type_readable = "Platform Memory";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiPcieErrorSectionGuid))
-		section_type_readable = "PCIe";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiFirmwareErrorSectionGuid))
-		section_type_readable = "Firmware Error Record Reference";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiPciBusErrorSectionGuid))
-		section_type_readable = "PCI/PCI-X Bus";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiPciDevErrorSectionGuid))
-		section_type_readable = "PCI Component/Device";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiDMArGenericErrorSectionGuid))
-		section_type_readable = "DMAr Generic";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiDirectedIoDMArErrorSectionGuid))
-		section_type_readable =
-			"Intel VT for Directed I/O specific DMAr section";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiIommuDMArErrorSectionGuid))
-		section_type_readable = "IOMMU specific DMAr section";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiCcixPerLogErrorSectionGuid))
-		section_type_readable = "CCIX PER Log Error";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiCxlProtocolErrorSectionGuid))
-		section_type_readable = "CXL Protocol Error";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiCxlGeneralMediaErrorSectionGuid))
-		section_type_readable = "CXL General Media Component Error";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiCxlDramEventErrorSectionGuid))
-		section_type_readable = "CXL DRAM Component Error";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiCxlPhysicalSwitchErrorSectionGuid))
-		section_type_readable = "CXL Physical Switch Component Error";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiCxlVirtualSwitchErrorSectionGuid))
-		section_type_readable = "CXL Virtual Switch Component Error";
-	else if (guid_equal(&section_descriptor->SectionType,
-			    &gEfiCxlMldPortErrorSectionGuid))
-		section_type_readable = "CXL MLD Port Component Error";
+	const char *section_type_readable = "Unknown";
+	for (int i=0; i<section_definitions_len; i++)
+	{
+		if (guid_equal(section_definitions[i].Guid, &section_descriptor->SectionType)) {
+			section_type_readable = section_definitions[i].ReadableName;
+			break;
+		}
+	}
 
 	json_object_object_add(section_type, "type",
 			       json_object_new_string(section_type_readable));
@@ -382,66 +315,18 @@ json_object *cper_section_to_ir(FILE *handle,
 
 	//Parse section to IR based on GUID.
 	json_object *result = NULL;
-	if (guid_equal(&descriptor->SectionType,
-		       &gEfiProcessorGenericErrorSectionGuid))
-		result = cper_section_generic_to_ir(section, descriptor);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiIa32X64ProcessorErrorSectionGuid))
-		result = cper_section_ia32x64_to_ir(section, descriptor);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiIpfProcessorErrorSectionGuid))
-		result = cper_section_ipf_to_ir(section, descriptor);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiArmProcessorErrorSectionGuid))
-		result = cper_section_arm_to_ir(section, descriptor);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiPlatformMemoryErrorSectionGuid))
-		result =
-			cper_section_platform_memory_to_ir(section, descriptor);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiPlatformMemoryError2SectionGuid))
-		result = cper_section_platform_memory2_to_ir(section,
-							     descriptor);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiPcieErrorSectionGuid))
-		result = cper_section_pcie_to_ir(section, descriptor);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiFirmwareErrorSectionGuid))
-		result = cper_section_firmware_to_ir(section, descriptor);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiPciBusErrorSectionGuid))
-		result = cper_section_pci_bus_to_ir(section, descriptor);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiPciDevErrorSectionGuid))
-		result = cper_section_pci_dev_to_ir(section, descriptor);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiDMArGenericErrorSectionGuid))
-		result = cper_section_dmar_generic_to_ir(section, descriptor);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiDirectedIoDMArErrorSectionGuid))
-		result = cper_section_dmar_vtd_to_ir(section, descriptor);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiIommuDMArErrorSectionGuid))
-		result = cper_section_dmar_iommu_to_ir(section, descriptor);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiCcixPerLogErrorSectionGuid))
-		result = cper_section_ccix_per_to_ir(section, descriptor);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiCxlProtocolErrorSectionGuid))
-		result = cper_section_cxl_protocol_to_ir(section, descriptor);
-	else if (guid_equal(&descriptor->SectionType,
-			    &gEfiCxlGeneralMediaErrorSectionGuid) ||
-		 guid_equal(&descriptor->SectionType,
-			    &gEfiCxlDramEventErrorSectionGuid) ||
-		 guid_equal(&descriptor->SectionType,
-			    &gEfiCxlPhysicalSwitchErrorSectionGuid) ||
-		 guid_equal(&descriptor->SectionType,
-			    &gEfiCxlVirtualSwitchErrorSectionGuid) ||
-		 guid_equal(&descriptor->SectionType,
-			    &gEfiCxlMldPortErrorSectionGuid)) {
-		result = cper_section_cxl_component_to_ir(section, descriptor);
-	} else {
-		//Failed read, unknown GUID.
+	int section_converted = 0;
+	for (int i=0; i<section_definitions_len; i++)
+	{
+		if (guid_equal(section_definitions[i].Guid, &descriptor->SectionType) && section_definitions[i].ToIR != NULL) {
+			result = section_definitions[i].ToIR(section, descriptor);
+			section_converted = 1;
+			break;
+		}
+	}
+
+	//Was it an unknown GUID/failed read?
+	if (!section_converted) {
 		//Output the data as formatted base64.
 		result = json_object_new_object();
 		char *encoded = b64_encode((unsigned char *)section,
