@@ -265,11 +265,11 @@ TEST(CXLProtocolTests, BinaryEqual)
 //CXL Component tests.
 TEST(CXLComponentTests, IRValid)
 {
-	cper_log_section_dual_ir_test("cxlcomponent");
+	cper_log_section_dual_ir_test("cxlcomponent-media");
 }
 TEST(CXLComponentTests, BinaryEqual)
 {
-	cper_log_section_dual_binary_test("cxlcomponent");
+	cper_log_section_dual_binary_test("cxlcomponent-media");
 }
 
 //Unknown section tests.

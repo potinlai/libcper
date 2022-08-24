@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include "../../edk/BaseTypes.h"
 #include "../gen-utils.h"
-#include "gen-sections.h"
+#include "gen-section.h"
 
 //Generates a single pseudo-random generic processor section, saving the resulting address to the given
 //location. Returns the size of the newly created section.

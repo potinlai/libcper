@@ -2,7 +2,9 @@
 #define GEN_SECTIONS_H
 
 #include <stdlib.h>
+#include "../../edk/Cper.h"
 
+//Section generator function predefinitions.
 size_t generate_section_generic(void** location);
 size_t generate_section_ia32x64(void** location);
 size_t generate_section_arm(void** location);
@@ -18,5 +20,15 @@ size_t generate_section_dmar_iommu(void** location);
 size_t generate_section_ccix_per(void** location);
 size_t generate_section_cxl_protocol(void** location);
 size_t generate_section_cxl_component(void** location);
+
+//Definition structure for a single CPER section generator.
+typedef struct {
+    EFI_GUID* Guid;
+    const char* ShortName;
+    size_t (*Generate)(void**);
+} CPER_GENERATOR_DEFINITION;
+
+extern CPER_GENERATOR_DEFINITION generator_definitions[];
+extern const size_t generator_definitions_len;
 
 #endif

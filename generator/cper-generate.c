@@ -9,7 +9,7 @@
 #include <string.h>
 #include "../edk/Cper.h"
 #include "gen-utils.h"
-#include "sections/gen-sections.h"
+#include "sections/gen-section.h"
 #include "cper-generate.h"
 
 EFI_ERROR_SECTION_DESCRIPTOR *generate_section_descriptor(char *type,
@@ -150,83 +150,26 @@ EFI_ERROR_SECTION_DESCRIPTOR *generate_section_descriptor(char *type,
 			descriptor->FruString[i] = 0x0;
 	}
 
-	//Set section type GUID based on type name.
-	if (strcmp(type, "generic") == 0)
-		memcpy(&descriptor->SectionType,
-		       &gEfiProcessorGenericErrorSectionGuid, sizeof(EFI_GUID));
-	else if (strcmp(type, "ia32x64") == 0)
-		memcpy(&descriptor->SectionType,
-		       &gEfiIa32X64ProcessorErrorSectionGuid, sizeof(EFI_GUID));
-	else if (strcmp(type, "ipf") == 0)
-		memcpy(&descriptor->SectionType,
-		       &gEfiIpfProcessorErrorSectionGuid, sizeof(EFI_GUID));
-	else if (strcmp(type, "arm") == 0)
-		memcpy(&descriptor->SectionType,
-		       &gEfiArmProcessorErrorSectionGuid, sizeof(EFI_GUID));
-	else if (strcmp(type, "memory") == 0)
-		memcpy(&descriptor->SectionType,
-		       &gEfiPlatformMemoryErrorSectionGuid, sizeof(EFI_GUID));
-	else if (strcmp(type, "memory2") == 0)
-		memcpy(&descriptor->SectionType,
-		       &gEfiPlatformMemoryError2SectionGuid, sizeof(EFI_GUID));
-	else if (strcmp(type, "pcie") == 0)
-		memcpy(&descriptor->SectionType, &gEfiPcieErrorSectionGuid,
-		       sizeof(EFI_GUID));
-	else if (strcmp(type, "firmware") == 0)
-		memcpy(&descriptor->SectionType, &gEfiFirmwareErrorSectionGuid,
-		       sizeof(EFI_GUID));
-	else if (strcmp(type, "pcibus") == 0)
-		memcpy(&descriptor->SectionType, &gEfiPciBusErrorSectionGuid,
-		       sizeof(EFI_GUID));
-	else if (strcmp(type, "pcidev") == 0)
-		memcpy(&descriptor->SectionType, &gEfiPciDevErrorSectionGuid,
-		       sizeof(EFI_GUID));
-	else if (strcmp(type, "dmargeneric") == 0)
-		memcpy(&descriptor->SectionType,
-		       &gEfiDMArGenericErrorSectionGuid, sizeof(EFI_GUID));
-	else if (strcmp(type, "dmarvtd") == 0)
-		memcpy(&descriptor->SectionType,
-		       &gEfiDirectedIoDMArErrorSectionGuid, sizeof(EFI_GUID));
-	else if (strcmp(type, "dmariommu") == 0)
-		memcpy(&descriptor->SectionType, &gEfiIommuDMArErrorSectionGuid,
-		       sizeof(EFI_GUID));
-	else if (strcmp(type, "ccixper") == 0)
-		memcpy(&descriptor->SectionType,
-		       &gEfiCcixPerLogErrorSectionGuid, sizeof(EFI_GUID));
-	else if (strcmp(type, "cxlprotocol") == 0)
-		memcpy(&descriptor->SectionType,
-		       &gEfiCxlProtocolErrorSectionGuid, sizeof(EFI_GUID));
-	else if (strcmp(type, "cxlcomponent") == 0) {
-		//Choose between the different CXL component type GUIDs.
-		int componentType = rand() % 5;
-		switch (componentType) {
-		case 0:
-			memcpy(&descriptor->SectionType,
-			       &gEfiCxlGeneralMediaErrorSectionGuid,
-			       sizeof(EFI_GUID));
-			break;
-		case 1:
-			memcpy(&descriptor->SectionType,
-			       &gEfiCxlDramEventErrorSectionGuid,
-			       sizeof(EFI_GUID));
-			break;
-		case 2:
-			memcpy(&descriptor->SectionType,
-			       &gEfiCxlPhysicalSwitchErrorSectionGuid,
-			       sizeof(EFI_GUID));
-			break;
-		case 3:
-			memcpy(&descriptor->SectionType,
-			       &gEfiCxlVirtualSwitchErrorSectionGuid,
-			       sizeof(EFI_GUID));
-			break;
-		default:
-			memcpy(&descriptor->SectionType,
-			       &gEfiCxlMldPortErrorSectionGuid,
-			       sizeof(EFI_GUID));
-			break;
+	//If section type is not "unknown", set section type GUID based on type name.
+	int section_guid_found = 0;
+	if (strcmp(type, "unknown") == 0) {
+		section_guid_found = 1;
+	} else {
+		//Find the appropriate GUID for this section name.
+		for (int i = 0; i < generator_definitions_len; i++) {
+			if (strcmp(type, generator_definitions[i].ShortName) ==
+			    0) {
+				memcpy(&descriptor->SectionType,
+				       generator_definitions[i].Guid,
+				       sizeof(EFI_GUID));
+				section_guid_found = 1;
+				break;
+			}
 		}
-	} else if (strcmp(type, "unknown") != 0) {
+	}
+
+	//Undefined section, show error.
+	if (!section_guid_found) {
 		//Undefined section, show error.
 		printf("Undefined section type '%s' provided. See 'cper-generate --help' for command information.\n",
 		       type);
@@ -242,43 +185,26 @@ size_t generate_section(void **location, char *type)
 	//The length of the section.
 	size_t length = 0;
 
-	//Switch on the type, generate accordingly.
-	if (strcmp(type, "generic") == 0)
-		length = generate_section_generic(location);
-	else if (strcmp(type, "ia32x64") == 0)
-		length = generate_section_ia32x64(location);
-	// else if (strcmp(type, "ipf") == 0)
-	//     length = generate_section_ipf(location);
-	else if (strcmp(type, "arm") == 0)
-		length = generate_section_arm(location);
-	else if (strcmp(type, "memory") == 0)
-		length = generate_section_memory(location);
-	else if (strcmp(type, "memory2") == 0)
-		length = generate_section_memory2(location);
-	else if (strcmp(type, "pcie") == 0)
-		length = generate_section_pcie(location);
-	else if (strcmp(type, "firmware") == 0)
-		length = generate_section_firmware(location);
-	else if (strcmp(type, "pcibus") == 0)
-		length = generate_section_pci_bus(location);
-	else if (strcmp(type, "pcidev") == 0)
-		length = generate_section_pci_dev(location);
-	else if (strcmp(type, "dmargeneric") == 0)
-		length = generate_section_dmar_generic(location);
-	else if (strcmp(type, "dmarvtd") == 0)
-		length = generate_section_dmar_vtd(location);
-	else if (strcmp(type, "dmariommu") == 0)
-		length = generate_section_dmar_iommu(location);
-	else if (strcmp(type, "ccixper") == 0)
-		length = generate_section_ccix_per(location);
-	else if (strcmp(type, "cxlprotocol") == 0)
-		length = generate_section_cxl_protocol(location);
-	else if (strcmp(type, "cxlcomponent") == 0)
-		length = generate_section_cxl_component(location);
-	else if (strcmp(type, "unknown") == 0)
+	//If the section name is "unknown", simply generate a random bytes section.
+	int section_generated = 0;
+	if (strcmp(type, "unknown") == 0) {
 		length = generate_random_section(location, rand() % 256);
-	else {
-		//Undefined section, show error.
+		section_generated = 1;
+	} else {
+		//Function defined section, switch on the type, generate accordingly.
+		for (int i = 0; i < generator_definitions_len; i++) {
+			if (strcmp(type, generator_definitions[i].ShortName) ==
+			    0) {
+				length = generator_definitions[i].Generate(
+					location);
+				section_generated = 1;
+				break;
+			}
+		}
+	}
+
+	//If we didn't find a section generator for the given name, error out.
+	if (!section_generated) {
 		printf("Undefined section type '%s' given to generate. See 'cper-generate --help' for command information.\n",
 		       type);
 		return 0;
