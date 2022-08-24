@@ -4,6 +4,7 @@
  * Author: Lawrence.Tang@arm.com
  **/
 
+#include <ctype.h>
 #include "gtest/gtest.h"
 #include "test-utils.hpp"
 extern "C" {
@@ -12,6 +13,7 @@ extern "C" {
 #include "../json-schema.h"
 #include "../generator/cper-generate.h"
 #include "../sections/cper-section.h"
+#include "../generator/sections/gen-section.h"
 }
 
 /*
@@ -103,14 +105,27 @@ void cper_log_section_dual_binary_test(const char *section_name)
 */
 TEST(CompileTimeAssertions, TwoWayConversion)
 {
-	for (int i=0; i<section_definitions_len; i++)
-	{
+	for (int i = 0; i < section_definitions_len; i++) {
 		//If a conversion one way exists, a conversion the other way must exist.
-		std::string err = "If a CPER conversion exists one way, there must be an equivalent method in reverse.";
+		std::string err =
+			"If a CPER conversion exists one way, there must be an equivalent method in reverse.";
 		if (section_definitions[i].ToCPER != NULL)
 			ASSERT_NE(section_definitions[i].ToIR, NULL) << err;
 		if (section_definitions[i].ToIR != NULL)
 			ASSERT_NE(section_definitions[i].ToCPER, NULL) << err;
+	}
+}
+
+TEST(CompileTimeAssertions, ShortcodeNoSpaces)
+{
+	for (int i = 0; i < generator_definitions_len; i++) {
+		for (int j = 0;
+		     generator_definitions[i].ShortName[j + 1] != '\0'; j++) {
+			ASSERT_FALSE(
+				isspace(generator_definitions[i].ShortName[j]))
+				<< "Illegal space character detected in shortcode '"
+				<< generator_definitions[i].ShortName << "'.";
+		}
 	}
 }
 
