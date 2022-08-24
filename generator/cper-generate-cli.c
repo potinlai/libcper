@@ -9,6 +9,7 @@
 #include <string.h>
 #include "../edk/Cper.h"
 #include "cper-generate.h"
+#include "sections/gen-section.h"
 
 void print_help();
 
@@ -90,22 +91,9 @@ void print_help()
 	printf("\tWhen the '--single-section' flag is set, the next argument is the single section that should be generated, and\n");
 	printf("\ta single section (no header, only a section descriptor & section) CPER file is generated.\n\n");
 	printf("\tValid section type names are the following:\n");
-	printf("\t\t- generic\n");
-	printf("\t\t- ia32x64\n");
-	printf("\t\t- ipf\n");
-	printf("\t\t- arm\n");
-	printf("\t\t- memory\n");
-	printf("\t\t- memory2\n");
-	printf("\t\t- pcie\n");
-	printf("\t\t- firmware\n");
-	printf("\t\t- pcibus\n");
-	printf("\t\t- pcidev\n");
-	printf("\t\t- dmargeneric\n");
-	printf("\t\t- dmarvtd\n");
-	printf("\t\t- dmariommu\n");
-	printf("\t\t- ccixper\n");
-	printf("\t\t- cxlprotocol\n");
-	printf("\t\t- cxlcomponent\n");
+	for (int i=0; i<generator_definitions_len; i++) {
+		printf("\t\t- %s\n", generator_definitions[i].ShortName);
+	}
 	printf("\t\t- unknown\n");
 	printf("\n:: --help\n");
 	printf("\tDisplays help information to the console.\n");
