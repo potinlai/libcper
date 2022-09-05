@@ -17,16 +17,18 @@
 json_object *cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER *header);
 json_object *
 cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR *section_descriptor);
-json_object *cper_section_to_ir(FILE *handle,
+json_object *cper_section_to_ir(FILE *handle, long base_pos,
 				EFI_ERROR_SECTION_DESCRIPTOR *descriptor);
 
 //Reads a CPER log file at the given file location, and returns an intermediate
 //JSON representation of this CPER record.
 json_object *cper_to_ir(FILE *cper_file)
 {
+	//Read the current file pointer location as the base of the record.
+	long base_pos = ftell(cper_file);
+
 	//Ensure this is really a CPER log.
 	EFI_COMMON_ERROR_RECORD_HEADER header;
-	fseek(cper_file, 0, SEEK_SET);
 	if (fread(&header, sizeof(EFI_COMMON_ERROR_RECORD_HEADER), 1,
 		  cper_file) != 1) {
 		printf("Invalid CPER file: Invalid length (log too short).\n");
@@ -61,7 +63,7 @@ json_object *cper_to_ir(FILE *cper_file)
 
 		//Read the section itself.
 		json_object_array_add(sections_ir,
-				      cper_section_to_ir(cper_file,
+				      cper_section_to_ir(cper_file, base_pos,
 							 &section_descriptor));
 	}
 
@@ -295,14 +297,14 @@ cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR *section_descriptor)
 }
 
 //Converts the section described by a single given section descriptor.
-json_object *cper_section_to_ir(FILE *handle,
+json_object *cper_section_to_ir(FILE *handle, long base_pos,
 				EFI_ERROR_SECTION_DESCRIPTOR *descriptor)
 {
 	//Save our current position in the stream.
 	long position = ftell(handle);
 
 	//Read section as described by the section descriptor.
-	fseek(handle, descriptor->SectionOffset, SEEK_SET);
+	fseek(handle, base_pos + descriptor->SectionOffset, SEEK_SET);
 	void *section = malloc(descriptor->SectionLength);
 	if (fread(section, descriptor->SectionLength, 1, handle) != 1) {
 		printf("Section read failed: Could not read %d bytes from global offset %d.\n",
@@ -349,6 +351,9 @@ json_object *cper_single_section_to_ir(FILE *cper_section_file)
 {
 	json_object *ir = json_object_new_object();
 
+	//Read the current file pointer location as base record position.
+	long base_pos = ftell(cper_section_file);
+
 	//Read the section descriptor out.
 	EFI_ERROR_SECTION_DESCRIPTOR section_descriptor;
 	if (fread(&section_descriptor, sizeof(EFI_ERROR_SECTION_DESCRIPTOR), 1,
@@ -364,7 +369,7 @@ json_object *cper_single_section_to_ir(FILE *cper_section_file)
 
 	//Parse the single section.
 	json_object *section_ir =
-		cper_section_to_ir(cper_section_file, &section_descriptor);
+		cper_section_to_ir(cper_section_file, base_pos, &section_descriptor);
 	json_object_object_add(ir, "section", section_ir);
 
 	return ir;
