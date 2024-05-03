@@ -1,13 +1,15 @@
-%module cperparse
-%{
-    #include "cper-parse.h"
-    #include <json.h>
-    #include <stdio.h>
-%}
+% module cperparse %
+	{
+#include "cper-parse.h"
+#include <json.h>
+#include <stdio.h>
+		%
+	}
 
-//Library function declarations for module export.
-json_object* cper_to_ir(FILE* cper_file);
-void ir_to_cper(json_object* ir, FILE* out);
+	//Library function declarations for module export.
+	json_object *
+	cper_to_ir(FILE *cper_file);
+void ir_to_cper(json_object *ir, FILE *out);
 
 //JSON function symbol export.
 const char *json_object_to_json_string(struct json_object *obj);

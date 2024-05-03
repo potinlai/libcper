@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 #include <json.h>
-#include "b64.h"
+#include "libbase64.h"
 #include "edk/Cper.h"
 #include "cper-parse.h"
 #include "cper-utils.h"
@@ -109,7 +109,7 @@ json_object *cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER *header)
 			       json_object_new_uint64(header->RecordLength));
 
 	//If a timestamp exists according to validation bits, then add it.
-	if (header->ValidationBits & 0b10) {
+	if (header->ValidationBits & 0x2) {
 		char timestamp_string[TIMESTAMP_LENGTH];
 		timestamp_to_string(timestamp_string, &header->TimeStamp);
 
@@ -122,7 +122,7 @@ json_object *cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER *header)
 	}
 
 	//If a platform ID exists according to the validation bits, then add it.
-	if (header->ValidationBits & 0b1) {
+	if (header->ValidationBits & 0x1) {
 		char platform_string[GUID_STRING_LENGTH];
 		guid_to_string(platform_string, &header->PlatformID);
 		json_object_object_add(header_ir, "platformID",
@@ -130,7 +130,7 @@ json_object *cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER *header)
 	}
 
 	//If a partition ID exists according to the validation bits, then add it.
-	if (header->ValidationBits & 0b100) {
+	if (header->ValidationBits & 0x4) {
 		char partition_string[GUID_STRING_LENGTH];
 		guid_to_string(partition_string, &header->PartitionID);
 		json_object_object_add(
@@ -155,41 +155,42 @@ json_object *cper_header_to_ir(EFI_COMMON_ERROR_RECORD_HEADER *header)
 	//Add the human readable notification type if possible.
 	char *notification_type_readable = "Unknown";
 	if (guid_equal(&header->NotificationType,
-		       &gEfiEventNotificationTypeCmcGuid))
+		       &gEfiEventNotificationTypeCmcGuid)) {
 		notification_type_readable = "CMC";
-	else if (guid_equal(&header->NotificationType,
-			    &gEfiEventNotificationTypeCpeGuid))
+	} else if (guid_equal(&header->NotificationType,
+			      &gEfiEventNotificationTypeCpeGuid)) {
 		notification_type_readable = "CPE";
-	else if (guid_equal(&header->NotificationType,
-			    &gEfiEventNotificationTypeMceGuid))
+	} else if (guid_equal(&header->NotificationType,
+			      &gEfiEventNotificationTypeMceGuid)) {
 		notification_type_readable = "MCE";
-	else if (guid_equal(&header->NotificationType,
-			    &gEfiEventNotificationTypePcieGuid))
+	} else if (guid_equal(&header->NotificationType,
+			      &gEfiEventNotificationTypePcieGuid)) {
 		notification_type_readable = "PCIe";
-	else if (guid_equal(&header->NotificationType,
-			    &gEfiEventNotificationTypeInitGuid))
+	} else if (guid_equal(&header->NotificationType,
+			      &gEfiEventNotificationTypeInitGuid)) {
 		notification_type_readable = "INIT";
-	else if (guid_equal(&header->NotificationType,
-			    &gEfiEventNotificationTypeNmiGuid))
+	} else if (guid_equal(&header->NotificationType,
+			      &gEfiEventNotificationTypeNmiGuid)) {
 		notification_type_readable = "NMI";
-	else if (guid_equal(&header->NotificationType,
-			    &gEfiEventNotificationTypeBootGuid))
+	} else if (guid_equal(&header->NotificationType,
+			      &gEfiEventNotificationTypeBootGuid)) {
 		notification_type_readable = "Boot";
-	else if (guid_equal(&header->NotificationType,
-			    &gEfiEventNotificationTypeDmarGuid))
+	} else if (guid_equal(&header->NotificationType,
+			      &gEfiEventNotificationTypeDmarGuid)) {
 		notification_type_readable = "DMAr";
-	else if (guid_equal(&header->NotificationType,
-			    &gEfiEventNotificationTypeSeaGuid))
+	} else if (guid_equal(&header->NotificationType,
+			      &gEfiEventNotificationTypeSeaGuid)) {
 		notification_type_readable = "SEA";
-	else if (guid_equal(&header->NotificationType,
-			    &gEfiEventNotificationTypeSeiGuid))
+	} else if (guid_equal(&header->NotificationType,
+			      &gEfiEventNotificationTypeSeiGuid)) {
 		notification_type_readable = "SEI";
-	else if (guid_equal(&header->NotificationType,
-			    &gEfiEventNotificationTypePeiGuid))
+	} else if (guid_equal(&header->NotificationType,
+			      &gEfiEventNotificationTypePeiGuid)) {
 		notification_type_readable = "PEI";
-	else if (guid_equal(&header->NotificationType,
-			    &gEfiEventNotificationTypeCxlGuid))
+	} else if (guid_equal(&header->NotificationType,
+			      &gEfiEventNotificationTypeCxlGuid)) {
 		notification_type_readable = "CXL Component";
+	}
 	json_object_object_add(
 		notification_type, "type",
 		json_object_new_string(notification_type_readable));
@@ -254,7 +255,7 @@ cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR *section_descriptor)
 
 	//Readable section type, if possible.
 	const char *section_type_readable = "Unknown";
-	for (int i = 0; i < section_definitions_len; i++) {
+	for (size_t i = 0; i < section_definitions_len; i++) {
 		if (guid_equal(section_definitions[i].Guid,
 			       &section_descriptor->SectionType)) {
 			section_type_readable =
@@ -269,7 +270,7 @@ cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR *section_descriptor)
 			       section_type);
 
 	//If validation bits indicate it exists, add FRU ID.
-	if (section_descriptor->SecValidMask & 0b1) {
+	if (section_descriptor->SecValidMask & 0x1) {
 		char fru_id_string[GUID_STRING_LENGTH];
 		guid_to_string(fru_id_string, &section_descriptor->FruId);
 		json_object_object_add(section_descriptor_ir, "fruID",
@@ -277,10 +278,11 @@ cper_section_descriptor_to_ir(EFI_ERROR_SECTION_DESCRIPTOR *section_descriptor)
 	}
 
 	//If validation bits indicate it exists, add FRU text.
-	if ((section_descriptor->SecValidMask & 0b10) >> 1)
+	if ((section_descriptor->SecValidMask & 0x2) >> 1) {
 		json_object_object_add(
 			section_descriptor_ir, "fruText",
 			json_object_new_string(section_descriptor->FruString));
+	}
 
 	//Section severity.
 	json_object *section_severity = json_object_new_object();
@@ -307,7 +309,7 @@ json_object *cper_section_to_ir(FILE *handle, long base_pos,
 	fseek(handle, base_pos + descriptor->SectionOffset, SEEK_SET);
 	void *section = malloc(descriptor->SectionLength);
 	if (fread(section, descriptor->SectionLength, 1, handle) != 1) {
-		printf("Section read failed: Could not read %d bytes from global offset %d.\n",
+		printf("Section read failed: Could not read %u bytes from global offset %d.\n",
 		       descriptor->SectionLength, descriptor->SectionOffset);
 		free(section);
 		return NULL;
@@ -319,12 +321,11 @@ json_object *cper_section_to_ir(FILE *handle, long base_pos,
 	//Parse section to IR based on GUID.
 	json_object *result = NULL;
 	int section_converted = 0;
-	for (int i = 0; i < section_definitions_len; i++) {
+	for (size_t i = 0; i < section_definitions_len; i++) {
 		if (guid_equal(section_definitions[i].Guid,
 			       &descriptor->SectionType) &&
 		    section_definitions[i].ToIR != NULL) {
-			result = section_definitions[i].ToIR(section,
-							     descriptor);
+			result = section_definitions[i].ToIR(section);
 			section_converted = 1;
 			break;
 		}
@@ -334,11 +335,18 @@ json_object *cper_section_to_ir(FILE *handle, long base_pos,
 	if (!section_converted) {
 		//Output the data as formatted base64.
 		result = json_object_new_object();
-		char *encoded = b64_encode((unsigned char *)section,
-					   descriptor->SectionLength);
-		json_object_object_add(result, "data",
-				       json_object_new_string(encoded));
-		free(encoded);
+		char *encoded = malloc(2 * descriptor->SectionLength);
+		size_t encoded_len = 0;
+		if (!encoded) {
+			printf("Failed to allocate encode output buffer. \n");
+		} else {
+			base64_encode(section, descriptor->SectionLength,
+				      encoded, &encoded_len, 0);
+			json_object_object_add(result, "data",
+					       json_object_new_string_len(
+						       encoded, encoded_len));
+			free(encoded);
+		}
 	}
 
 	//Free section memory, return result.
@@ -368,8 +376,8 @@ json_object *cper_single_section_to_ir(FILE *cper_section_file)
 	json_object_object_add(ir, "sectionDescriptor", section_descriptor_ir);
 
 	//Parse the single section.
-	json_object *section_ir =
-		cper_section_to_ir(cper_section_file, base_pos, &section_descriptor);
+	json_object *section_ir = cper_section_to_ir(
+		cper_section_file, base_pos, &section_descriptor);
 	json_object_object_add(ir, "section", section_ir);
 
 	return ir;

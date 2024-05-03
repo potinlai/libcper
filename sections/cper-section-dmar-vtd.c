@@ -7,15 +7,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <json.h>
-#include "b64.h"
+#include "libbase64.h"
 #include "../edk/Cper.h"
 #include "../cper-utils.h"
 #include "cper-section-dmar-vtd.h"
 
 //Converts a single VT-d specific DMAr CPER section into JSON IR.
-json_object *
-cper_section_dmar_vtd_to_ir(void *section,
-			    EFI_ERROR_SECTION_DESCRIPTOR *descriptor)
+json_object *cper_section_dmar_vtd_to_ir(void *section)
 {
 	EFI_DIRECTED_IO_DMAR_ERROR_DATA *vtd_error =
 		(EFI_DIRECTED_IO_DMAR_ERROR_DATA *)section;
@@ -23,8 +21,9 @@ cper_section_dmar_vtd_to_ir(void *section,
 
 	//Version, revision and OEM ID, as defined in the VT-d architecture.
 	UINT64 oem_id = 0;
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 6; i++) {
 		oem_id |= (UINT64)vtd_error->OemId[i] << (i * 8);
+	}
 	json_object_object_add(section_ir, "version",
 			       json_object_new_int(vtd_error->Version));
 	json_object_object_add(section_ir, "revision",
@@ -83,16 +82,32 @@ cper_section_dmar_vtd_to_ir(void *section,
 	json_object_object_add(section_ir, "faultRecord", fault_record_ir);
 
 	//Root entry.
-	char *encoded = b64_encode((unsigned char *)vtd_error->RootEntry, 16);
-	json_object_object_add(section_ir, "rootEntry",
-			       json_object_new_string(encoded));
-	free(encoded);
+	char *encoded = malloc(2 * 16);
+	size_t encoded_len = 0;
+	if (!encoded) {
+		printf("Failed to allocate encode output buffer. \n");
+	} else {
+		base64_encode((const char *)vtd_error->RootEntry, 16, encoded,
+			      &encoded_len, 0);
+		json_object_object_add(section_ir, "rootEntry",
+				       json_object_new_string_len(encoded,
+								  encoded_len));
+		free(encoded);
+	}
 
 	//Context entry.
-	encoded = b64_encode((unsigned char *)vtd_error->ContextEntry, 16);
-	json_object_object_add(section_ir, "contextEntry",
-			       json_object_new_string(encoded));
-	free(encoded);
+	encoded = malloc(2 * 16);
+	encoded_len = 0;
+	if (!encoded) {
+		printf("Failed to allocate encode output buffer. \n");
+	} else {
+		base64_encode((const char *)vtd_error->ContextEntry, 16,
+			      encoded, &encoded_len, 0);
+		json_object_object_add(section_ir, "contextEntry",
+				       json_object_new_string_len(encoded,
+								  encoded_len));
+		free(encoded);
+	}
 
 	//PTE entry for all page levels.
 	json_object_object_add(section_ir, "pageTableEntry_Level6",
@@ -121,8 +136,9 @@ void ir_section_dmar_vtd_to_cper(json_object *section, FILE *out)
 	//OEM ID.
 	UINT64 oem_id = json_object_get_uint64(
 		json_object_object_get(section, "oemID"));
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 6; i++) {
 		section_cper->OemId[i] = (oem_id >> (i * 8)) & 0xFF;
+	}
 
 	//Registers & basic numeric fields.
 	section_cper->Version = (UINT8)json_object_get_int(
@@ -167,17 +183,30 @@ void ir_section_dmar_vtd_to_cper(json_object *section, FILE *out)
 
 	//Root entry.
 	json_object *encoded = json_object_object_get(section, "rootEntry");
-	UINT8 *decoded = b64_decode(json_object_get_string(encoded),
-				    json_object_get_string_len(encoded));
-	memcpy(section_cper->RootEntry, decoded, 16);
-	free(decoded);
-
+	char *decoded = malloc(json_object_get_string_len(encoded));
+	size_t decoded_len = 0;
+	if (!decoded) {
+		printf("Failed to allocate decode output buffer. \n");
+	} else {
+		base64_decode(json_object_get_string(encoded),
+			      json_object_get_string_len(encoded), decoded,
+			      &decoded_len, 0);
+		memcpy(section_cper->RootEntry, decoded, decoded_len);
+		free(decoded);
+	}
 	//Context entry.
 	encoded = json_object_object_get(section, "contextEntry");
-	decoded = b64_decode(json_object_get_string(encoded),
-			     json_object_get_string_len(encoded));
-	memcpy(section_cper->ContextEntry, decoded, 16);
-	free(decoded);
+	decoded = malloc(json_object_get_string_len(encoded));
+	decoded_len = 0;
+	if (!decoded) {
+		printf("Failed to allocate decode output buffer. \n");
+	} else {
+		base64_decode(json_object_get_string(encoded),
+			      json_object_get_string_len(encoded), decoded,
+			      &decoded_len, 0);
+		memcpy(section_cper->ContextEntry, decoded, decoded_len);
+		free(decoded);
+	}
 
 	//Page table entries.
 	section_cper->PteL1 = json_object_get_uint64(

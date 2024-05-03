@@ -13,9 +13,7 @@
 #include "cper-section-generic.h"
 
 //Converts the given processor-generic CPER section into JSON IR.
-json_object *
-cper_section_generic_to_ir(void *section,
-			   EFI_ERROR_SECTION_DESCRIPTOR *descriptor)
+json_object *cper_section_generic_to_ir(void *section)
 {
 	EFI_PROCESSOR_GENERIC_ERROR_DATA *section_generic =
 		(EFI_PROCESSOR_GENERIC_ERROR_DATA *)section;
@@ -144,8 +142,9 @@ void ir_section_generic_to_cper(json_object *section, FILE *out)
 	//CPU brand string.
 	const char *brand_string = json_object_get_string(
 		json_object_object_get(section, "cpuBrandString"));
-	if (brand_string != NULL)
+	if (brand_string != NULL) {
 		strncpy(section_cper->BrandString, brand_string, 127);
+	}
 
 	//Write & flush out to file, free memory.
 	fwrite(section_cper, sizeof(EFI_PROCESSOR_GENERIC_ERROR_DATA), 1, out);

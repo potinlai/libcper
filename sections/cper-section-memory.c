@@ -11,9 +11,7 @@
 #include "cper-section-memory.h"
 
 //Converts a single memory error CPER section into JSON IR.
-json_object *
-cper_section_platform_memory_to_ir(void *section,
-				   EFI_ERROR_SECTION_DESCRIPTOR *descriptor)
+json_object *cper_section_platform_memory_to_ir(void *section)
 {
 	EFI_PLATFORM_MEMORY_ERROR_DATA *memory_error =
 		(EFI_PLATFORM_MEMORY_ERROR_DATA *)section;
@@ -59,10 +57,10 @@ cper_section_platform_memory_to_ir(void *section,
 	json_object *extended = json_object_new_object();
 	json_object_object_add(extended, "rowBit16",
 			       json_object_new_boolean(memory_error->Extended &
-						       0b1));
+						       0x1));
 	json_object_object_add(
 		extended, "rowBit17",
-		json_object_new_boolean((memory_error->Extended >> 1) & 0b1));
+		json_object_new_boolean((memory_error->Extended >> 1) & 0x1));
 	json_object_object_add(extended, "chipIdentification",
 			       json_object_new_int(memory_error->Extended >>
 						   5));
@@ -112,9 +110,7 @@ cper_section_platform_memory_to_ir(void *section,
 }
 
 //Converts a single memory error 2 CPER section into JSON IR.
-json_object *
-cper_section_platform_memory2_to_ir(void *section,
-				    EFI_ERROR_SECTION_DESCRIPTOR *descriptor)
+json_object *cper_section_platform_memory2_to_ir(void *section)
 {
 	EFI_PLATFORM_MEMORY2_ERROR_DATA *memory_error =
 		(EFI_PLATFORM_MEMORY2_ERROR_DATA *)section;
@@ -160,11 +156,11 @@ cper_section_platform_memory2_to_ir(void *section,
 	json_object *status = json_object_new_object();
 	json_object_object_add(status, "value",
 			       json_object_new_int(memory_error->Status));
-	json_object_object_add(status, "state",
-			       json_object_new_string(memory_error->Status &
-								      0b1 == 0 ?
-								    "Corrected" :
-								    "Uncorrected"));
+	json_object_object_add(
+		status, "state",
+		json_object_new_string((memory_error->Status & 0x1) == 0 ?
+					       "Corrected" :
+					       "Uncorrected"));
 	json_object_object_add(section_ir, "status", status);
 
 	//Miscellaneous numeric fields.

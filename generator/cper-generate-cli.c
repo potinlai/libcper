@@ -40,8 +40,9 @@ int main(int argc, char *argv[])
 			sections = malloc(sizeof(char *) * num_sections);
 			i++;
 
-			for (int j = i; j < argc; j++)
+			for (int j = i; j < argc; j++) {
 				sections[j - i] = argv[j];
+			}
 			break;
 		} else {
 			printf("Unrecognised argument '%s'. For command information, refer to 'cper-generate --help'.\n",
@@ -53,6 +54,9 @@ int main(int argc, char *argv[])
 	//If no output file passed as argument, exit.
 	if (out_file == NULL) {
 		printf("No output file provided. For command information, refer to 'cper-generate --help'.\n");
+		if (sections) {
+			free(sections);
+		}
 		return -1;
 	}
 
@@ -61,6 +65,9 @@ int main(int argc, char *argv[])
 	if (cper_file == NULL) {
 		printf("Could not get a handle for output file '%s', file handle returned null.\n",
 		       out_file);
+		if (sections) {
+			free(sections);
+		}
 		return -1;
 	}
 
@@ -72,13 +79,17 @@ int main(int argc, char *argv[])
 	} else {
 		//Invalid arguments.
 		printf("Invalid argument. Either both '--sections' and '--single-section' were set, or neither. For command information, refer to 'cper-generate --help'.\n");
+		if (sections) {
+			free(sections);
+		}
 		return -1;
 	}
 
 	//Close & free remaining resources.
 	fclose(cper_file);
-	if (sections != NULL)
+	if (sections != NULL) {
 		free(sections);
+	}
 }
 
 //Prints command help for this CPER generator.
@@ -91,7 +102,7 @@ void print_help()
 	printf("\tWhen the '--single-section' flag is set, the next argument is the single section that should be generated, and\n");
 	printf("\ta single section (no header, only a section descriptor & section) CPER file is generated.\n\n");
 	printf("\tValid section type names are the following:\n");
-	for (int i=0; i<generator_definitions_len; i++) {
+	for (size_t i = 0; i < generator_definitions_len; i++) {
 		printf("\t\t- %s\n", generator_definitions[i].ShortName);
 	}
 	printf("\t\t- unknown\n");

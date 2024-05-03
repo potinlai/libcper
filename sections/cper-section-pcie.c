@@ -7,14 +7,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <json.h>
-#include "b64.h"
+#include "libbase64.h"
 #include "../edk/Cper.h"
 #include "../cper-utils.h"
 #include "cper-section-pcie.h"
 
 //Converts a single PCIe CPER section into JSON IR.
-json_object *cper_section_pcie_to_ir(void *section,
-				     EFI_ERROR_SECTION_DESCRIPTOR *descriptor)
+json_object *cper_section_pcie_to_ir(void *section)
 {
 	EFI_PCIE_ERROR_DATA *pcie_error = (EFI_PCIE_ERROR_DATA *)section;
 	json_object *section_ir = json_object_new_object();
@@ -104,21 +103,38 @@ json_object *cper_section_pcie_to_ir(void *section,
 	//The PCIe capability structure provided here could either be PCIe 1.1 Capability Structure
 	//(36-byte, padded to 60 bytes) or PCIe 2.0 Capability Structure (60-byte). There does not seem
 	//to be a way to differentiate these, so this is left as a b64 dump.
-	char *encoded =
-		b64_encode((unsigned char *)pcie_error->Capability.PcieCap, 60);
-	json_object *capability = json_object_new_object();
-	json_object_object_add(capability, "data",
-			       json_object_new_string(encoded));
-	free(encoded);
-	json_object_object_add(section_ir, "capabilityStructure", capability);
+	char *encoded = malloc(2 * 60);
+	size_t encoded_len = 0;
+	if (!encoded) {
+		printf("Failed to allocate encode output buffer. \n");
+	} else {
+		base64_encode((const char *)pcie_error->Capability.PcieCap, 60,
+			      encoded, &encoded_len, 0);
+		json_object *capability = json_object_new_object();
+		json_object_object_add(capability, "data",
+				       json_object_new_string_len(encoded,
+								  encoded_len));
+		free(encoded);
+		json_object_object_add(section_ir, "capabilityStructure",
+				       capability);
+	}
 
 	//AER information.
 	json_object *aer_capability_ir = json_object_new_object();
-	encoded = b64_encode((unsigned char *)pcie_error->AerInfo.PcieAer, 96);
-	json_object_object_add(aer_capability_ir, "data",
-			       json_object_new_string(encoded));
-	free(encoded);
-	json_object_object_add(section_ir, "aerInfo", aer_capability_ir);
+	encoded = malloc(2 * 96);
+	encoded_len = 0;
+	if (!encoded) {
+		printf("Failed to allocate encode output buffer. \n");
+	} else {
+		base64_encode((const char *)pcie_error->AerInfo.PcieAer, 96,
+			      encoded, &encoded_len, 0);
+		json_object_object_add(aer_capability_ir, "data",
+				       json_object_new_string_len(encoded,
+								  encoded_len));
+		free(encoded);
+		json_object_object_add(section_ir, "aerInfo",
+				       aer_capability_ir);
+	}
 	return section_ir;
 }
 
@@ -190,18 +206,32 @@ void ir_section_pcie_to_cper(json_object *section, FILE *out)
 	json_object *capability =
 		json_object_object_get(section, "capabilityStructure");
 	json_object *encoded = json_object_object_get(capability, "data");
-	UINT8 *decoded = b64_decode(json_object_get_string(encoded),
-				    json_object_get_string_len(encoded));
-	memcpy(section_cper->Capability.PcieCap, decoded, 60);
-	free(decoded);
+	char *decoded = malloc(json_object_get_string_len(encoded));
+	size_t decoded_len = 0;
+	if (!decoded) {
+		printf("Failed to allocate decode output buffer. \n");
+	} else {
+		base64_decode(json_object_get_string(encoded),
+			      json_object_get_string_len(encoded), decoded,
+			      &decoded_len, 0);
+		memcpy(section_cper->Capability.PcieCap, decoded, decoded_len);
+		free(decoded);
+	}
 
 	//AER capability structure.
 	json_object *aer_info = json_object_object_get(section, "aerInfo");
 	encoded = json_object_object_get(aer_info, "data");
-	decoded = b64_decode(json_object_get_string(encoded),
-			     json_object_get_string_len(encoded));
-	memcpy(section_cper->AerInfo.PcieAer, decoded, 96);
-	free(decoded);
+	decoded = malloc(json_object_get_string_len(encoded));
+	decoded_len = 0;
+	if (!decoded) {
+		printf("Failed to allocate decode output buffer. \n");
+	} else {
+		base64_decode(json_object_get_string(encoded),
+			      json_object_get_string_len(encoded), decoded,
+			      &decoded_len, 0);
+		memcpy(section_cper->AerInfo.PcieAer, decoded, decoded_len);
+		free(decoded);
+	}
 
 	//Miscellaneous value fields.
 	section_cper->PortType = (UINT32)readable_pair_to_integer(

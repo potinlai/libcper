@@ -141,8 +141,9 @@ json_object *integer_to_readable_pair(UINT64 value, int len, int keys[],
 	//Search for human readable name, add.
 	const char *name = default_value;
 	for (int i = 0; i < len; i++) {
-		if (keys[i] == value)
+		if ((UINT64)keys[i] == value) {
 			name = values[i];
+		}
 	}
 
 	json_object_object_add(result, "name", json_object_new_string(name));
@@ -188,7 +189,7 @@ json_object *bitfield_to_ir(UINT64 bitfield, int num_fields,
 	for (int i = 0; i < num_fields; i++) {
 		json_object_object_add(result, names[i],
 				       json_object_new_boolean((bitfield >> i) &
-							       0b1));
+							       0x1));
 	}
 
 	return result;
@@ -200,8 +201,9 @@ UINT64 ir_to_bitfield(json_object *ir, int num_fields, const char *names[])
 	UINT64 result = 0x0;
 	for (int i = 0; i < num_fields; i++) {
 		if (json_object_get_boolean(
-			    json_object_object_get(ir, names[i])))
+			    json_object_object_get(ir, names[i]))) {
 			result |= (0x1 << i);
+		}
 	}
 
 	return result;
@@ -211,9 +213,10 @@ UINT64 ir_to_bitfield(json_object *ir, int num_fields, const char *names[])
 json_object *uint64_array_to_ir_array(UINT64 *array, int len)
 {
 	json_object *array_ir = json_object_new_array();
-	for (int i = 0; i < len; i++)
+	for (int i = 0; i < len; i++) {
 		json_object_array_add(array_ir,
 				      json_object_new_uint64(array[i]));
+	}
 	return array_ir;
 }
 
@@ -240,7 +243,7 @@ void timestamp_to_string(char *out, EFI_ERROR_TIME_STAMP *timestamp)
 {
 	sprintf(out, "%02hhu%02hhu-%02hhu-%02hhuT%02hhu:%02hhu:%02hhu.000",
 		bcd_to_int(timestamp->Century) %
-			100, //Cannot go to three digits.
+			100,			   //Cannot go to three digits.
 		bcd_to_int(timestamp->Year) % 100, //Cannot go to three digits.
 		bcd_to_int(timestamp->Month), bcd_to_int(timestamp->Day),
 		bcd_to_int(timestamp->Hours), bcd_to_int(timestamp->Minutes),
@@ -251,8 +254,9 @@ void timestamp_to_string(char *out, EFI_ERROR_TIME_STAMP *timestamp)
 void string_to_timestamp(EFI_ERROR_TIME_STAMP *out, const char *timestamp)
 {
 	//Ignore invalid timestamps.
-	if (timestamp == NULL)
+	if (timestamp == NULL) {
 		return;
+	}
 
 	sscanf(timestamp, "%2hhu%2hhu-%hhu-%hhuT%hhu:%hhu:%hhu.000",
 	       &out->Century, &out->Year, &out->Month, &out->Day, &out->Hours,
@@ -281,8 +285,9 @@ void guid_to_string(char *out, EFI_GUID *guid)
 void string_to_guid(EFI_GUID *out, const char *guid)
 {
 	//Ignore invalid GUIDs.
-	if (guid == NULL)
+	if (guid == NULL) {
 		return;
+	}
 
 	sscanf(guid,
 	       "%08x-%04hx-%04hx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx",
@@ -302,8 +307,9 @@ int guid_equal(EFI_GUID *a, EFI_GUID *b)
 
 	//Check Data4 array for equality.
 	for (int i = 0; i < 8; i++) {
-		if (a->Data4[i] != b->Data4[i])
+		if (a->Data4[i] != b->Data4[i]) {
 			return 0;
+		}
 	}
 
 	return 1;

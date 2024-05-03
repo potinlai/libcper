@@ -6,15 +6,13 @@
  **/
 #include <stdio.h>
 #include <json.h>
-#include "b64.h"
+#include "libbase64.h"
 #include "../edk/Cper.h"
 #include "../cper-utils.h"
 #include "cper-section-cxl-component.h"
 
 //Converts a single CXL component error CPER section into JSON IR.
-json_object *
-cper_section_cxl_component_to_ir(void *section,
-				 EFI_ERROR_SECTION_DESCRIPTOR *descriptor)
+json_object *cper_section_cxl_component_to_ir(void *section)
 {
 	EFI_CXL_COMPONENT_EVENT_HEADER *cxl_error =
 		(EFI_CXL_COMPONENT_EVENT_HEADER *)section;
@@ -60,16 +58,26 @@ cper_section_cxl_component_to_ir(void *section,
 			       json_object_new_uint64(cxl_error->DeviceSerial));
 
 	//The specification for this is defined within the CXL Specification Section 8.2.9.1.
-	unsigned char *cur_pos = (unsigned char *)(cxl_error + 1);
-	int remaining_len = cxl_error->Length - sizeof(cxl_error);
+	const char *cur_pos = (const char *)(cxl_error + 1);
+	int remaining_len =
+		cxl_error->Length - sizeof(EFI_CXL_COMPONENT_EVENT_HEADER);
 	if (remaining_len > 0) {
 		json_object *event_log = json_object_new_object();
-		char *encoded = b64_encode(cur_pos, remaining_len);
-		json_object_object_add(event_log, "data",
-				       json_object_new_string(encoded));
-		free(encoded);
-		json_object_object_add(section_ir, "cxlComponentEventLog",
-				       event_log);
+		char *encoded = malloc(2 * remaining_len);
+		size_t encoded_len = 0;
+		if (!encoded) {
+			printf("Failed to allocate encode output buffer. \n");
+		} else {
+			base64_encode((const char *)cur_pos, remaining_len,
+				      encoded, &encoded_len, 0);
+			json_object_object_add(event_log, "data",
+					       json_object_new_string_len(
+						       encoded, encoded_len));
+
+			free(encoded);
+			json_object_object_add(
+				section_ir, "cxlComponentEventLog", event_log);
+		}
 	}
 
 	return section_ir;
@@ -121,13 +129,18 @@ void ir_section_cxl_component_to_cper(json_object *section, FILE *out)
 	json_object *event_log =
 		json_object_object_get(section, "cxlComponentEventLog");
 	json_object *encoded = json_object_object_get(event_log, "data");
-	int log_length =
-		section_cper->Length - sizeof(EFI_CXL_COMPONENT_EVENT_HEADER);
-	char *decoded = b64_decode(json_object_get_string(encoded),
-				   json_object_get_string_len(encoded));
-	fwrite(decoded, log_length, 1, out);
-	fflush(out);
-	free(decoded);
+	char *decoded = malloc(json_object_get_string_len(encoded));
+	size_t decoded_len = 0;
+	if (!decoded) {
+		printf("Failed to allocate decode output buffer. \n");
+	} else {
+		base64_decode(json_object_get_string(encoded),
+			      json_object_get_string_len(encoded), decoded,
+			      &decoded_len, 0);
+		fwrite(decoded, decoded_len, 1, out);
+		fflush(out);
+		free(decoded);
+	}
 
 	free(section_cper);
 }

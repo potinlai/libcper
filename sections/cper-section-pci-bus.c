@@ -12,9 +12,7 @@
 #include "cper-section-pci-bus.h"
 
 //Converts a single PCI/PCI-X bus CPER section into JSON IR.
-json_object *
-cper_section_pci_bus_to_ir(void *section,
-			   EFI_ERROR_SECTION_DESCRIPTOR *descriptor)
+json_object *cper_section_pci_bus_to_ir(void *section)
 {
 	EFI_PCI_PCIX_BUS_ERROR_DATA *bus_error =
 		(EFI_PCI_PCIX_BUS_ERROR_DATA *)section;
@@ -46,7 +44,7 @@ cper_section_pci_bus_to_ir(void *section,
 
 	//Miscellaneous numeric fields.
 	UINT8 command_type = (bus_error->BusCommand >> 56) &
-			     0b1; //Byte 7, bit 0.
+			     0x1; //Byte 7, bit 0.
 	json_object_object_add(section_ir, "busAddress",
 			       json_object_new_uint64(bus_error->BusAddress));
 	json_object_object_add(section_ir, "busData",

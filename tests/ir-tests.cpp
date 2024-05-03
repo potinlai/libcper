@@ -4,7 +4,7 @@
  * Author: Lawrence.Tang@arm.com
  **/
 
-#include <ctype.h>
+#include <cctype>
 #include "gtest/gtest.h"
 #include "test-utils.hpp"
 extern "C" {
@@ -31,10 +31,11 @@ void cper_log_section_ir_test(const char *section_name, int single_section)
 
 	//Convert to IR, free resources.
 	json_object *ir;
-	if (single_section)
+	if (single_section) {
 		ir = cper_single_section_to_ir(record);
-	else
+	} else {
 		ir = cper_to_ir(record);
+	}
 	fclose(record);
 	free(buf);
 
@@ -42,6 +43,7 @@ void cper_log_section_ir_test(const char *section_name, int single_section)
 	char error_message[JSON_ERROR_MSG_MAX_LEN] = { 0 };
 	int valid = validate_schema_from_file("./specification/cper-json.json",
 					      ir, error_message);
+	json_object_put(ir);
 	ASSERT_TRUE(valid)
 		<< "IR validation test failed (single section mode = "
 		<< single_section << ") with message: " << error_message;
@@ -58,19 +60,21 @@ void cper_log_section_binary_test(const char *section_name, int single_section)
 
 	//Convert to IR.
 	json_object *ir;
-	if (single_section)
+	if (single_section) {
 		ir = cper_single_section_to_ir(record);
-	else
+	} else {
 		ir = cper_to_ir(record);
+	}
 
 	//Now convert back to binary, and get a stream out.
 	char *cper_buf;
 	size_t cper_buf_size;
 	FILE *stream = open_memstream(&cper_buf, &cper_buf_size);
-	if (single_section)
+	if (single_section) {
 		ir_single_section_to_cper(ir, stream);
-	else
+	} else {
 		ir_to_cper(ir, stream);
+	}
 	size_t cper_len = ftell(stream);
 	fclose(stream);
 
@@ -84,6 +88,7 @@ void cper_log_section_binary_test(const char *section_name, int single_section)
 	fclose(record);
 	free(buf);
 	free(cper_buf);
+	json_object_put(ir);
 }
 
 //Tests randomly generated CPER sections for IR validity of a given type, in both single section mode and full CPER log mode.
@@ -105,20 +110,23 @@ void cper_log_section_dual_binary_test(const char *section_name)
 */
 TEST(CompileTimeAssertions, TwoWayConversion)
 {
-	for (int i = 0; i < section_definitions_len; i++) {
+	for (size_t i = 0; i < section_definitions_len; i++) {
 		//If a conversion one way exists, a conversion the other way must exist.
 		std::string err =
 			"If a CPER conversion exists one way, there must be an equivalent method in reverse.";
-		if (section_definitions[i].ToCPER != NULL)
-			ASSERT_NE(section_definitions[i].ToIR, NULL) << err;
-		if (section_definitions[i].ToIR != NULL)
-			ASSERT_NE(section_definitions[i].ToCPER, NULL) << err;
+		if (section_definitions[i].ToCPER != NULL) {
+			ASSERT_NE(section_definitions[i].ToIR, nullptr) << err;
+		}
+		if (section_definitions[i].ToIR != NULL) {
+			ASSERT_NE(section_definitions[i].ToCPER, nullptr)
+				<< err;
+		}
 	}
 }
 
 TEST(CompileTimeAssertions, ShortcodeNoSpaces)
 {
-	for (int i = 0; i < generator_definitions_len; i++) {
+	for (size_t i = 0; i < generator_definitions_len; i++) {
 		for (int j = 0;
 		     generator_definitions[i].ShortName[j + 1] != '\0'; j++) {
 			ASSERT_FALSE(

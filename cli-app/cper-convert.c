@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <libgen.h>
-#include <limits.h>
+#include <linux/limits.h>
 #include <json.h>
 #include "../cper-parse.h"
 #include "../json-schema.h"
@@ -92,10 +92,11 @@ void cper_to_json(char *in_file, char *out_file, int is_single_section)
 
 	//Convert.
 	json_object *ir;
-	if (is_single_section)
+	if (is_single_section) {
 		ir = cper_single_section_to_ir(cper_file);
-	else
+	} else {
 		ir = cper_to_ir(cper_file);
+	}
 	fclose(cper_file);
 
 	//Output to string.
@@ -157,8 +158,9 @@ void json_to_cper(char *in_file, char *out_file, char *specification_file,
 		}
 
 		//Enable debug mode if indicated.
-		if (debug)
+		if (debug) {
 			validate_schema_debug_enable();
+		}
 
 		//Attempt to verify with the the specification.
 		char *error_message = malloc(JSON_ERROR_MSG_MAX_LEN);
@@ -166,8 +168,9 @@ void json_to_cper(char *in_file, char *out_file, char *specification_file,
 							error_message);
 
 		//Free specification path (if necessary).
-		if (using_default_spec_path)
+		if (using_default_spec_path) {
 			free(specification_file);
+		}
 
 		//If failed, early exit before conversion.
 		if (!success) {
@@ -189,11 +192,13 @@ void json_to_cper(char *in_file, char *out_file, char *specification_file,
 
 	//Detect the type of CPER (full log, single section) from the IR given.
 	//Run the converter accordingly.
-	if (json_object_object_get(ir, "header") != NULL)
+	if (json_object_object_get(ir, "header") != NULL) {
 		ir_to_cper(ir, cper_file);
-	else
+	} else {
 		ir_single_section_to_cper(ir, cper_file);
+	}
 	fclose(cper_file);
+	json_object_put(ir);
 }
 
 //Command for printing help information.

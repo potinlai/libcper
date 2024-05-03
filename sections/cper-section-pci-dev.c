@@ -11,9 +11,7 @@
 #include "cper-section-pci-dev.h"
 
 //Converts a single PCI/PCI-X device CPER section into JSON IR.
-json_object *
-cper_section_pci_dev_to_ir(void *section,
-			   EFI_ERROR_SECTION_DESCRIPTOR *descriptor)
+json_object *cper_section_pci_dev_to_ir(void *section)
 {
 	EFI_PCI_PCIX_DEVICE_ERROR_DATA *dev_error =
 		(EFI_PCI_PCIX_DEVICE_ERROR_DATA *)section;

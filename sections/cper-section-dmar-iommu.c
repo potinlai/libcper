@@ -7,15 +7,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <json.h>
-#include "b64.h"
+#include "libbase64.h"
 #include "../edk/Cper.h"
 #include "../cper-utils.h"
 #include "cper-section-dmar-iommu.h"
 
 //Converts a single IOMMU specific DMAr CPER section into JSON IR.
-json_object *
-cper_section_dmar_iommu_to_ir(void *section,
-			      EFI_ERROR_SECTION_DESCRIPTOR *descriptor)
+json_object *cper_section_dmar_iommu_to_ir(void *section)
 {
 	EFI_IOMMU_DMAR_ERROR_DATA *iommu_error =
 		(EFI_IOMMU_DMAR_ERROR_DATA *)section;
@@ -33,18 +31,32 @@ cper_section_dmar_iommu_to_ir(void *section,
 
 	//IOMMU event log entry.
 	//The format of these entries differ widely by the type of error.
-	char *encoded =
-		b64_encode((unsigned char *)iommu_error->EventLogEntry, 16);
-	json_object_object_add(section_ir, "eventLogEntry",
-			       json_object_new_string(encoded));
-	free(encoded);
+	char *encoded = malloc(2 * 16);
+	size_t encoded_len = 0;
+	if (!encoded) {
+		printf("Failed to allocate encode output buffer. \n");
+	} else {
+		base64_encode((const char *)iommu_error->EventLogEntry, 16,
+			      encoded, &encoded_len, 0);
+		json_object_object_add(section_ir, "eventLogEntry",
+				       json_object_new_string_len(encoded,
+								  encoded_len));
+		free(encoded);
+	}
 
 	//Device table entry (as base64).
-	encoded =
-		b64_encode((unsigned char *)iommu_error->DeviceTableEntry, 32);
-	json_object_object_add(section_ir, "deviceTableEntry",
-			       json_object_new_string(encoded));
-	free(encoded);
+	encoded = malloc(2 * 32);
+	encoded_len = 0;
+	if (!encoded) {
+		printf("Failed to allocate encode output buffer. \n");
+	} else {
+		base64_encode((const char *)iommu_error->DeviceTableEntry, 32,
+			      encoded, &encoded_len, 0);
+		json_object_object_add(section_ir, "deviceTableEntry",
+				       json_object_new_string_len(encoded,
+								  encoded_len));
+		free(encoded);
+	}
 
 	//Page table entries.
 	json_object_object_add(section_ir, "pageTableEntry_Level6",
@@ -80,17 +92,31 @@ void ir_section_dmar_iommu_to_cper(json_object *section, FILE *out)
 
 	//IOMMU event log entry.
 	json_object *encoded = json_object_object_get(section, "eventLogEntry");
-	UINT8 *decoded = b64_decode(json_object_get_string(encoded),
-				    json_object_get_string_len(encoded));
-	memcpy(section_cper->EventLogEntry, decoded, 16);
-	free(decoded);
+	char *decoded = malloc(json_object_get_string_len(encoded));
+	size_t decoded_len = 0;
+	if (!decoded) {
+		printf("Failed to allocate decode output buffer. \n");
+	} else {
+		base64_decode(json_object_get_string(encoded),
+			      json_object_get_string_len(encoded), decoded,
+			      &decoded_len, 0);
+		memcpy(section_cper->EventLogEntry, decoded, decoded_len);
+		free(decoded);
+	}
 
 	//Device table entry.
 	encoded = json_object_object_get(section, "deviceTableEntry");
-	decoded = b64_decode(json_object_get_string(encoded),
-			     json_object_get_string_len(encoded));
-	memcpy(section_cper->DeviceTableEntry, decoded, 32);
-	free(decoded);
+	decoded = malloc(json_object_get_string_len(encoded));
+	decoded_len = 0;
+	if (!decoded) {
+		printf("Failed to allocate decode output buffer. \n");
+	} else {
+		base64_decode(json_object_get_string(encoded),
+			      json_object_get_string_len(encoded), decoded,
+			      &decoded_len, 0);
+		memcpy(section_cper->DeviceTableEntry, decoded, decoded_len);
+		free(decoded);
+	}
 
 	//Page table entries.
 	section_cper->PteL1 = json_object_get_uint64(

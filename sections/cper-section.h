@@ -8,10 +8,10 @@
 
 //Definition structure for a single CPER section type.
 typedef struct {
-    EFI_GUID* Guid;
-    const char* ReadableName;
-    json_object* (*ToIR)(void*, EFI_ERROR_SECTION_DESCRIPTOR*);
-    void (*ToCPER)(json_object*, FILE*);
+	EFI_GUID *Guid;
+	const char *ReadableName;
+	json_object *(*ToIR)(void *);
+	void (*ToCPER)(json_object *, FILE *);
 } CPER_SECTION_DEFINITION;
 
 extern CPER_SECTION_DEFINITION section_definitions[];

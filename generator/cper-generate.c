@@ -57,18 +57,20 @@ void generate_cper_record(char **types, UINT16 num_sections, FILE *out)
 	header->TimeStamp.Seconds = int_to_bcd(rand() % 60);
 
 	//Turn all validation bits on.
-	header->ValidationBits = 0b11;
+	header->ValidationBits = 0x3;
 
 	//Generate the section descriptors given the number of sections.
 	EFI_ERROR_SECTION_DESCRIPTOR *section_descriptors[num_sections];
-	for (int i = 0; i < num_sections; i++)
+	for (int i = 0; i < num_sections; i++) {
 		section_descriptors[i] = generate_section_descriptor(
 			types[i], section_lengths, i, num_sections);
+	}
 
 	//Calculate total length of structure, set in header.
 	size_t total_len = sizeof(EFI_COMMON_ERROR_RECORD_HEADER);
-	for (int i = 0; i < num_sections; i++)
+	for (int i = 0; i < num_sections; i++) {
 		total_len += section_lengths[i];
+	}
 	total_len += num_sections * sizeof(EFI_ERROR_SECTION_DESCRIPTOR);
 	header->RecordLength = (UINT32)total_len;
 
@@ -93,7 +95,7 @@ void generate_cper_record(char **types, UINT16 num_sections, FILE *out)
 void generate_single_section_record(char *type, FILE *out)
 {
 	//Generate a section.
-	void *section;
+	void *section = NULL;
 	size_t section_len = generate_section(&section, type);
 
 	//Generate a descriptor, correct the offset.
@@ -110,6 +112,7 @@ void generate_single_section_record(char *type, FILE *out)
 
 	//Free remaining resources.
 	free(section_descriptor);
+	free(section);
 }
 
 //Generates a single section descriptor for a section with the given properties.
@@ -127,7 +130,7 @@ EFI_ERROR_SECTION_DESCRIPTOR *generate_section_descriptor(char *type,
 	descriptor->SectionFlags &= 0xFF;
 
 	//Validation bits all set to 'on'.
-	descriptor->SecValidMask = 0b11;
+	descriptor->SecValidMask = 0x3;
 
 	//Set severity.
 	descriptor->Severity = rand() % 4;
@@ -137,17 +140,20 @@ EFI_ERROR_SECTION_DESCRIPTOR *generate_section_descriptor(char *type,
 	descriptor->SectionOffset =
 		sizeof(EFI_COMMON_ERROR_RECORD_HEADER) +
 		(num_sections * sizeof(EFI_ERROR_SECTION_DESCRIPTOR));
-	for (int i = 0; i < index; i++)
+	for (int i = 0; i < index; i++) {
 		descriptor->SectionOffset += lengths[i];
+	}
 
 	//Ensure the FRU text is not null terminated early.
 	for (int i = 0; i < 20; i++) {
-		if (descriptor->FruString[i] == 0x0)
+		if (descriptor->FruString[i] == 0x0) {
 			descriptor->FruString[i] = rand() % 127 + 1;
+		}
 
 		//Null terminate last byte.
-		if (i == 19)
+		if (i == 19) {
 			descriptor->FruString[i] = 0x0;
+		}
 	}
 
 	//If section type is not "unknown", set section type GUID based on type name.
@@ -156,7 +162,7 @@ EFI_ERROR_SECTION_DESCRIPTOR *generate_section_descriptor(char *type,
 		section_guid_found = 1;
 	} else {
 		//Find the appropriate GUID for this section name.
-		for (int i = 0; i < generator_definitions_len; i++) {
+		for (size_t i = 0; i < generator_definitions_len; i++) {
 			if (strcmp(type, generator_definitions[i].ShortName) ==
 			    0) {
 				memcpy(&descriptor->SectionType,
@@ -192,7 +198,7 @@ size_t generate_section(void **location, char *type)
 		section_generated = 1;
 	} else {
 		//Function defined section, switch on the type, generate accordingly.
-		for (int i = 0; i < generator_definitions_len; i++) {
+		for (size_t i = 0; i < generator_definitions_len; i++) {
 			if (strcmp(type, generator_definitions[i].ShortName) ==
 			    0) {
 				length = generator_definitions[i].Generate(

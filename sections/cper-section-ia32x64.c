@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 #include <json.h>
-#include "b64.h"
+#include "libbase64.h"
 #include "../edk/Cper.h"
 #include "../cper-utils.h"
 #include "cper-section-ia32x64.h"
@@ -43,9 +43,7 @@ void ir_ia32x64_x64_registers_to_cper(json_object *registers, FILE *out);
 //////////////////
 
 //Converts the IA32/x64 error section described in the given descriptor into intermediate format.
-json_object *
-cper_section_ia32x64_to_ir(void *section,
-			   EFI_ERROR_SECTION_DESCRIPTOR *descriptor)
+json_object *cper_section_ia32x64_to_ir(void *section)
 {
 	EFI_IA32_X64_PROCESSOR_ERROR_RECORD *record =
 		(EFI_IA32_X64_PROCESSOR_ERROR_RECORD *)section;
@@ -55,14 +53,14 @@ cper_section_ia32x64_to_ir(void *section,
 	json_object *validationBits = json_object_new_object();
 	json_object_object_add(validationBits, "localAPICIDValid",
 			       json_object_new_boolean(record->ValidFields &
-						       0b1));
+						       0x1));
 	json_object_object_add(
 		validationBits, "cpuIDInfoValid",
-		json_object_new_boolean((record->ValidFields >> 1) & 0b1));
-	int processor_error_info_num = (record->ValidFields >> 2) & 0b111111;
+		json_object_new_boolean((record->ValidFields >> 1) & 0x1));
+	int processor_error_info_num = (record->ValidFields >> 2) & 0x3F;
 	json_object_object_add(validationBits, "processorErrorInfoNum",
 			       json_object_new_int(processor_error_info_num));
-	int processor_context_info_num = (record->ValidFields >> 8) & 0b111111;
+	int processor_context_info_num = (record->ValidFields >> 8) & 0x3F;
 	json_object_object_add(validationBits, "processorContextInfoNum",
 			       json_object_new_int(processor_context_info_num));
 	json_object_object_add(record_ir, "validationBits", validationBits);
@@ -133,18 +131,20 @@ json_object *cper_ia32x64_processor_error_info_to_ir(
 	//Get the error structure type as a readable string.
 	const char *readable_type = "Unknown";
 	if (guid_equal(&error_info->ErrorType,
-		       &gEfiIa32x64ErrorTypeCacheCheckGuid))
+		       &gEfiIa32x64ErrorTypeCacheCheckGuid)) {
 		readable_type = "Cache Check Error";
-	else if (guid_equal(&error_info->ErrorType,
-			    &gEfiIa32x64ErrorTypeTlbCheckGuid))
+	} else if (guid_equal(&error_info->ErrorType,
+			      &gEfiIa32x64ErrorTypeTlbCheckGuid)) {
 		readable_type = "TLB Check Error";
-	else if (guid_equal(&error_info->ErrorType,
-			    &gEfiIa32x64ErrorTypeBusCheckGuid))
+	} else if (guid_equal(&error_info->ErrorType,
+			      &gEfiIa32x64ErrorTypeBusCheckGuid)) {
 		readable_type = "Bus Check Error";
-	else if (guid_equal(&error_info->ErrorType,
-			    &gEfiIa32x64ErrorTypeMsCheckGuid))
+	} else if (guid_equal(&error_info->ErrorType,
+			      &gEfiIa32x64ErrorTypeMsCheckGuid)) {
 		readable_type = "MS Check Error";
-	json_object_object_add(type, "name", json_object_new_string(readable_type));
+	}
+	json_object_object_add(type, "name",
+			       json_object_new_string(readable_type));
 	json_object_object_add(error_info_ir, "type", type);
 
 	//Validation bits.
@@ -390,12 +390,21 @@ json_object *cper_ia32x64_processor_context_info_to_ir(
 		//No parseable data, just dump as base64 and shift the head to the next item.
 		*cur_pos = (void *)(context_info + 1);
 
-		char *encoded = b64_encode((unsigned char *)*cur_pos,
-					   context_info->ArraySize);
-		register_array = json_object_new_object();
-		json_object_object_add(register_array, "data",
-				       json_object_new_string(encoded));
-		free(encoded);
+		char *encoded = malloc(2 * context_info->ArraySize);
+		size_t encoded_len = 0;
+		if (!encoded) {
+			printf("Failed to allocate encode output buffer. \n");
+		} else {
+			base64_encode((const char *)*cur_pos,
+				      context_info->ArraySize, encoded,
+				      &encoded_len, 0);
+
+			register_array = json_object_new_object();
+			json_object_object_add(register_array, "data",
+					       json_object_new_string_len(
+						       encoded, encoded_len));
+			free(encoded);
+		}
 
 		*cur_pos =
 			(void *)(((char *)*cur_pos) + context_info->ArraySize);
@@ -574,11 +583,11 @@ void ir_section_ia32x64_to_cper(json_object *section, FILE *out)
 	int proc_error_info_num =
 		json_object_get_int(json_object_object_get(
 			validation, "processorErrorInfoNum")) &
-		0b111111;
+		0x3F;
 	int proc_ctx_info_num =
 		json_object_get_int(json_object_object_get(
 			validation, "processorContextInfoNum")) &
-		0b111111;
+		0x3F;
 	section_cper->ValidFields |= proc_error_info_num << 2;
 	section_cper->ValidFields |= proc_ctx_info_num << 8;
 
@@ -610,12 +619,14 @@ void ir_section_ia32x64_to_cper(json_object *section, FILE *out)
 		json_object_object_get(section, "processorErrorInfo");
 	json_object *context_info =
 		json_object_object_get(section, "processorContextInfo");
-	for (int i = 0; i < proc_error_info_num; i++)
+	for (int i = 0; i < proc_error_info_num; i++) {
 		ir_ia32x64_error_info_to_cper(
 			json_object_array_get_idx(error_info, i), out);
-	for (int i = 0; i < proc_ctx_info_num; i++)
+	}
+	for (int i = 0; i < proc_ctx_info_num; i++) {
 		ir_ia32x64_context_info_to_cper(
 			json_object_array_get_idx(context_info, i), out);
+	}
 }
 
 //Converts a single CPER-JSON IA32/x64 error information structure into CPER binary, outputting to the
@@ -649,17 +660,18 @@ void ir_ia32x64_error_info_to_cper(json_object *error_info, FILE *out)
 			(EFI_IA32_X64_CACHE_CHECK_INFO *)&error_info_cper
 				->CheckInfo);
 	} else if (guid_equal(&error_info_cper->ErrorType,
-			      &gEfiIa32x64ErrorTypeBusCheckGuid))
+			      &gEfiIa32x64ErrorTypeBusCheckGuid)) {
 		ir_ia32x64_bus_check_error_to_cper(
 			check_info,
 			(EFI_IA32_X64_BUS_CHECK_INFO *)&error_info_cper
 				->CheckInfo);
-	else if (guid_equal(&error_info_cper->ErrorType,
-			    &gEfiIa32x64ErrorTypeMsCheckGuid))
+	} else if (guid_equal(&error_info_cper->ErrorType,
+			      &gEfiIa32x64ErrorTypeMsCheckGuid)) {
 		ir_ia32x64_ms_check_error_to_cper(
 			check_info,
 			(EFI_IA32_X64_MS_CHECK_INFO *)&error_info_cper
 				->CheckInfo);
+	}
 
 	//Miscellaneous numeric fields.
 	error_info_cper->TargetId = json_object_get_uint64(
@@ -807,10 +819,18 @@ void ir_ia32x64_context_info_to_cper(json_object *context_info, FILE *out)
 		//Unknown/structure is not defined.
 		json_object *encoded =
 			json_object_object_get(register_array, "data");
-		char *decoded = b64_decode(json_object_get_string(encoded),
-					   json_object_get_string_len(encoded));
-		fwrite(decoded, context_info_cper->ArraySize, 1, out);
-		fflush(out);
+		char *decoded = malloc(json_object_get_string_len(encoded));
+		size_t decoded_len = 0;
+		if (!decoded) {
+			printf("Failed to allocate decode output buffer. \n");
+		} else {
+			base64_decode(json_object_get_string(encoded),
+				      json_object_get_string_len(encoded),
+				      decoded, &decoded_len, 0);
+			fwrite(decoded, decoded_len, 1, out);
+			fflush(out);
+			free(decoded);
+		}
 	}
 
 	//Free remaining resources.

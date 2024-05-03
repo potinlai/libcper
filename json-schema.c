@@ -14,6 +14,7 @@
 #include <json.h>
 #include "json-schema.h"
 #include "edk/BaseTypes.h"
+#include <linux/limits.h>
 
 //Field definitions.
 int json_validator_debug = 0;
@@ -57,6 +58,7 @@ int validate_schema_from_file(const char *schema_file, json_object *object,
 
 	//Free memory from directory call.
 	free(schema_file_copy);
+	json_object_put(schema_ir);
 
 	return result;
 }
@@ -69,8 +71,8 @@ int validate_schema(json_object *schema, char *schema_directory,
 {
 	//Check that the schema version is the same as this validator.
 	json_object *schema_ver = json_object_object_get(schema, "$schema");
-	if (schema_ver == NULL ||
-	    strcmp(json_object_get_string(schema_ver), JSON_SCHEMA_VERSION)) {
+	if (schema_ver == NULL || strcmp(json_object_get_string(schema_ver),
+					 JSON_SCHEMA_VERSION) != 0) {
 		log_validator_error(
 			error_message,
 			"Provided schema is not of the same version that is referenced by this validator, or is not a schema.");
@@ -82,11 +84,17 @@ int validate_schema(json_object *schema, char *schema_directory,
 	if (getcwd(original_cwd, PATH_MAX) == NULL) {
 		log_validator_error(error_message,
 				    "Failed fetching the current directory.");
+		if (original_cwd) {
+			free(original_cwd);
+		}
 		return 0;
 	}
 	if (chdir(schema_directory)) {
 		log_validator_error(error_message,
 				    "Failed to chdir into schema directory.");
+		if (original_cwd) {
+			free(original_cwd);
+		}
 		return 0;
 	}
 
@@ -94,12 +102,17 @@ int validate_schema(json_object *schema, char *schema_directory,
 	int result = validate_field("parent", schema, object, error_message);
 
 	//Change back to original CWD.
-	chdir(original_cwd);
+	if (chdir(original_cwd)) {
+		log_validator_error(error_message,
+				    "Failed to chdir into original directory.");
+	}
+
 	free(original_cwd);
 
-	if (result)
+	if (result) {
 		log_validator_debug(
 			"Successfully validated the provided object against schema.");
+	}
 	return result;
 }
 
@@ -119,14 +132,15 @@ int validate_field(const char *field_name, json_object *schema,
 
 		//Attempt to load. If loading fails, report error.
 		const char *ref_path = json_object_get_string(ref_schema);
-		schema = json_object_from_file(ref_path);
-		if (schema == NULL) {
+		json_object *tmp = json_object_from_file(ref_path);
+		if (tmp == NULL) {
 			log_validator_error(
 				error_message,
 				"Failed to open referenced schema file '%s'.",
 				ref_path);
 			return -1;
 		}
+		json_object_put(tmp);
 
 		log_validator_debug("loaded schema path '%s' for field '%s'.",
 				    ref_path, field_name);
@@ -190,10 +204,12 @@ int validate_field(const char *field_name, json_object *schema,
 			//Validate field with schema.
 			validated = validate_field(field_name, one_of_option,
 						   object, error_message);
-			if (validated == -1)
+			if (validated == -1) {
 				return -1;
-			if (validated)
+			}
+			if (validated) {
 				break;
+			}
 		}
 
 		//Return if failed all checks.
@@ -240,7 +256,7 @@ int validate_integer(const char *field_name, json_object *schema,
 	if (min_value != NULL &&
 	    json_object_is_type(min_value, json_type_int)) {
 		int min_value_int = json_object_get_int(min_value);
-		if (json_object_get_uint64(object) < min_value_int) {
+		if (json_object_get_uint64(object) < (uint64_t)min_value_int) {
 			log_validator_error(
 				error_message,
 				"Failed to validate integer field '%s'. Value was below minimum of %d.",
@@ -254,7 +270,7 @@ int validate_integer(const char *field_name, json_object *schema,
 	if (max_value != NULL &&
 	    json_object_is_type(max_value, json_type_int)) {
 		int max_value_int = json_object_get_int(max_value);
-		if (json_object_get_uint64(object) > max_value_int) {
+		if (json_object_get_uint64(object) > (uint64_t)max_value_int) {
 			log_validator_error(
 				error_message,
 				"Failed to validate integer field '%s'. Value was above maximum of %d.",
@@ -271,6 +287,11 @@ int validate_string(const char *field_name, json_object *schema,
 		    json_object *object, char *error_message)
 {
 	//todo: if there is a "pattern" field, verify the string with RegEx.
+	(void)field_name;
+	(void)schema;
+	(void)object;
+	(void)error_message;
+
 	return 1;
 }
 
@@ -320,9 +341,10 @@ int validate_object(const char *field_name, json_object *schema,
 		json_object_object_get(schema, "additionalProperties");
 	int additional_properties_allowed = 0;
 	if (additional_properties != NULL &&
-	    json_object_get_type(additional_properties) == json_type_boolean)
+	    json_object_get_type(additional_properties) == json_type_boolean) {
 		additional_properties_allowed =
 			json_object_get_boolean(additional_properties);
+	}
 
 	//Run through the "properties" object and validate each of those in turn.
 	json_object *properties = json_object_object_get(schema, "properties");
@@ -333,21 +355,26 @@ int validate_object(const char *field_name, json_object *schema,
 			//If the given property name does not exist on the target object, ignore and continue next.
 			json_object *object_prop =
 				json_object_object_get(object, key);
-			if (object_prop == NULL)
+			if (object_prop == NULL) {
 				continue;
+			}
 
 			//Validate against the schema.
 			if (!validate_field(key, value, object_prop,
-					    error_message))
+					    error_message)) {
 				return 0;
+			}
 		}
 
 		//If additional properties are banned, validate that no additional properties exist.
 		if (!additional_properties_allowed) {
 			json_object_object_foreach(object, key, value)
 			{
+				//Avoid compiler warning
+				(void)value;
+
 				//If the given property name does not exist on the schema object, fail validation.
-				json_object *schema_prop =
+				const json_object *schema_prop =
 					json_object_object_get(properties, key);
 				if (schema_prop == NULL) {
 					log_validator_error(
@@ -376,8 +403,9 @@ int validate_array(const char *field_name, json_object *schema,
 			if (!validate_field(field_name, items_schema,
 					    json_object_array_get_idx(object,
 								      i),
-					    error_message))
+					    error_message)) {
 				return 0;
+			}
 		}
 	}
 

@@ -20,8 +20,9 @@ size_t generate_random_section(void **location, size_t size)
 UINT8 *generate_random_bytes(size_t size)
 {
 	UINT8 *bytes = malloc(size);
-	for (size_t i = 0; i < size; i++)
+	for (size_t i = 0; i < size; i++) {
 		bytes[i] = rand();
+	}
 	return bytes;
 }
 
@@ -31,7 +32,7 @@ void create_valid_error_section(UINT8 *start)
 {
 	//Fix reserved bits.
 	UINT64 *error_section = (UINT64 *)start;
-	*error_section &= ~0xFF; //Reserved bits 0-7.
+	*error_section &= ~0xFF;    //Reserved bits 0-7.
 	*error_section &= 0x7FFFFF; //Reserved bits 23-63
 
 	//Ensure error type has a valid value.

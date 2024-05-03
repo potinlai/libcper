@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <json.h>
-#include "b64.h"
+#include "libbase64.h"
 #include "edk/Cper.h"
 #include "cper-parse.h"
 #include "cper-utils.h"
@@ -53,18 +53,22 @@ void ir_to_cper(json_object *ir, FILE *out)
 	//Run through each section in turn.
 	json_object *sections = json_object_object_get(ir, "sections");
 	int amt_sections = json_object_array_length(sections);
-	for (int i = 0; i < amt_sections; i++) {
-		//Get the section itself from the IR.
-		json_object *section = json_object_array_get_idx(sections, i);
+	if (amt_sections == amt_descriptors) {
+		for (int i = 0; i < amt_sections; i++) {
+			//Get the section itself from the IR.
+			json_object *section =
+				json_object_array_get_idx(sections, i);
 
-		//Convert.
-		ir_section_to_cper(section, descriptors[i], out);
+			//Convert.
+			ir_section_to_cper(section, descriptors[i], out);
+		}
 	}
 
 	//Free all remaining resources.
 	free(header);
-	for (int i = 0; i < amt_descriptors; i++)
+	for (int i = 0; i < amt_descriptors; i++) {
 		free(descriptors[i]);
+	}
 }
 
 //Converts a CPER-JSON IR header to a CPER header structure.
@@ -117,12 +121,14 @@ void ir_header_to_cper(json_object *header_ir,
 		json_object_object_get(header_ir, "platformID");
 	json_object *partition_id =
 		json_object_object_get(header_ir, "partitionID");
-	if (platform_id != NULL)
+	if (platform_id != NULL) {
 		string_to_guid(&header->PlatformID,
 			       json_object_get_string(platform_id));
-	if (partition_id != NULL)
+	}
+	if (partition_id != NULL) {
 		string_to_guid(&header->PartitionID,
 			       json_object_get_string(partition_id));
+	}
 	string_to_guid(&header->CreatorID,
 		       json_object_get_string(
 			       json_object_object_get(header_ir, "creatorID")));
@@ -152,7 +158,7 @@ void ir_section_to_cper(json_object *section,
 {
 	//Find the correct section type, and parse.
 	int section_converted = 0;
-	for (int i = 0; i < section_definitions_len; i++) {
+	for (size_t i = 0; i < section_definitions_len; i++) {
 		if (guid_equal(section_definitions[i].Guid,
 			       &descriptor->SectionType) &&
 		    section_definitions[i].ToCPER != NULL) {
@@ -165,12 +171,18 @@ void ir_section_to_cper(json_object *section,
 	//If unknown GUID, so read as a base64 unknown section.
 	if (!section_converted) {
 		json_object *encoded = json_object_object_get(section, "data");
-		UINT8 *decoded =
-			b64_decode(json_object_get_string(encoded),
-				   json_object_get_string_len(encoded));
-		fwrite(decoded, descriptor->SectionLength, 1, out);
-		fflush(out);
-		free(decoded);
+		char *decoded = malloc(json_object_get_string_len(encoded));
+		size_t decoded_len = 0;
+		if (!decoded) {
+			printf("Failed to allocate decode output buffer. \n");
+		} else {
+			base64_decode(json_object_get_string(encoded),
+				      json_object_get_string_len(encoded),
+				      decoded, &decoded_len, 0);
+			fwrite(decoded, decoded_len, 1, out);
+			fflush(out);
+			free(decoded);
+		}
 	}
 }
 
@@ -211,9 +223,10 @@ void ir_section_descriptor_to_cper(json_object *section_descriptor_ir,
 	//FRU ID, if present.
 	json_object *fru_id =
 		json_object_object_get(section_descriptor_ir, "fruID");
-	if (fru_id != NULL)
+	if (fru_id != NULL) {
 		string_to_guid(&descriptor->FruId,
 			       json_object_get_string(fru_id));
+	}
 
 	//Severity code.
 	json_object *severity =
@@ -224,9 +237,10 @@ void ir_section_descriptor_to_cper(json_object *section_descriptor_ir,
 	//FRU text, if present.
 	json_object *fru_text =
 		json_object_object_get(section_descriptor_ir, "fruText");
-	if (fru_text != NULL)
+	if (fru_text != NULL) {
 		strncpy(descriptor->FruString, json_object_get_string(fru_text),
 			20);
+	}
 }
 
 //Converts IR for a given single section format CPER record into CPER binary.

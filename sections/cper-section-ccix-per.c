@@ -7,15 +7,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <json.h>
-#include "b64.h"
+#include "libbase64.h"
 #include "../edk/Cper.h"
 #include "../cper-utils.h"
 #include "cper-section-ccix-per.h"
 
 //Converts a single CCIX PER log CPER section into JSON IR.
-json_object *
-cper_section_ccix_per_to_ir(void *section,
-			    EFI_ERROR_SECTION_DESCRIPTOR *descriptor)
+json_object *cper_section_ccix_per_to_ir(void *section)
 {
 	EFI_CCIX_PER_LOG_DATA *ccix_error = (EFI_CCIX_PER_LOG_DATA *)section;
 	json_object *section_ir = json_object_new_object();
@@ -37,14 +35,22 @@ cper_section_ccix_per_to_ir(void *section,
 
 	//CCIX PER Log.
 	//This is formatted as described in Section 7.3.2 of CCIX Base Specification (Rev 1.0).
-	unsigned char *cur_pos = (unsigned char *)(ccix_error + 1);
+	const char *cur_pos = (const char *)(ccix_error + 1);
 	int remaining_length =
 		ccix_error->Length - sizeof(EFI_CCIX_PER_LOG_DATA);
 	if (remaining_length > 0) {
-		char *encoded = b64_encode(cur_pos, remaining_length);
-		json_object_object_add(section_ir, "ccixPERLog",
-				       json_object_new_string(encoded));
-		free(encoded);
+		char *encoded = malloc(2 * remaining_length);
+		size_t encoded_len = 0;
+		if (!encoded) {
+			printf("Failed to allocate encode output buffer. \n");
+		} else {
+			base64_encode((const char *)cur_pos, remaining_length,
+				      encoded, &encoded_len, 0);
+			json_object_object_add(section_ir, "ccixPERLog",
+					       json_object_new_string_len(
+						       encoded, encoded_len));
+			free(encoded);
+		}
 	}
 
 	return section_ir;
@@ -77,11 +83,17 @@ void ir_section_ccix_per_to_cper(json_object *section, FILE *out)
 
 	//Write CCIX PER log itself to stream.
 	json_object *encoded = json_object_object_get(section, "ccixPERLog");
-	UINT8 *decoded = b64_decode(json_object_get_string(encoded),
-				    json_object_get_string_len(encoded));
-	fwrite(decoded, section_cper->Length - sizeof(EFI_CCIX_PER_LOG_DATA), 1,
-	       out);
-	fflush(out);
+	char *decoded = malloc(json_object_get_string_len(encoded));
+	size_t decoded_len = 0;
+	if (!decoded) {
+		printf("Failed to allocate decode output buffer. \n");
+	} else {
+		base64_decode(json_object_get_string(encoded),
+			      json_object_get_string_len(encoded), decoded,
+			      &decoded_len, 0);
+		fwrite(decoded, decoded_len, 1, out);
+		fflush(out);
+	}
 
 	//Free resources.
 	free(decoded);

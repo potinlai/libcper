@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 #include <json.h>
-#include "b64.h"
+#include "libbase64.h"
 #include "../edk/Cper.h"
 #include "../cper-utils.h"
 #include "cper-section-arm.h"
@@ -40,13 +40,10 @@ void ir_arm_aarch64_el1_to_cper(json_object *registers, FILE *out);
 void ir_arm_aarch64_el2_to_cper(json_object *registers, FILE *out);
 void ir_arm_aarch64_el3_to_cper(json_object *registers, FILE *out);
 void ir_arm_misc_registers_to_cper(json_object *registers, FILE *out);
-void ir_arm_unknown_register_to_cper(json_object *registers,
-				     EFI_ARM_CONTEXT_INFORMATION_HEADER *header,
-				     FILE *out);
+void ir_arm_unknown_register_to_cper(json_object *registers, FILE *out);
 
 //Converts the given processor-generic CPER section into JSON IR.
-json_object *cper_section_arm_to_ir(void *section,
-				    EFI_ERROR_SECTION_DESCRIPTOR *descriptor)
+json_object *cper_section_arm_to_ir(void *section)
 {
 	EFI_ARM_ERROR_RECORD *record = (EFI_ARM_ERROR_RECORD *)section;
 	json_object *section_ir = json_object_new_object();
@@ -71,8 +68,8 @@ json_object *cper_section_arm_to_ir(void *section,
 	json_object_object_add(
 		error_affinity, "type",
 		json_object_new_string(record->ErrorAffinityLevel < 4 ?
-						     "Vendor Defined" :
-						     "Reserved"));
+					       "Vendor Defined" :
+					       "Reserved"));
 	json_object_object_add(section_ir, "errorAffinity", error_affinity);
 
 	//Processor ID (MPIDR_EL1) and chip ID (MIDR_EL1).
@@ -84,7 +81,7 @@ json_object *cper_section_arm_to_ir(void *section,
 	//Whether the processor is running, and the state of it if so.
 	json_object_object_add(section_ir, "running",
 			       json_object_new_boolean(record->RunningState &
-						       0b1));
+						       0x1));
 	if (!(record->RunningState >> 31)) {
 		//Bit 32 of running state is on, so PSCI state information is included.
 		//This can't be made human readable, as it is unknown whether this will be the pre-PSCI 1.0 format
@@ -107,29 +104,38 @@ json_object *cper_section_arm_to_ir(void *section,
 
 	//Processor context structures.
 	//The current position is moved within the processing, as it is a dynamic size structure.
-	void *cur_pos = (void *)cur_error;
+	uint8_t *cur_pos = (uint8_t *)cur_error;
 	json_object *context_info_array = json_object_new_array();
 	for (int i = 0; i < record->ContextInfoNum; i++) {
 		EFI_ARM_CONTEXT_INFORMATION_HEADER *header =
 			(EFI_ARM_CONTEXT_INFORMATION_HEADER *)cur_pos;
 		json_object *processor_context =
-			cper_arm_processor_context_to_ir(header, &cur_pos);
+			cper_arm_processor_context_to_ir(header,
+							 (void **)&cur_pos);
 		json_object_array_add(context_info_array, processor_context);
 	}
 	json_object_object_add(section_ir, "contextInfo", context_info_array);
 
 	//Is there any vendor-specific information following?
-	if (cur_pos < section + record->SectionLength) {
+	if (cur_pos < (uint8_t *)section + record->SectionLength) {
 		json_object *vendor_specific = json_object_new_object();
-		char *encoded =
-			b64_encode((unsigned char *)cur_pos,
-				   section + record->SectionLength - cur_pos);
-		json_object_object_add(vendor_specific, "data",
-				       json_object_new_string(encoded));
-		free(encoded);
+		size_t input_size =
+			(uint8_t *)section + record->SectionLength - cur_pos;
+		char *encoded = malloc(2 * input_size);
+		size_t encoded_len = 0;
+		if (!encoded) {
+			printf("Failed to allocate encode output buffer. \n");
+		} else {
+			base64_encode((const char *)cur_pos, input_size,
+				      encoded, &encoded_len, 0);
+			json_object_object_add(vendor_specific, "data",
+					       json_object_new_string_len(
+						       encoded, encoded_len));
+			free(encoded);
 
-		json_object_object_add(section_ir, "vendorSpecificInfo",
-				       vendor_specific);
+			json_object_object_add(section_ir, "vendorSpecificInfo",
+					       vendor_specific);
+		}
 	}
 
 	return section_ir;
@@ -166,8 +172,8 @@ cper_arm_error_info_to_ir(EFI_ARM_ERROR_INFORMATION_ENTRY *error_info)
 	json_object_object_add(
 		multiple_error, "type",
 		json_object_new_string(error_info->MultipleError < 1 ?
-						     "Single Error" :
-						     "Multiple Errors"));
+					       "Single Error" :
+					       "Multiple Errors"));
 	json_object_object_add(error_info_ir, "multipleError", multiple_error);
 
 	//Flags.
@@ -179,7 +185,7 @@ cper_arm_error_info_to_ir(EFI_ARM_ERROR_INFORMATION_ENTRY *error_info)
 	json_object *error_subinfo = NULL;
 	switch (error_info->Type) {
 	case ARM_ERROR_INFORMATION_TYPE_CACHE: //Cache
-	case ARM_ERROR_INFORMATION_TYPE_TLB: //TLB
+	case ARM_ERROR_INFORMATION_TYPE_TLB:   //TLB
 		error_subinfo = cper_arm_cache_tlb_error_to_ir(
 			(EFI_ARM_CACHE_ERROR_STRUCTURE *)&error_info
 				->ErrorInformation,
@@ -340,7 +346,7 @@ json_object *cper_arm_bus_error_to_ir(EFI_ARM_BUS_ERROR_STRUCTURE *bus_error)
 	json_object_object_add(
 		access_mode, "name",
 		json_object_new_string(bus_error->AccessMode == 0 ? "Secure" :
-									  "Normal"));
+								    "Normal"));
 	json_object_object_add(bus_error_ir, "accessMode", access_mode);
 
 	return bus_error_ir;
@@ -435,11 +441,19 @@ cper_arm_processor_context_to_ir(EFI_ARM_CONTEXT_INFORMATION_HEADER *header,
 	default:
 		//Unknown register array type, add as base64 data instead.
 		register_array = json_object_new_object();
-		char *encoded = b64_encode((unsigned char *)cur_pos,
-					   header->RegisterArraySize);
-		json_object_object_add(register_array, "data",
-				       json_object_new_string(encoded));
-		free(encoded);
+		char *encoded = malloc(2 * header->RegisterArraySize);
+		size_t encoded_len = 0;
+		if (!encoded) {
+			printf("Failed to allocate encode output buffer. \n");
+		} else {
+			base64_encode((const char *)cur_pos,
+				      header->RegisterArraySize, encoded,
+				      &encoded_len, 0);
+			json_object_object_add(register_array, "data",
+					       json_object_new_string_len(
+						       encoded, encoded_len));
+			free(encoded);
+		}
 		break;
 	}
 	json_object_object_add(context_ir, "registerArray", register_array);
@@ -478,7 +492,6 @@ void ir_section_arm_to_cper(json_object *section, FILE *out)
 {
 	EFI_ARM_ERROR_RECORD *section_cper =
 		(EFI_ARM_ERROR_RECORD *)calloc(1, sizeof(EFI_ARM_ERROR_RECORD));
-	long starting_stream_pos = ftell(out);
 
 	//Validation bits.
 	section_cper->ValidFields = ir_to_bitfield(
@@ -505,8 +518,9 @@ void ir_section_arm_to_cper(json_object *section, FILE *out)
 
 	//Optional PSCI state.
 	json_object *psci_state = json_object_object_get(section, "psciState");
-	if (psci_state != NULL)
+	if (psci_state != NULL) {
 		section_cper->PsciState = json_object_get_uint64(psci_state);
+	}
 
 	//Flush header to stream.
 	fwrite(section_cper, sizeof(EFI_ARM_ERROR_RECORD), 1, out);
@@ -514,16 +528,18 @@ void ir_section_arm_to_cper(json_object *section, FILE *out)
 
 	//Error info structure array.
 	json_object *error_info = json_object_object_get(section, "errorInfo");
-	for (int i = 0; i < section_cper->ErrInfoNum; i++)
+	for (int i = 0; i < section_cper->ErrInfoNum; i++) {
 		ir_arm_error_info_to_cper(
 			json_object_array_get_idx(error_info, i), out);
+	}
 
 	//Context info structure array.
 	json_object *context_info =
 		json_object_object_get(section, "contextInfo");
-	for (int i = 0; i < section_cper->ContextInfoNum; i++)
+	for (int i = 0; i < section_cper->ContextInfoNum; i++) {
 		ir_arm_context_info_to_cper(
 			json_object_array_get_idx(context_info, i), out);
+	}
 
 	//Vendor specific error info.
 	json_object *vendor_specific_info =
@@ -533,18 +549,20 @@ void ir_section_arm_to_cper(json_object *section, FILE *out)
 			json_object_object_get(vendor_specific_info, "data");
 		int vendor_specific_len =
 			json_object_get_string_len(vendor_info_string);
-		UINT8 *decoded =
-			b64_decode(json_object_get_string(vendor_info_string),
-				   vendor_specific_len);
+		char *decoded = malloc(vendor_specific_len);
+		size_t decoded_len = 0;
+		if (!decoded) {
+			printf("Failed to allocate decode output buffer. \n");
+		} else {
+			base64_decode(
+				json_object_get_string(vendor_info_string),
+				vendor_specific_len, decoded, &decoded_len, 0);
 
-		//Write out to file.
-		long cur_stream_pos = ftell(out);
-		fwrite(decoded,
-		       starting_stream_pos + section_cper->SectionLength -
-			       cur_stream_pos,
-		       1, out);
-		fflush(out);
-		free(decoded);
+			//Write out to file.
+			fwrite(decoded, decoded_len, 1, out);
+			fflush(out);
+			free(decoded);
+		}
 	}
 
 	//Free remaining resources.
@@ -730,8 +748,7 @@ void ir_arm_context_info_to_cper(json_object *context_info, FILE *out)
 		break;
 	default:
 		//Unknown register structure.
-		ir_arm_unknown_register_to_cper(register_array, &info_header,
-						out);
+		ir_arm_unknown_register_to_cper(register_array, out);
 		break;
 	}
 }
@@ -883,17 +900,22 @@ void ir_arm_misc_registers_to_cper(json_object *registers, FILE *out)
 }
 
 //Converts a single ARM unknown register CPER-JSON object to CPER binary, outputting to the given stream.
-void ir_arm_unknown_register_to_cper(json_object *registers,
-				     EFI_ARM_CONTEXT_INFORMATION_HEADER *header,
-				     FILE *out)
+void ir_arm_unknown_register_to_cper(json_object *registers, FILE *out)
 {
 	//Get base64 represented data.
 	json_object *encoded = json_object_object_get(registers, "data");
-	UINT8 *decoded = b64_decode(json_object_get_string(encoded),
-				    json_object_get_string_len(encoded));
+	char *decoded = malloc(json_object_get_string_len(encoded));
+	size_t decoded_len = 0;
+	if (!decoded) {
+		printf("Failed to allocate decode output buffer. \n");
+	} else {
+		base64_decode(json_object_get_string(encoded),
+			      json_object_get_string_len(encoded), decoded,
+			      &decoded_len, 0);
 
-	//Flush out to stream.
-	fwrite(&decoded, header->RegisterArraySize, 1, out);
-	fflush(out);
-	free(decoded);
+		//Flush out to stream.
+		fwrite(&decoded, decoded_len, 1, out);
+		fflush(out);
+		free(decoded);
+	}
 }
