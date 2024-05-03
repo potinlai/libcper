@@ -2,12 +2,31 @@
     "$id": "cper-json-pcie-section",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "required": ["validationBits", "portType", "version", "commandStatus", "deviceID", "deviceSerialNumber", "bridgeControlStatus", "capabilityStructure", "aerInfo"],
+    "required": [
+        "validationBits",
+        "portType",
+        "version",
+        "commandStatus",
+        "deviceID",
+        "deviceSerialNumber",
+        "bridgeControlStatus",
+        "capabilityStructure",
+        "aerInfo"
+    ],
     "additionalProperties": false,
     "properties": {
         "validationBits": {
             "type": "object",
-            "required": ["portTypeValid", "versionValid", "commandStatusValid", "deviceIDValid", "deviceSerialNumberValid", "bridgeControlStatusValid", "capabilityStructureStatusValid", "aerInfoValid"],
+            "required": [
+                "portTypeValid",
+                "versionValid",
+                "commandStatusValid",
+                "deviceIDValid",
+                "deviceSerialNumberValid",
+                "bridgeControlStatusValid",
+                "capabilityStructureStatusValid",
+                "aerInfoValid"
+            ],
             "properties": {
                 "portTypeValid": {
                     "type": "boolean"
@@ -56,7 +75,7 @@
             "required": ["commandRegister", "statusRegister"],
             "properties": {
                 "commandRegister": {
-                    "type" : "integer"
+                    "type": "integer"
                 },
                 "statusRegister": {
                     "type": "integer"
@@ -65,7 +84,17 @@
         },
         "deviceID": {
             "type": "object",
-            "required": ["vendorID", "deviceID", "classCode", "functionNumber", "deviceNumber", "segmentNumber", "primaryOrDeviceBusNumber", "secondaryBusNumber", "slotNumber"],
+            "required": [
+                "vendorID",
+                "deviceID",
+                "classCode",
+                "functionNumber",
+                "deviceNumber",
+                "segmentNumber",
+                "primaryOrDeviceBusNumber",
+                "secondaryBusNumber",
+                "slotNumber"
+            ],
             "properties": {
                 "vendorID": {
                     "type": "integer"

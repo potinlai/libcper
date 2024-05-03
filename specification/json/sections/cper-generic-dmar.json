@@ -2,7 +2,15 @@
     "$id": "cper-json-generic-dmar-section",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "required": ["requesterID", "segmentNumber", "faultReason", "accessType", "addressType", "architectureType", "deviceAddress"],
+    "required": [
+        "requesterID",
+        "segmentNumber",
+        "faultReason",
+        "accessType",
+        "addressType",
+        "architectureType",
+        "deviceAddress"
+    ],
     "additionalProperties": false,
     "properties": {
         "requesterID": {
@@ -39,7 +47,7 @@
             "$ref": "./common/cper-json-nvp.json"
         },
         "deviceAddress": {
-            "type" : "integer"
+            "type": "integer"
         }
     }
 }

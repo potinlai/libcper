@@ -2,12 +2,41 @@
     "$id": "cper-json-generic-processor-section",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "required": ["validationBits", "processorType", "processorISA", "errorType", "operation", "flags", "level", "cpuVersionInfo", "cpuBrandString", "processorID", "targetAddress", "requestorID", "responderID", "instructionIP"],
+    "required": [
+        "validationBits",
+        "processorType",
+        "processorISA",
+        "errorType",
+        "operation",
+        "flags",
+        "level",
+        "cpuVersionInfo",
+        "cpuBrandString",
+        "processorID",
+        "targetAddress",
+        "requestorID",
+        "responderID",
+        "instructionIP"
+    ],
     "additionalProperties": false,
     "properties": {
         "validationBits": {
             "type": "object",
-            "required": ["processorTypeValid", "processorISAValid", "processorErrorTypeValid", "operationValid", "flagsValid", "levelValid", "cpuVersionValid", "cpuBrandInfoValid", "cpuIDValid", "targetAddressValid", "requestorIDValid", "responderIDValid", "instructionIPValid"],
+            "required": [
+                "processorTypeValid",
+                "processorISAValid",
+                "processorErrorTypeValid",
+                "operationValid",
+                "flagsValid",
+                "levelValid",
+                "cpuVersionValid",
+                "cpuBrandInfoValid",
+                "cpuIDValid",
+                "targetAddressValid",
+                "requestorIDValid",
+                "responderIDValid",
+                "instructionIPValid"
+            ],
             "properties": {
                 "processorTypeValid": {
                     "type": "boolean"

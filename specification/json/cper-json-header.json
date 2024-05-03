@@ -2,7 +2,18 @@
     "$id": "cper-json-header",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "required": ["revision", "sectionCount", "severity", "validationBits", "recordLength", "creatorID", "notificationType", "recordID", "flags", "persistenceInfo"],
+    "required": [
+        "revision",
+        "sectionCount",
+        "severity",
+        "validationBits",
+        "recordLength",
+        "creatorID",
+        "notificationType",
+        "recordID",
+        "flags",
+        "persistenceInfo"
+    ],
     "additionalProperties": false,
     "properties": {
         "revision": {
@@ -38,7 +49,11 @@
         },
         "validationBits": {
             "type": "object",
-            "required": ["platformIDValid", "timestampValid", "partitionIDValid"],
+            "required": [
+                "platformIDValid",
+                "timestampValid",
+                "partitionIDValid"
+            ],
             "properties": {
                 "platformIDValid": {
                     "type": "boolean"

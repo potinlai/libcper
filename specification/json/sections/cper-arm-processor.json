@@ -2,12 +2,28 @@
     "$id": "cper-json-arm-processor-section",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "required": ["validationBits", "errorInfoNum", "contextInfoNum", "sectionLength", "errorAffinity", "mpidrEl1", "midrEl1", "running", "errorInfo", "contextInfo"],
+    "required": [
+        "validationBits",
+        "errorInfoNum",
+        "contextInfoNum",
+        "sectionLength",
+        "errorAffinity",
+        "mpidrEl1",
+        "midrEl1",
+        "running",
+        "errorInfo",
+        "contextInfo"
+    ],
     "additionalProperties": false,
     "properties": {
         "validationBits": {
             "type": "object",
-            "required": ["mpidrValid", "errorAffinityLevelValid", "runningStateValid", "vendorSpecificInfoValid"],
+            "required": [
+                "mpidrValid",
+                "errorAffinityLevelValid",
+                "runningStateValid",
+                "vendorSpecificInfoValid"
+            ],
             "properties": {
                 "mpidrValid": {
                     "type": "boolean"
@@ -60,7 +76,17 @@
             "type": "array",
             "items": {
                 "type": "object",
-                "required": ["version", "length", "validationBits", "errorType", "multipleError", "flags", "errorInformation", "virtualFaultAddress", "physicalFaultAddress"],
+                "required": [
+                    "version",
+                    "length",
+                    "validationBits",
+                    "errorType",
+                    "multipleError",
+                    "flags",
+                    "errorInformation",
+                    "virtualFaultAddress",
+                    "physicalFaultAddress"
+                ],
                 "additionalProperties": false,
                 "properties": {
                     "version": {
@@ -71,7 +97,13 @@
                     },
                     "validationBits": {
                         "type": "object",
-                        "required": ["multipleErrorValid", "flagsValid", "errorInformationValid", "virtualFaultAddressValid", "physicalFaultAddressValid"],
+                        "required": [
+                            "multipleErrorValid",
+                            "flagsValid",
+                            "errorInformationValid",
+                            "virtualFaultAddressValid",
+                            "physicalFaultAddressValid"
+                        ],
                         "properties": {
                             "multipleErrorValid": {
                                 "type": "boolean"
@@ -109,7 +141,12 @@
                     },
                     "flags": {
                         "type": "object",
-                        "required": ["firstErrorCaptured", "lastErrorCaptured", "propagated", "overflow"],
+                        "required": [
+                            "firstErrorCaptured",
+                            "lastErrorCaptured",
+                            "propagated",
+                            "overflow"
+                        ],
                         "properties": {
                             "firstErrorCaptured": {
                                 "type": "boolean"
@@ -130,12 +167,29 @@
                         "oneOf": [
                             {
                                 "type": "object",
-                                "required": ["validationBits", "transactionType", "operation", "level", "processorContextCorrupt", "corrected", "precisePC", "restartablePC"],
+                                "required": [
+                                    "validationBits",
+                                    "transactionType",
+                                    "operation",
+                                    "level",
+                                    "processorContextCorrupt",
+                                    "corrected",
+                                    "precisePC",
+                                    "restartablePC"
+                                ],
                                 "additionalProperties": false,
                                 "properties": {
                                     "validationBits": {
                                         "type": "object",
-                                        "required": ["transactionTypeValid", "operationValid", "levelValid", "processorContextCorruptValid", "correctedValid", "precisePCValid", "restartablePCValid"],
+                                        "required": [
+                                            "transactionTypeValid",
+                                            "operationValid",
+                                            "levelValid",
+                                            "processorContextCorruptValid",
+                                            "correctedValid",
+                                            "precisePCValid",
+                                            "restartablePCValid"
+                                        ],
                                         "properties": {
                                             "transactionTypeValid": {
                                                 "type": "boolean"
@@ -187,12 +241,39 @@
                             },
                             {
                                 "type": "object",
-                                "required": ["validationBits", "transactionType", "operation", "level", "processorContextCorrupt", "corrected", "precisePC", "restartablePC", "timedOut", "participationType", "addressSpace", "memoryAttributes", "accessMode"],
+                                "required": [
+                                    "validationBits",
+                                    "transactionType",
+                                    "operation",
+                                    "level",
+                                    "processorContextCorrupt",
+                                    "corrected",
+                                    "precisePC",
+                                    "restartablePC",
+                                    "timedOut",
+                                    "participationType",
+                                    "addressSpace",
+                                    "memoryAttributes",
+                                    "accessMode"
+                                ],
                                 "additionalProperties": false,
                                 "properties": {
                                     "validationBits": {
                                         "type": "object",
-                                        "required": ["transactionTypeValid", "operationValid", "levelValid", "processorContextCorruptValid", "correctedValid", "precisePCValid", "restartablePCValid", "participationTypeValid", "timedOutValid", "addressSpaceValid", "memoryAttributesValid", "accessModeValid"],
+                                        "required": [
+                                            "transactionTypeValid",
+                                            "operationValid",
+                                            "levelValid",
+                                            "processorContextCorruptValid",
+                                            "correctedValid",
+                                            "precisePCValid",
+                                            "restartablePCValid",
+                                            "participationTypeValid",
+                                            "timedOutValid",
+                                            "addressSpaceValid",
+                                            "memoryAttributesValid",
+                                            "accessModeValid"
+                                        ],
                                         "properties": {
                                             "transactionTypeValid": {
                                                 "type": "boolean"
@@ -300,7 +381,12 @@
             "type": "array",
             "items": {
                 "type": "object",
-                "required": ["version", "registerContextType", "registerArraySize", "registerArray"],
+                "required": [
+                    "version",
+                    "registerContextType",
+                    "registerArraySize",
+                    "registerArray"
+                ],
                 "additionalProperties": false,
                 "properties": {
                     "version": {
@@ -319,7 +405,23 @@
                         "oneOf": [
                             {
                                 "type": "object",
-                                "required": ["r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12", "r13_sp", "r14_lr", "r15_pc"],
+                                "required": [
+                                    "r1",
+                                    "r2",
+                                    "r3",
+                                    "r4",
+                                    "r5",
+                                    "r6",
+                                    "r7",
+                                    "r8",
+                                    "r9",
+                                    "r10",
+                                    "r11",
+                                    "r12",
+                                    "r13_sp",
+                                    "r14_lr",
+                                    "r15_pc"
+                                ],
                                 "properties": {
                                     "r0": { "type": "integer" },
                                     "r1": { "type": "integer" },
@@ -341,7 +443,32 @@
                             },
                             {
                                 "type": "object",
-                                "required": ["dfar", "dfsr", "ifar", "isr", "mair0", "mair1", "midr", "mpidr", "nmrr", "prrr", "sctlr_ns", "spsr", "spsr_abt", "spsr_fiq", "spsr_irq", "spsr_svc", "spsr_und", "tpidrprw", "tpidruro", "tpidrurw", "ttbcr", "ttbr0", "ttbr1", "dacr"],
+                                "required": [
+                                    "dfar",
+                                    "dfsr",
+                                    "ifar",
+                                    "isr",
+                                    "mair0",
+                                    "mair1",
+                                    "midr",
+                                    "mpidr",
+                                    "nmrr",
+                                    "prrr",
+                                    "sctlr_ns",
+                                    "spsr",
+                                    "spsr_abt",
+                                    "spsr_fiq",
+                                    "spsr_irq",
+                                    "spsr_svc",
+                                    "spsr_und",
+                                    "tpidrprw",
+                                    "tpidruro",
+                                    "tpidrurw",
+                                    "ttbcr",
+                                    "ttbr0",
+                                    "ttbr1",
+                                    "dacr"
+                                ],
                                 "properties": {
                                     "dfar": { "type": "integer" },
                                     "dfsr": { "type": "integer" },
@@ -371,7 +498,24 @@
                             },
                             {
                                 "type": "object",
-                                "required": ["elr_hyp", "hamair0", "hamair1", "hcr", "hcr2", "hdfar", "hifar", "hpfar", "hsr", "htcr", "htpidr", "httbr", "spsr_hyp", "vtcr", "vttbr", "dacr32_el2"],
+                                "required": [
+                                    "elr_hyp",
+                                    "hamair0",
+                                    "hamair1",
+                                    "hcr",
+                                    "hcr2",
+                                    "hdfar",
+                                    "hifar",
+                                    "hpfar",
+                                    "hsr",
+                                    "htcr",
+                                    "htpidr",
+                                    "httbr",
+                                    "spsr_hyp",
+                                    "vtcr",
+                                    "vttbr",
+                                    "dacr32_el2"
+                                ],
                                 "properties": {
                                     "elr_hyp": { "type": "integer" },
                                     "hamair0": { "type": "integer" },
@@ -401,7 +545,40 @@
                             },
                             {
                                 "type": "object",
-                                "required": ["x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x18", "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "x29", "x30", "sp"],
+                                "required": [
+                                    "x0",
+                                    "x1",
+                                    "x2",
+                                    "x3",
+                                    "x4",
+                                    "x5",
+                                    "x6",
+                                    "x7",
+                                    "x8",
+                                    "x9",
+                                    "x10",
+                                    "x11",
+                                    "x12",
+                                    "x13",
+                                    "x14",
+                                    "x15",
+                                    "x16",
+                                    "x17",
+                                    "x18",
+                                    "x19",
+                                    "x20",
+                                    "x21",
+                                    "x22",
+                                    "x23",
+                                    "x24",
+                                    "x25",
+                                    "x26",
+                                    "x27",
+                                    "x28",
+                                    "x29",
+                                    "x30",
+                                    "sp"
+                                ],
                                 "properties": {
                                     "x0": { "type": "integer" },
                                     "x1": { "type": "integer" },
@@ -439,7 +616,25 @@
                             },
                             {
                                 "type": "object",
-                                "required": ["elr_el1", "esr_el1", "far_el1", "isr_el1", "mair_el1", "midr_el1", "mpidr_el1", "sctlr_el1", "sp_el0", "sp_el1", "spsr_el1", "tcr_el1", "tpidr_el0", "tpidr_el1", "tpidrro_el0", "ttbr0_el1", "ttbr1_el1"],
+                                "required": [
+                                    "elr_el1",
+                                    "esr_el1",
+                                    "far_el1",
+                                    "isr_el1",
+                                    "mair_el1",
+                                    "midr_el1",
+                                    "mpidr_el1",
+                                    "sctlr_el1",
+                                    "sp_el0",
+                                    "sp_el1",
+                                    "spsr_el1",
+                                    "tcr_el1",
+                                    "tpidr_el0",
+                                    "tpidr_el1",
+                                    "tpidrro_el0",
+                                    "ttbr0_el1",
+                                    "ttbr1_el1"
+                                ],
                                 "properties": {
                                     "elr_el1": { "type": "integer" },
                                     "esr_el1": { "type": "integer" },
@@ -462,7 +657,23 @@
                             },
                             {
                                 "type": "object",
-                                "required": ["elr_el2", "esr_el2", "far_el2", "hacr_el2", "hcr_el2", "hpfar_el2", "mair_el2", "sctlr_el2", "sp_el2", "spsr_el2", "tcr_el2", "tpidr_el2", "ttbr0_el2", "vtcr_el2", "vttbr_el2"],
+                                "required": [
+                                    "elr_el2",
+                                    "esr_el2",
+                                    "far_el2",
+                                    "hacr_el2",
+                                    "hcr_el2",
+                                    "hpfar_el2",
+                                    "mair_el2",
+                                    "sctlr_el2",
+                                    "sp_el2",
+                                    "spsr_el2",
+                                    "tcr_el2",
+                                    "tpidr_el2",
+                                    "ttbr0_el2",
+                                    "vtcr_el2",
+                                    "vttbr_el2"
+                                ],
                                 "properties": {
                                     "elr_el2": { "type": "integer" },
                                     "esr_el2": { "type": "integer" },
@@ -483,7 +694,18 @@
                             },
                             {
                                 "type": "object",
-                                "required": ["elr_el3", "esr_el3", "far_el3", "mair_el3", "sctlr_el3", "sp_el3", "spsr_el3", "tcr_el3", "tpidr_el3", "ttbr0_el3"],
+                                "required": [
+                                    "elr_el3",
+                                    "esr_el3",
+                                    "far_el3",
+                                    "mair_el3",
+                                    "sctlr_el3",
+                                    "sp_el3",
+                                    "spsr_el3",
+                                    "tcr_el3",
+                                    "tpidr_el3",
+                                    "ttbr0_el3"
+                                ],
                                 "properties": {
                                     "elr_el3": { "type": "integer" },
                                     "esr_el3": { "type": "integer" },
@@ -504,7 +726,13 @@
                                 "properties": {
                                     "mrsEncoding": {
                                         "type": "object",
-                                        "required": ["op2", "crm", "crn", "op1", "o0"],
+                                        "required": [
+                                            "op2",
+                                            "crm",
+                                            "crn",
+                                            "op1",
+                                            "o0"
+                                        ],
                                         "properties": {
                                             "op2": { "type": "integer" },
                                             "crm": { "type": "integer" },

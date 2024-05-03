@@ -10,7 +10,11 @@
         },
         "validationBits": {
             "type": "object",
-            "required": ["deviceIDValid", "deviceSerialValid", "cxlComponentEventLogValid"],
+            "required": [
+                "deviceIDValid",
+                "deviceSerialValid",
+                "cxlComponentEventLogValid"
+            ],
             "properties": {
                 "deviceIDValid": {
                     "type": "boolean"
@@ -25,7 +29,15 @@
         },
         "deviceID": {
             "type": "object",
-            "required": ["vendorID", "deviceID", "functionNumber", "deviceNumber", "busNumber", "segmentNumber", "slotNumber"],
+            "required": [
+                "vendorID",
+                "deviceID",
+                "functionNumber",
+                "deviceNumber",
+                "busNumber",
+                "segmentNumber",
+                "slotNumber"
+            ],
             "properties": {
                 "vendorID": {
                     "type": "integer"

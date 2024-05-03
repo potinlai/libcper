@@ -2,12 +2,29 @@
     "$id": "cper-json-cxl-protocol-section",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "required": ["validationBits", "agentType", "cxlAgentAddress", "deviceID", "dvsecLength", "errorLogLength", "cxlDVSEC", "cxlErrorLog"],
+    "required": [
+        "validationBits",
+        "agentType",
+        "cxlAgentAddress",
+        "deviceID",
+        "dvsecLength",
+        "errorLogLength",
+        "cxlDVSEC",
+        "cxlErrorLog"
+    ],
     "additionalProperties": false,
     "properties": {
         "validationBits": {
             "type": "object",
-            "required": ["cxlAgentTypeValid", "cxlAgentAddressValid", "deviceIDValid", "deviceSerialValid", "capabilityStructureValid", "cxlDVSECValid", "cxlErrorLogValid"],
+            "required": [
+                "cxlAgentTypeValid",
+                "cxlAgentAddressValid",
+                "deviceIDValid",
+                "deviceSerialValid",
+                "capabilityStructureValid",
+                "cxlDVSECValid",
+                "cxlErrorLogValid"
+            ],
             "properties": {
                 "cxlAgentTypeValid": {
                     "type": "boolean"
@@ -41,18 +58,23 @@
             "oneOf": [
                 {
                     "type": "object",
-                    "required": ["functionNumber", "deviceNumber", "busNumber", "segmentNumber"],
+                    "required": [
+                        "functionNumber",
+                        "deviceNumber",
+                        "busNumber",
+                        "segmentNumber"
+                    ],
                     "properties": {
-                        "functionNumber": { 
+                        "functionNumber": {
                             "type": "integer"
                         },
-                        "deviceNumber": { 
+                        "deviceNumber": {
                             "type": "integer"
                         },
-                        "busNumber": { 
+                        "busNumber": {
                             "type": "integer"
                         },
-                        "segmentNumber": { 
+                        "segmentNumber": {
                             "type": "integer"
                         }
                     }
@@ -70,44 +92,51 @@
         },
         "deviceID": {
             "type": "object",
-            "required": ["vendorID", "deviceID", "subsystemVendorID", "subsystemDeviceID", "classCode", "slotNumber"],
+            "required": [
+                "vendorID",
+                "deviceID",
+                "subsystemVendorID",
+                "subsystemDeviceID",
+                "classCode",
+                "slotNumber"
+            ],
             "properties": {
-                "vendorID": { 
+                "vendorID": {
                     "type": "integer"
                 },
-                "deviceID": { 
+                "deviceID": {
                     "type": "integer"
                 },
-                "subsystemVendorID": { 
+                "subsystemVendorID": {
                     "type": "integer"
                 },
-                "subsystemDeviceID": { 
+                "subsystemDeviceID": {
                     "type": "integer"
                 },
-                "classCode": { 
+                "classCode": {
                     "type": "integer"
                 },
-                "slotNumber": { 
+                "slotNumber": {
                     "type": "integer"
                 }
             }
         },
-        "deviceSerial": { 
+        "deviceSerial": {
             "type": "integer"
         },
         "capabilityStructure": {
             "type": "string"
         },
-        "dvsecLength": { 
+        "dvsecLength": {
             "type": "integer"
         },
-        "errorLogLength": { 
+        "errorLogLength": {
             "type": "integer"
         },
-        "cxlDVSEC": { 
+        "cxlDVSEC": {
             "type": "string"
         },
-        "cxlErrorLog": { 
+        "cxlErrorLog": {
             "type": "string"
         }
     }

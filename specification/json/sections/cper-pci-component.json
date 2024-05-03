@@ -2,12 +2,25 @@
     "$id": "cper-json-pci-component-section",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "required": ["validationBits", "errorStatus", "idInfo", "memoryNumber", "ioNumber", "registerDataPairs"],
+    "required": [
+        "validationBits",
+        "errorStatus",
+        "idInfo",
+        "memoryNumber",
+        "ioNumber",
+        "registerDataPairs"
+    ],
     "additionalProperties": false,
     "properties": {
         "validationBits": {
             "type": "object",
-            "required": ["errorStatusValid", "idInfoValid", "memoryNumberValid", "ioNumberValid", "registerDataPairsValid"],
+            "required": [
+                "errorStatusValid",
+                "idInfoValid",
+                "memoryNumberValid",
+                "ioNumberValid",
+                "registerDataPairsValid"
+            ],
             "properties": {
                 "errorStatusValid": {
                     "type": "boolean"
@@ -32,7 +45,15 @@
         },
         "idInfo": {
             "type": "object",
-            "required": ["vendorID", "deviceID", "classCode", "functionNumber", "deviceNumber", "busNumber", "segmentNumber"],
+            "required": [
+                "vendorID",
+                "deviceID",
+                "classCode",
+                "functionNumber",
+                "deviceNumber",
+                "busNumber",
+                "segmentNumber"
+            ],
             "properties": {
                 "vendorID": {
                     "type": "integer"

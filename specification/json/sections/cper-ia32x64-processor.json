@@ -2,12 +2,23 @@
     "$id": "cper-json-ia32x54-processor-section",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "required": ["validationBits", "localAPICID", "cpuidInfo", "processorErrorInfo", "processorContextInfo"],
+    "required": [
+        "validationBits",
+        "localAPICID",
+        "cpuidInfo",
+        "processorErrorInfo",
+        "processorContextInfo"
+    ],
     "additionalProperties": false,
     "properties": {
         "validationBits": {
             "type": "object",
-            "required": ["localAPICIDValid", "cpuIDInfoValid", "processorErrorInfoNum", "processorContextInfoNum"],
+            "required": [
+                "localAPICIDValid",
+                "cpuIDInfoValid",
+                "processorErrorInfoNum",
+                "processorContextInfoNum"
+            ],
             "properties": {
                 "localAPICIDValid": {
                     "type": "boolean"
@@ -50,7 +61,15 @@
             "type": "array",
             "items": {
                 "type": "object",
-                "required": ["type", "validationBits", "checkInfo", "targetAddressID", "requestorID", "responderID", "instructionPointer"],
+                "required": [
+                    "type",
+                    "validationBits",
+                    "checkInfo",
+                    "targetAddressID",
+                    "requestorID",
+                    "responderID",
+                    "instructionPointer"
+                ],
                 "additionalProperties": false,
                 "properties": {
                     "type": {
@@ -67,7 +86,13 @@
                     },
                     "validationBits": {
                         "type": "object",
-                        "required": ["checkInfoValid", "targetAddressIDValid", "requestorIDValid", "responderIDValid", "instructionPointerValid"],
+                        "required": [
+                            "checkInfoValid",
+                            "targetAddressIDValid",
+                            "requestorIDValid",
+                            "responderIDValid",
+                            "instructionPointerValid"
+                        ],
                         "additionalProperties": false,
                         "properties": {
                             "checkInfoValid": {
@@ -88,16 +113,35 @@
                         }
                     },
                     "checkInfo": {
-                        "type" : "object",
+                        "type": "object",
                         "oneOf": [
                             {
                                 "type": "object",
-                                "required": ["validationBits", "transactionType", "operation", "level", "processorContextCorrupt", "uncorrected", "preciseIP", "restartableIP", "overflow"],
+                                "required": [
+                                    "validationBits",
+                                    "transactionType",
+                                    "operation",
+                                    "level",
+                                    "processorContextCorrupt",
+                                    "uncorrected",
+                                    "preciseIP",
+                                    "restartableIP",
+                                    "overflow"
+                                ],
                                 "additionalProperties": false,
                                 "properties": {
                                     "validationBits": {
                                         "type": "object",
-                                        "required": ["transactionTypeValid", "operationValid", "levelValid", "processorContextCorruptValid", "uncorrectedValid", "preciseIPValid", "restartableIPValid", "overflowValid"],
+                                        "required": [
+                                            "transactionTypeValid",
+                                            "operationValid",
+                                            "levelValid",
+                                            "processorContextCorruptValid",
+                                            "uncorrectedValid",
+                                            "preciseIPValid",
+                                            "restartableIPValid",
+                                            "overflowValid"
+                                        ],
                                         "properties": {
                                             "transactionTypeValid": {
                                                 "type": "boolean"
@@ -156,12 +200,37 @@
                             },
                             {
                                 "type": "object",
-                                "required": ["validationBits", "transactionType", "operation", "level", "processorContextCorrupt", "uncorrected", "preciseIP", "restartableIP", "overflow", "participationType", "timedOut", "addressSpace"],
+                                "required": [
+                                    "validationBits",
+                                    "transactionType",
+                                    "operation",
+                                    "level",
+                                    "processorContextCorrupt",
+                                    "uncorrected",
+                                    "preciseIP",
+                                    "restartableIP",
+                                    "overflow",
+                                    "participationType",
+                                    "timedOut",
+                                    "addressSpace"
+                                ],
                                 "additionalProperties": false,
                                 "properties": {
                                     "validationBits": {
                                         "type": "object",
-                                        "required": ["transactionTypeValid", "operationValid", "levelValid", "processorContextCorruptValid", "uncorrectedValid", "preciseIPValid", "restartableIPValid", "overflowValid", "participationTypeValid", "timedOutValid", "addressSpaceValid"],
+                                        "required": [
+                                            "transactionTypeValid",
+                                            "operationValid",
+                                            "levelValid",
+                                            "processorContextCorruptValid",
+                                            "uncorrectedValid",
+                                            "preciseIPValid",
+                                            "restartableIPValid",
+                                            "overflowValid",
+                                            "participationTypeValid",
+                                            "timedOutValid",
+                                            "addressSpaceValid"
+                                        ],
                                         "properties": {
                                             "transactionTypeValid": {
                                                 "type": "boolean"
@@ -245,7 +314,14 @@
                                 "properties": {
                                     "validationBits": {
                                         "type": "object",
-                                        "required": ["errorTypeValid", "processorContextCorruptValid", "uncorrectedValid", "preciseIPValid", "restartableIPValid", "overflowValid"],
+                                        "required": [
+                                            "errorTypeValid",
+                                            "processorContextCorruptValid",
+                                            "uncorrectedValid",
+                                            "preciseIPValid",
+                                            "restartableIPValid",
+                                            "overflowValid"
+                                        ],
                                         "properties": {
                                             "errorTypeValid": {
                                                 "type": "boolean"
@@ -309,7 +385,12 @@
             "type": "array",
             "items": {
                 "type": "object",
-                "required": ["registerContextType", "registerArraySize", "msrAddress", "mmRegisterAddress"],
+                "required": [
+                    "registerContextType",
+                    "registerArraySize",
+                    "msrAddress",
+                    "mmRegisterAddress"
+                ],
                 "additionalProperties": false,
                 "properties": {
                     "registerContextType": {
@@ -330,7 +411,33 @@
                         "oneOf": [
                             {
                                 "type": "object",
-                                "required": ["eax", "ebx", "ecx", "edx", "esi", "edi", "ebp", "esp", "cs", "ds", "ss", "es", "fs", "gs", "eflags", "eip", "cr0", "cr1", "cr2", "cr3", "cr4", "gdtr", "idtr", "ldtr", "tr"],
+                                "required": [
+                                    "eax",
+                                    "ebx",
+                                    "ecx",
+                                    "edx",
+                                    "esi",
+                                    "edi",
+                                    "ebp",
+                                    "esp",
+                                    "cs",
+                                    "ds",
+                                    "ss",
+                                    "es",
+                                    "fs",
+                                    "gs",
+                                    "eflags",
+                                    "eip",
+                                    "cr0",
+                                    "cr1",
+                                    "cr2",
+                                    "cr3",
+                                    "cr4",
+                                    "gdtr",
+                                    "idtr",
+                                    "ldtr",
+                                    "tr"
+                                ],
                                 "additionalProperties": false,
                                 "properties": {
                                     "eax": { "type": "integer" },
@@ -362,7 +469,43 @@
                             },
                             {
                                 "type": "object",
-                                "required": ["rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp", "rsp", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15", "cs", "ds", "es", "fs", "gs", "rflags", "eip", "cr0", "cr1", "cr2", "cr3", "cr4", "cr8", "gdtr_0", "gdtr_1", "idtr_0", "idtr_1", "ldtr", "tr"],
+                                "required": [
+                                    "rax",
+                                    "rbx",
+                                    "rcx",
+                                    "rdx",
+                                    "rsi",
+                                    "rdi",
+                                    "rbp",
+                                    "rsp",
+                                    "r8",
+                                    "r9",
+                                    "r10",
+                                    "r11",
+                                    "r12",
+                                    "r13",
+                                    "r14",
+                                    "r15",
+                                    "cs",
+                                    "ds",
+                                    "es",
+                                    "fs",
+                                    "gs",
+                                    "rflags",
+                                    "eip",
+                                    "cr0",
+                                    "cr1",
+                                    "cr2",
+                                    "cr3",
+                                    "cr4",
+                                    "cr8",
+                                    "gdtr_0",
+                                    "gdtr_1",
+                                    "idtr_0",
+                                    "idtr_1",
+                                    "ldtr",
+                                    "tr"
+                                ],
                                 "additionalProperties": false,
                                 "properties": {
                                     "rax": { "type": "integer" },

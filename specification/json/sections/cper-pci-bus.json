@@ -2,12 +2,33 @@
     "$id": "cper-json-pci-bus-section",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "required": ["validationBits", "errorStatus", "errorType", "busID", "busAddress", "busData", "busCommandType", "busRequestorID", "busCompleterID", "targetID"],
+    "required": [
+        "validationBits",
+        "errorStatus",
+        "errorType",
+        "busID",
+        "busAddress",
+        "busData",
+        "busCommandType",
+        "busRequestorID",
+        "busCompleterID",
+        "targetID"
+    ],
     "additionalProperties": false,
     "properties": {
         "validationBits": {
             "type": "object",
-            "required": ["errorStatusValid", "errorTypeValid", "busIDValid", "busAddressValid", "busDataValid", "commandValid", "requestorIDValid", "completerIDValid", "targetIDValid"],
+            "required": [
+                "errorStatusValid",
+                "errorTypeValid",
+                "busIDValid",
+                "busAddressValid",
+                "busDataValid",
+                "commandValid",
+                "requestorIDValid",
+                "completerIDValid",
+                "targetIDValid"
+            ],
             "properties": {
                 "errorStatusValid": {
                     "type": "boolean"

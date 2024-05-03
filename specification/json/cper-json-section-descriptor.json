@@ -2,7 +2,15 @@
     "$id": "cper-json-section-descriptor",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "required": ["sectionOffset", "sectionLength", "revision", "validationBits", "flags", "sectionType", "severity"],
+    "required": [
+        "sectionOffset",
+        "sectionLength",
+        "revision",
+        "validationBits",
+        "flags",
+        "sectionType",
+        "severity"
+    ],
     "additionalProperties": false,
     "properties": {
         "sectionOffset": {
@@ -39,7 +47,16 @@
         },
         "flags": {
             "type": "object",
-            "required": ["primary", "containmentWarning", "reset", "errorThresholdExceeded", "resourceNotAccessible", "latentError", "propagated", "overflow"],
+            "required": [
+                "primary",
+                "containmentWarning",
+                "reset",
+                "errorThresholdExceeded",
+                "resourceNotAccessible",
+                "latentError",
+                "propagated",
+                "overflow"
+            ],
             "properties": {
                 "primary": {
                     "type": "boolean"
