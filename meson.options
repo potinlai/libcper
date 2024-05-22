@@ -1,1 +1,2 @@
-option('tests', type: 'feature', description: 'Build tests')
+option('tests', type: 'feature', value: 'enabled', description: 'Build tests')
+option('utility', type: 'feature', value: 'enabled', description: 'Utility')

@@ -52,17 +52,19 @@ GeneratorSectionSources = files(
 )
 
 cmake = import('cmake')
+cc = meson.get_compiler('c')
 
 json_c_dep = dependency(
               'json-c',
               required: true,
               fallback : ['json-c', 'json_c_dep'])
 
-libb64 = dependency('base64', required: false)
+libb64 = cc.find_library('base64', has_headers: 'libbase64.h', required: false)
 if not libb64.found()
   opt_var = cmake.subproject_options()
   opt_var.add_cmake_defines({
         'BUILD_SHARED_LIBS': true,
+        'BASE64_BUILD_CLI': false,
         'BASE64_WITH_AVX': false,
         'BASE64_WITH_AVX2': false,
         'BASE64_WITH_AVX512': false,
@@ -130,27 +132,38 @@ libcper_generate = declare_dependency(
   link_with: libcper_generate
 )
 
-executable(
-  'cper-convert',
-  'cli-app/cper-convert.c',
-  include_directories:include_directories(libcper_include),
-  dependencies: [
-    libcper_parse,
-    json_c_dep,
-  ],
-  install: true
-)
+install_headers('cper-parse.h')
+install_headers('cper-utils.h')
+install_headers('common-utils.h')
+install_headers('generator/cper-generate.h', subdir: 'generator')
+install_headers('edk/Cper.h', subdir: 'edk')
+install_headers('edk/BaseTypes.h', subdir: 'edk')
 
-executable(
-  'cper-generate',
-  'generator/cper-generate-cli.c',
-  EDKSources,
-  include_directories:include_directories(libcper_include),
-  dependencies: [
-    libcper_generate,
-  ],
-  install: true
-)
+if get_option('utility').allowed()
+  executable(
+    'cper-convert',
+    'cli-app/cper-convert.c',
+    include_directories:include_directories(libcper_include),
+    dependencies: [
+      libcper_parse,
+      json_c_dep,
+    ],
+    install: true,
+    install_dir: get_option('bindir')
+  )
+
+  executable(
+    'cper-generate',
+    'generator/cper-generate-cli.c',
+    EDKSources,
+    include_directories:include_directories(libcper_include),
+    dependencies: [
+      libcper_generate,
+    ],
+    install: true,
+    install_dir: get_option('bindir')
+  )
+endif
 
 run_command('cp', '-r', 'specification/json/', meson.current_build_dir())
 run_command('mv', meson.current_build_dir() / 'json', meson.current_build_dir() / 'specification')
