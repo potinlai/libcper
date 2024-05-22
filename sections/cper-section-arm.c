@@ -203,7 +203,7 @@ cper_arm_error_info_to_ir(EFI_ARM_ERROR_INFORMATION_ENTRY *error_info)
 		json_object_object_add(
 			error_subinfo, "data",
 			json_object_new_uint64(
-				*((UINT64 *)&error_info->ErrorInformation)));
+				error_info->ErrorInformation.Value));
 		break;
 	}
 	json_object_object_add(error_info_ir, "errorInformation",
@@ -615,9 +615,8 @@ void ir_arm_error_info_to_cper(json_object *error_info, FILE *out)
 
 	default:
 		//Unknown error information type.
-		*((UINT64 *)&error_info_cper.ErrorInformation) =
-			json_object_get_uint64(json_object_object_get(
-				error_info_information, "data"));
+		error_info_cper.ErrorInformation.Value = json_object_get_uint64(
+			json_object_object_get(error_info_information, "data"));
 		break;
 	}
 
