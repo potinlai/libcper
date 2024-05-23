@@ -1,7 +1,7 @@
-Notice: This repository contains a proof of concept library.
-It is intended to serve as a demonstrator.
-Arm is not actively using the library in this repository or integrating the library into reference code.
-Arm is willing to collaborate to integrate the code in another upstream project.
+Notice: This repository contains a proof of concept library. It is intended to
+serve as a demonstrator. Arm is not actively using the library in this
+repository or integrating the library into reference code. Arm is willing to
+collaborate to integrate the code in another upstream project.
 
 # CPER JSON Representation & Conversion Library
 
