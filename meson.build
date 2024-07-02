@@ -20,6 +20,7 @@ add_global_arguments(
 )
 
 library_is_share = get_option('default_library') == 'shared'
+add_global_arguments('-D_POSIX_C_SOURCE=200809L', language : 'c')
 
 project_description = 'libcper library'
 
