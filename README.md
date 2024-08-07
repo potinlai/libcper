@@ -16,7 +16,7 @@ This project uses Meson (>=1.1.1). To build for native architecture, simply run:
 
 ```sh
 meson setup build
-ninji -C build
+ninja -C build
 ```
 
 ## Usage
