@@ -33,6 +33,6 @@ cper_tests = executable(
     implicit_include_directories: false,
     include_directories: include_directories(test_include_dirs),
     cpp_args: '-fpermissive',
-    dependencies: [libcper_parse, libcper_generate, json_c_dep, gtest, gmock],
+    dependencies: [libcper_parse_dep, libcper_generate_dep, json_c_dep, gtest, gmock],
 )
 test('test-cper-tests', cper_tests)
