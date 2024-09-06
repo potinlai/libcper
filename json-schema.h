@@ -1,5 +1,9 @@
-#ifndef JSON_SCHEMA_H
-#define JSON_SCHEMA_H
+#ifndef CPER_JSON_SCHEMA_H
+#define CPER_JSON_SCHEMA_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <json.h>
 
@@ -12,5 +16,9 @@ int validate_schema_from_file(const char *schema_file, json_object *object,
 			      char *error_message);
 void validate_schema_debug_enable();
 void validate_schema_debug_disable();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
