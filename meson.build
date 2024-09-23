@@ -5,7 +5,7 @@ project(
     meson_version: '>=1.1.1',
     default_options: [
         'c_std=c18',
-        'cpp_std=c++23',
+        'cpp_std=c++20',
         'tests=' + (meson.is_subproject() ? 'disabled' : 'enabled'),
         'werror=true',
         'warning_level=2',
